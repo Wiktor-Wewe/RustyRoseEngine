@@ -1,6 +1,10 @@
 ﻿#include <SDL.h>
 #include <SDL_image.h>
 #include "VDecoder.h"
+#include <fstream>
+#include <vector>
+#include <string>
+#include "BackGround.h"
 
 int main(int argc, char* argv[]) {
 
@@ -27,6 +31,23 @@ int main(int argc, char* argv[]) {
     char path[] = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\vid2.mp4";
     vdecoder.setPath(path);
     vdecoder.start();
+
+    std::fstream file;
+    file.open("list.rre", std::ios::in);
+    if (!file.good()) {
+        printf("cant open file\n");
+        return 1;
+    }
+
+    std::vector<std::string> list;
+    while (!file.eof()) {
+        std::string buff;
+        std::getline(file, buff);
+        list.push_back(buff);
+    }
+
+    BackGround bg = BackGround(renderer, list[3555], list);
+    
 
     while (vdecoder.decodeFrame()) {
 

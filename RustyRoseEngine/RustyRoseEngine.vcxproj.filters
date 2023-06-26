@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\GameElements">
+      <UniqueIdentifier>{d7affb37-3f72-4252-bc3c-15b57720f99f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\GameElements">
+      <UniqueIdentifier>{ba0f7ee3-e77e-4162-bcbf-2fa92c01754e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RustyRoseEngine.cpp">
@@ -24,13 +30,43 @@
     <ClCompile Include="GameContext.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="BackGround.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGroundMusic.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundEffect.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Voice.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Script.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VDecoder.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="BackGround.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="BackGroundMusic.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundEffect.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Voice.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
     <ClInclude Include="GameContext.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Script.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
