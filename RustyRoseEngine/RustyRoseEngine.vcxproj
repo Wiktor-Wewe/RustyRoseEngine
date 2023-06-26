@@ -151,10 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
     <ClCompile Include="VDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameContext.h" />
     <ClInclude Include="VDecoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

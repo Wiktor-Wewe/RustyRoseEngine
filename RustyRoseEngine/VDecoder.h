@@ -19,7 +19,7 @@ public:
 	void freeDecoder();
 	
 
-protected:
+private:
 	char* _path;
 	AVFormatContext* _formatContext;
 	int _videoStreamIndex;

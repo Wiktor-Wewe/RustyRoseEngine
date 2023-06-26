@@ -1,12 +1,6 @@
 ﻿#include <SDL.h>
 #include <SDL_image.h>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
 #include "VDecoder.h"
-}
 
 int main(int argc, char* argv[]) {
 
