@@ -40,7 +40,7 @@ void BackGround::_loadAnimation()
 		for (int i = 1; i < list.size();) {
 			TalkAnimation* ta = new TalkAnimation;
 			ta->i = 0;
-			ta->name = this->_getName(list[i]);
+			ta->shortName = this->_getName(list[i]);
 			ta->sprites[0] = this->_getSpriteForAnimaton(list[i]);
 			i++;
 			ta->sprites[1] = this->_getSpriteForAnimaton(list[i]);

@@ -10,7 +10,7 @@ public:
 	struct TalkAnimation
 	{
 		int i;
-		std::string name;
+		std::string shortName;
 		SDL_Texture* sprites[3];
 	};
 

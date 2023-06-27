@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "BackGround.h"
+#include "Script.h"
 
 int main(int argc, char* argv[]) {
 
@@ -48,6 +49,7 @@ int main(int argc, char* argv[]) {
 
     BackGround bg = BackGround(renderer, list[3555], list);
     
+    Script s = Script(list[4036]);
 
     while (vdecoder.decodeFrame()) {
 
