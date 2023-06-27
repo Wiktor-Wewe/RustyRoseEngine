@@ -6,12 +6,42 @@
 #include <string>
 #include "BackGround.h"
 #include "Script.h"
+#include "Voice.h"
+#include "SoundEffect.h"
+#include "BackGroundMusic.h"
 
 int main(int argc, char* argv[]) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
+
+    // Inicjalizacja SDL2
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        printf("Błąd: Nie można zainicjalizować SDL: %s\n", SDL_GetError());
+        return -1;
+    }
+
+    // Inicjalizacja SDL2 Mixer
+    int flags = MIX_INIT_OGG | MIX_INIT_MP3;
+    int initFlags = Mix_Init(flags);
+    if ((initFlags & flags) != flags) {
+        printf("Błąd: Nie można zainicjalizować SDL Mixer: %s\n", Mix_GetError());
+        SDL_Quit();
+        return -1;
+    }
+
+    // Otwarcie strumienia audio
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
+        printf("Błąd: Nie można otworzyć strumienia audio: %s\n", Mix_GetError());
+        Mix_Quit();
+        SDL_Quit();
+        return -1;
+    }
+
+    // Ustawienie liczby kanałów
+    Mix_AllocateChannels(16);
+
     SDL_Window* win = SDL_CreateWindow("School Days: Rusty Rose Edition",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
@@ -48,9 +78,30 @@ int main(int argc, char* argv[]) {
     }
 
     BackGround bg = BackGround(renderer, list[3555], list);
-    
-    Script s = Script(list[4036]);
 
+    Script s = Script(list[4036]);
+    
+    Voice v = Voice(list[5834]);
+    //v.play(1);
+
+    SoundEffect se = SoundEffect(list[5830]);
+    //se.play(2);
+
+    BackGroundMusic bgm = BackGroundMusic("D:\\SCHOOLDAYS HQ\\Packs\\BGM.GPK~\\SD_BGM\\SDBGM03");
+    bgm.playInt();
+    while (!bgm.isReadyForLoop()) {
+
+    }
+    bgm.playLoop();
+    
+
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, bg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    
+    se.stop();
+
+    SDL_Delay(50000);
     while (vdecoder.decodeFrame()) {
 
         void* texturePixels;

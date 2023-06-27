@@ -54,35 +54,58 @@ Script::Event* Script::_lineToEvent(std::string line)
 		event->data = output[3];
 		event->end = this->_stringToTime(output[4]);
 	}
-	else if (event->action == 4) {
-
+	else if (event->action == 4) { //[PrintText]
+		event->start = this->_stringToTime(output[1]);
+		event->name = output[2];
+		event->data = output[3];
+		event->end = this->_stringToTime(output[4]);
 	}
-	else if (event->action == 5) {
-
+	else if (event->action == 5) { //[PlayVoice]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->isMale = this->_stringToBool(output[3]);
+		event->shortName = output[4];
+		event->end = this->_stringToTime(output[5]);
 	}
-	else if (event->action == 6) {
-
+	else if (event->action == 6) { // [PlaySe]
+		event->start = this->_stringToTime(output[1]);
+		event->layer = this->_stringToInt(output[2]);
+		event->data = output[3];
+		event->end = this->_stringToTime(output[4]);
 	}
-	else if (event->action == 7) {
-
+	else if (event->action == 7) { // [Next]
+		event->start = this->_stringToTime(output[1]);
 	}
-	else if (event->action == 8) {
-
+	else if (event->action == 8) { // [PlayMovie]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->isEroge = this->_stringToBool(output[3]); //<-- not sure??
+		event->end = this->_stringToTime(output[4]);
 	}
-	else if (event->action == 9) {
-
+	else if (event->action == 9) { // [BlackFade]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
 	}
-	else if (event->action == 10) {
-
+	else if (event->action == 10) { // [WhiteFade]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
 	}
-	else if (event->action == 11) {
-
+	else if (event->action == 11) { // [SetSELECT]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
 	}
-	else if (event->action == 12) {
-
+	else if (event->action == 12) { // [EndBGM]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
 	}
-	else if (event->action == 13) {
-
+	else if (event->action == 13) { // [EndRoll]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
 	}
 
 	return event;
@@ -121,9 +144,37 @@ int Script::_codeAction(std::string action)
 	return 0;
 }
 
+bool Script::_stringToBool(std::string isMale)
+{
+	if (isMale == "1") {
+		return true;
+	}
+	return false;
+}
+
+int Script::_stringToInt(std::string layer)
+{
+	return std::stoi(layer);
+}
+
 Script::Time* Script::_stringToTime(std::string time)
 {
 	Time* t = new Time;
+
+	std::string minutes, seconds, miliseconds;
+	
+	minutes.push_back(time[0]);
+	minutes.push_back(time[1]);
+
+	seconds.push_back(time[3]);
+	seconds.push_back(time[4]);
+
+	miliseconds.push_back(time[6]);
+	miliseconds.push_back(time[7]);
+
+	t->minute = std::stoi(minutes);
+	t->second = std::stoi(seconds);
+	t->millisecond = std::stoi(miliseconds);
 
 	return t;
 }

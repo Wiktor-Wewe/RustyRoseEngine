@@ -5,15 +5,21 @@
 class BackGroundMusic
 {
 public:
-	BackGroundMusic(std::string path);
+	BackGroundMusic(std::string path); // <- path without _xxx/x_.ogg
 
-	void play();
+	void playInt();
+	void playLoop();
+	bool isReadyForLoop();
 	void stop();
 	void free();
 
 private:
 	std::string _path;
-	Mix_Music* _music;
+	std::string _nameInt;
+	std::string _nameLoop;
+	bool _int;
+	Mix_Music* _musicInt;
+	Mix_Music* _musicLoop;
 	void _load();
 
 };

@@ -3,6 +3,7 @@
 Voice::Voice(std::string path)
 {
 	this->_path = path;
+	this->_load();
 }
 
 void Voice::play(int channel)

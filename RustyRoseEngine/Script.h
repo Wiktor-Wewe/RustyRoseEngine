@@ -20,6 +20,7 @@ public:
 		int layer = 0;
 		std::string name;
 		std::string data;
+		bool isEroge = false;
 		bool isMale = false;
 		std::string shortName;
 		Time* end;
@@ -34,5 +35,7 @@ private:
 	Event* _lineToEvent(std::string line);
 	int _codeAction(std::string action);
 	Time* _stringToTime(std::string time);
+	bool _stringToBool(std::string isMale);
+	int _stringToInt(std::string layer);
 };
 
