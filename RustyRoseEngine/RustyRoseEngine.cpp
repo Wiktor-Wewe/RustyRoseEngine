@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
     BackGroundMusic bgm = BackGroundMusic("D:\\SCHOOLDAYS HQ\\Packs\\BGM.GPK~\\SD_BGM\\SDBGM03");
     bgm.playInt();
     while (!bgm.isReadyForLoop()) {
-
+        SDL_Delay(1);
     }
     bgm.playLoop();
     

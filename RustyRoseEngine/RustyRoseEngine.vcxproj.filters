@@ -45,6 +45,9 @@
     <ClCompile Include="Script.cpp">
       <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
+    <ClCompile Include="Episode.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VDecoder.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="Script.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Episode.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
