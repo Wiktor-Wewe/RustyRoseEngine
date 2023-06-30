@@ -7,7 +7,7 @@ class SoundEffect
 public:
 	SoundEffect(std::string path);
 	// Need to convert sound effect from ogg to wav
-	void play(int channel);
+	void play();
 	void stop();
 	void free();
 

@@ -6,8 +6,9 @@ SoundEffect::SoundEffect(std::string path)
 	this->_load();
 }
 
-void SoundEffect::play(int channel)
+void SoundEffect::play()
 {
+	this->_channel = 2;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
 	if (this->_channel == -1) {
 		printf("unable to play sound effect: %s\n", this->_path.c_str());

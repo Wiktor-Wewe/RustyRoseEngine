@@ -7,7 +7,7 @@ class Voice
 public:
 	Voice(std::string path);
 	// Need to convert voice from ogg to wav
-	void play(int channel);
+	void play();
 	void stop();
 	void free();
 

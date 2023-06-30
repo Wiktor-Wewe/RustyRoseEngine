@@ -6,8 +6,9 @@ Voice::Voice(std::string path)
 	this->_load();
 }
 
-void Voice::play(int channel)
+void Voice::play()
 {
+	this->_channel = 3;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
 	if (this->_channel == -1) {
 		printf("unable to play voice: %s\n", this->_path.c_str());

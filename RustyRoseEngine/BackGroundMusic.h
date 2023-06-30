@@ -17,9 +17,10 @@ private:
 	std::string _path;
 	std::string _nameInt;
 	std::string _nameLoop;
+	int _channel;
 	bool _int;
-	Mix_Music* _musicInt;
-	Mix_Music* _musicLoop;
+	Mix_Chunk* _musicInt;
+	Mix_Chunk* _musicLoop;
 	void _load();
 
 };

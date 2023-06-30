@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     vdecoder.start();
 
     std::fstream file;
-    file.open("list.rre", std::ios::in);
+    file.open("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\list.rre", std::ios::in);
     if (!file.good()) {
         printf("cant open file\n");
         return 1;
@@ -77,29 +77,34 @@ int main(int argc, char* argv[]) {
         list.push_back(buff);
     }
 
-    BackGround bg = BackGround(renderer, list[3555], list);
+    BackGround bg = BackGround(renderer, list[458], list);
 
-    Script s = Script(list[4036]);
+    Script s = Script(list[756]);
+    printf("script\n");
     
-    Voice v = Voice(list[5834]);
-    //v.play(1);
+    Voice v = Voice(list[3011]);
+    SoundEffect se = SoundEffect(list[2553]);
+    BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM.GPK~\\SD_BGM\\SDBGM01");
 
-    SoundEffect se = SoundEffect(list[5830]);
-    //se.play(2);
+    v.play();
+    printf("voice\n");
+    
+    se.play();
+    printf("se\n");
 
-    BackGroundMusic bgm = BackGroundMusic("D:\\SCHOOLDAYS HQ\\Packs\\BGM.GPK~\\SD_BGM\\SDBGM03");
     bgm.playInt();
+    printf("ms int\n");
     while (!bgm.isReadyForLoop()) {
         SDL_Delay(1);
     }
     bgm.playLoop();
+    printf("ms loop\n");
     
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, bg.getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
     
-    se.stop();
 
     SDL_Delay(50000);
     while (vdecoder.decodeFrame()) {

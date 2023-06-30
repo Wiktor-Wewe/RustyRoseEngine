@@ -46,7 +46,7 @@
       <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
     <ClCompile Include="Episode.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -72,7 +72,7 @@
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
     <ClInclude Include="Episode.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
