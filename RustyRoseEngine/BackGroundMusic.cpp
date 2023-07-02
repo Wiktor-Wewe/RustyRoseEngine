@@ -37,7 +37,7 @@ bool BackGroundMusic::isReadyForLoop()
 
 void BackGroundMusic::stop()
 {
-	Mix_HaltMusic();
+	Mix_HaltChannel(this->_channel);
 }
 
 void BackGroundMusic::free()

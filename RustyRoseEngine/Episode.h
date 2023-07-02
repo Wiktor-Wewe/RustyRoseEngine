@@ -8,16 +8,16 @@
 class Episode
 {
 public:
-	Episode();
+	Episode(std::string path);
 	/// <summary>
-	/// Trzeba zrobiæ listê wszytkich plików posegregowanych po 
-	/// epizodach - najlepiej ¿eby backgoud mia³y .png ale ju¿
-	/// backgroudmusic - mia³o tylko œcie¿kê do folderu
+	/// Make simple method that make 6 lists
+	/// Episode1, ..., Episode 5, System
 	/// </summary>
-	void load();
+	bool load();
 	void free();
 
 private:
+	std::string _path;
 	std::vector<Script*> _scripts;
 	std::vector<BackGround*> _backGrounds;
 	std::vector<BackGroundMusic*> _backGroundMusics;

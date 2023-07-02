@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{6abd4727-5465-4ee8-a88d-7414efa23bbc}</ProjectGuid>
-    <RootNamespace>RustyRoseEngine</RootNamespace>
+    <ProjectGuid>{8fb96304-2942-44ce-bf4d-6e1268c56c35}</ProjectGuid>
+    <RootNamespace>SchoolDaysToRREList</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -70,26 +70,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\libs\sdl\lib\x64;C:\libs\sdl_image\lib\x64;C:\libs\ffmpeg-6.0\lib;C:\libs\sdl_mixer\lib\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\libs\sdl\include;C:\libs\sdl_image\include;C:\libs\ffmpeg-6.0\include;C:\libs\sdl_mixer\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\libs\sdl\lib\x64;C:\libs\sdl_image\lib\x64;C:\libs\ffmpeg-6.0\lib;C:\libs\sdl_mixer\lib\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\libs\sdl\include;C:\libs\sdl_image\include;C:\libs\ffmpeg-6.0\include;C:\libs\sdl_mixer\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\libs\sdl\lib\x64;C:\libs\sdl_image\lib\x64;C:\libs\ffmpeg-6.0\lib;C:\libs\sdl_mixer\lib\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\libs\sdl\include;C:\libs\sdl_image\include;C:\libs\ffmpeg-6.0\include;C:\libs\sdl_mixer\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\libs\sdl\lib\x64;C:\libs\sdl_image\lib\x64;C:\libs\ffmpeg-6.0\lib;C:\libs\sdl_mixer\lib\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\libs\sdl\include;C:\libs\sdl_image\include;C:\libs\ffmpeg-6.0\include;C:\libs\sdl_mixer\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -100,7 +80,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,7 +96,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -130,7 +108,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,31 +124,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BackGround.cpp" />
-    <ClCompile Include="BackGroundMusic.cpp" />
-    <ClCompile Include="Episode.cpp" />
-    <ClCompile Include="GameContext.cpp" />
-    <ClCompile Include="RustyRoseEngine.cpp" />
-    <ClCompile Include="Script.cpp" />
-    <ClCompile Include="SoundEffect.cpp" />
-    <ClCompile Include="System.cpp" />
-    <ClCompile Include="VDecoder.cpp" />
-    <ClCompile Include="Voice.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BackGround.h" />
-    <ClInclude Include="BackGroundMusic.h" />
-    <ClInclude Include="Episode.h" />
-    <ClInclude Include="GameContext.h" />
-    <ClInclude Include="Script.h" />
-    <ClInclude Include="SoundEffect.h" />
-    <ClInclude Include="System.h" />
-    <ClInclude Include="VDecoder.h" />
-    <ClInclude Include="Voice.h" />
+    <ClCompile Include="SchoolDaysToRREList.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

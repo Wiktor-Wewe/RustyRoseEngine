@@ -16,7 +16,7 @@ Script::Script(std::string path)
 
 	while (!file.eof()) {
 		std::getline(file, line);
-		if (line.size() > 1) {
+		if (line.size() > 3) {
 			this->events.push_back(this->_lineToEvent(line));
 		}
 	}
@@ -30,6 +30,14 @@ Script::Event* Script::_lineToEvent(std::string line)
 	std::string item;
 	std::string delimiters = "\t=";
 	std::vector<std::string> output;
+
+	if (line.size() > 20) {
+		for (int i = 20; i < line.size(); i++) {
+			if (line[i] == '=') {
+				line[i] = '@';
+			}
+		}
+	}
 
 	while ((pos = line.find_first_of(delimiters)) != std::string::npos) {
 		item = line.substr(0, pos);
@@ -92,10 +100,10 @@ Script::Event* Script::_lineToEvent(std::string line)
 		event->data = output[2];
 		event->end = this->_stringToTime(output[3]);
 	}
-	else if (event->action == 11) { // [SetSELECT]
+	else if (event->action == 11) { // [SetSELECT] // <- TODO fix - select is not one string, but 2 strings with tabulator between
 		event->start = this->_stringToTime(output[1]);
-		event->data = output[2];
-		event->end = this->_stringToTime(output[3]);
+		event->data = output[2] + output[3]; // <- for test
+		event->end = this->_stringToTime(output[4]);
 	}
 	else if (event->action == 12) { // [EndBGM]
 		event->start = this->_stringToTime(output[1]);
@@ -103,6 +111,11 @@ Script::Event* Script::_lineToEvent(std::string line)
 		event->end = this->_stringToTime(output[3]);
 	}
 	else if (event->action == 13) { // [EndRoll]
+		event->start = this->_stringToTime(output[1]);
+		event->data = output[2];
+		event->end = this->_stringToTime(output[3]);
+	}
+	else if (event->action == 13) { // [MoveSom]
 		event->start = this->_stringToTime(output[1]);
 		event->data = output[2];
 		event->end = this->_stringToTime(output[3]);
@@ -139,6 +152,8 @@ int Script::_codeAction(std::string action)
 		return 12;
 	else if (action == "[EndRoll]")
 		return 13;
+	else if (action == "[MoveSom]")
+		return 14;
 	else
 		printf("unable to code action: %s\n", action.c_str());
 	return 0;

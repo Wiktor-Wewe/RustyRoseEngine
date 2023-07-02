@@ -48,6 +48,9 @@
     <ClCompile Include="Episode.cpp">
       <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
+    <ClCompile Include="System.cpp">
+      <Filter>Pliki źródłowe\GameElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VDecoder.h">
@@ -72,6 +75,9 @@
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
     <ClInclude Include="Episode.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="System.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
   </ItemGroup>

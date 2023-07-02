@@ -17,6 +17,29 @@ SDL_Texture* BackGround::getTexture()
 	return nullptr;
 }
 
+SDL_Texture* BackGround::getNextAnimationTexture(std::string shortName)
+{
+	TalkAnimation* animation = nullptr;
+	for (int i = 0; i < this->animations.size(); i++) {
+		if (this->animations[i]->shortName == shortName) {
+			animation = this->animations[i];
+			break;
+		}
+	}
+
+	if (animation == nullptr) {
+		return nullptr;
+	}
+
+	SDL_Texture* texture = animation->sprites[animation->i];
+	animation->i++;
+	if (animation->i > 2) {
+		animation->i = 0;
+	}
+
+	return texture;
+}
+
 void BackGround::_loadImage()
 {
 	SDL_Surface* surface = IMG_Load(this->_path.c_str());

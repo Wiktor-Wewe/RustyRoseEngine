@@ -16,6 +16,7 @@ public:
 
 	BackGround(SDL_Renderer* renderer, std::string path, std::vector<std::string> fileNames);
 	SDL_Texture* getTexture();
+	SDL_Texture* getNextAnimationTexture(std::string shortName);
 
 private:
 	SDL_Renderer* _renderer;

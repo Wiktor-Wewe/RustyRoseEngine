@@ -9,6 +9,7 @@
 #include "Voice.h"
 #include "SoundEffect.h"
 #include "BackGroundMusic.h"
+#include "Episode.h"
 
 int main(int argc, char* argv[]) {
 
@@ -104,9 +105,19 @@ int main(int argc, char* argv[]) {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, bg.getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
+    for (int i = 0; i < 1000; i++) {
+        SDL_RenderCopy(renderer, bg.getNextAnimationTexture("SEK"), NULL, NULL);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(100);
+    }
+
+    printf("\nstart loading\n");
+    Episode e = Episode("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\list.rre");
+    e.load();
+    printf("\nloading done\n");
     
 
-    SDL_Delay(50000);
+    SDL_Delay(10000);
     while (vdecoder.decodeFrame()) {
 
         void* texturePixels;
