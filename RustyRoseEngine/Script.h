@@ -32,10 +32,21 @@ private:
 	std::string _path;
 	std::vector<Event*> events;
 
-	Event* _lineToEvent(std::string line);
-	int _codeAction(std::string action);
-	Time* _stringToTime(std::string time);
-	bool _stringToBool(std::string isMale);
-	int _stringToInt(std::string layer);
+	bool _loadScript(std::fstream* file);
+	bool _loadSkipFrame(std::fstream* file);
+	bool _loadPlayBgm(std::fstream* file);
+	bool _loadCreateBG(std::fstream* file);
+	bool _loadPrintText(std::fstream* file);
+	bool _loadPlayVoice(std::fstream* file);
+	bool _loadPlaySe(std::fstream* file);
+	bool _loadNext(std::fstream* file);
+	bool _loadPlayMovie(std::fstream* file);
+	bool _loadBlackFade(std::fstream* file);
+	bool _loadWhiteFade(std::fstream* file);
+	bool _loadSetSELECT(std::fstream* file);
+	bool _loadEndBGM(std::fstream* file);
+	bool _loadEndRoll(std::fstream* file);
+	bool _loadMoveSom(std::fstream* file);
+
 };
 
