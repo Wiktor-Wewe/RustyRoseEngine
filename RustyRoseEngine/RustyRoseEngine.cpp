@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 
     BackGround bg = BackGround(renderer, list[458], list);
 
-    Script s = Script(list[756]);
+    Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script.GPK~\\ENGLISH\\00\\00-00-C00.rose");
     printf("script\n");
     
     Voice v = Voice(list[3011]);
@@ -105,16 +105,11 @@ int main(int argc, char* argv[]) {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, bg.getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 5; i++) {
         SDL_RenderCopy(renderer, bg.getNextAnimationTexture("SEK"), NULL, NULL);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }
-
-    printf("\nstart loading\n");
-    Episode e = Episode("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\list.rre");
-    e.load();
-    printf("\nloading done\n");
     
 
     SDL_Delay(10000);

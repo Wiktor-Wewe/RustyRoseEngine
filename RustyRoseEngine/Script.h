@@ -50,6 +50,6 @@ private:
 	bool _loadMoveSom(std::fstream* file);
 
 	Time* _miliSecToTime(uint32_t milisec);
-
+	void _wipeCharArr(char* arr, int size);
 };
 
