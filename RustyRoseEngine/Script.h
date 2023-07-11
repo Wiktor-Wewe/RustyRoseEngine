@@ -14,7 +14,7 @@ public:
 
 	struct Event 
 	{
-		int action = 0;
+		uint16_t action = 0;
 		Time* start;
 		std::string bgshit;
 		int layer = 0;
@@ -22,6 +22,7 @@ public:
 		std::string data;
 		bool isEroge = false;
 		bool isMale = false;
+		bool fade = false; // [OUT] = 0 | [IN] = 1
 		std::string shortName;
 		Time* end;
 	};
@@ -30,7 +31,7 @@ public:
 
 private:
 	std::string _path;
-	std::vector<Event*> events;
+	std::vector<Event*> _events;
 
 	bool _loadScript(std::fstream* file);
 	bool _loadSkipFrame(std::fstream* file);
@@ -47,6 +48,8 @@ private:
 	bool _loadEndBGM(std::fstream* file);
 	bool _loadEndRoll(std::fstream* file);
 	bool _loadMoveSom(std::fstream* file);
+
+	Time* _miliSecToTime(uint32_t milisec);
 
 };
 
