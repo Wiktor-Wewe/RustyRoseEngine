@@ -1,0 +1,17 @@
+it may be usefull:
+
+Ini:
+-ENDLIST.INI - list of background in menu after endings
+-FEELINGSCRIPT.INI - all of feeling scripts staff - i dont need that but it may be usefull if i want to add
+-STANDERDSCRIPT.INI - -||- ???
+-STARTSCRIPT.INI - some may be usefull for menu
+
+SysSe:
+all - it's just sound effects files - for system and etc
+
+System:
+- load all png's 
+- make simple converter for CMAP (reducing size)
+- !!! there is also WMV (video) file for MENU
+- load openigs - WMV files
+- get new font or try to understand font from game and extract
