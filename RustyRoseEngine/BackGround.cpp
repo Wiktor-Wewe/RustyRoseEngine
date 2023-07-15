@@ -1,12 +1,42 @@
 #include "BackGround.h"
 
-BackGround::BackGround(SDL_Renderer* renderer, std::string path, std::vector<std::string> fileNames)
+BackGround::BackGround(SDL_Renderer* renderer, std::string path)
 {
 	this->_renderer = renderer;
 	this->_path = path;
-	this->_fileNames = fileNames;
 	this->_loadImage();
-	this->_loadAnimation();
+}
+
+void BackGround::tryLoadAnimation(std::string shortName)
+{	
+	if (shortName.size() == 3) {
+		shortName[0] -= 32;
+		shortName[1] -= 32;
+		shortName[2] -= 32;
+	}
+	
+	std::string animPath = this->_path + shortName + ".A.PNG";
+	SDL_Texture* texture = this->_tryGetAnimationTexture(animPath);
+	
+	if (texture == NULL) {
+		printf("unable to load animation image - file does not excist: %s\n", animPath.c_str());
+		return;
+	}
+
+	TalkAnimation* talkAnimation = new TalkAnimation;
+	talkAnimation->i = 0;
+	talkAnimation->shortName = shortName;
+	talkAnimation->sprites[0] = texture;
+
+	animPath[animPath.size() - 1 - 4] = 'B';
+	texture = this->_tryGetAnimationTexture(animPath);
+	talkAnimation->sprites[1] = texture;
+
+	animPath[animPath.size() - 1 - 4] = 'C';
+	texture = this->_tryGetAnimationTexture(animPath);
+	talkAnimation->sprites[2] = texture;
+
+	this->animations.push_back(talkAnimation);
 }
 
 SDL_Texture* BackGround::getTexture()
@@ -28,6 +58,7 @@ SDL_Texture* BackGround::getNextAnimationTexture(std::string shortName)
 	}
 
 	if (animation == nullptr) {
+		printf("animation '%s' for image '%s' not found\n", shortName.c_str(), this->_path.c_str());
 		return nullptr;
 	}
 
@@ -40,9 +71,15 @@ SDL_Texture* BackGround::getNextAnimationTexture(std::string shortName)
 	return texture;
 }
 
+std::string BackGround::getPath()
+{
+	return this->_path;
+}
+
 void BackGround::_loadImage()
 {
-	SDL_Surface* surface = IMG_Load(this->_path.c_str());
+	std::string pathWithEnd = this->_path + ".PNG";
+	SDL_Surface* surface = IMG_Load(pathWithEnd.c_str());
 	if (surface == NULL) {
 		printf("unable to load backgroud image: %s\n", this->_path.c_str());
 	}
@@ -55,42 +92,7 @@ void BackGround::_loadImage()
 	SDL_FreeSurface(surface);
 }
 
-void BackGround::_loadAnimation()
-{
-	auto list = this->_findAnimations(this->_path);
-
-	if (list.size() > 1) {
-		for (int i = 1; i < list.size();) {
-			TalkAnimation* ta = new TalkAnimation;
-			ta->i = 0;
-			ta->shortName = this->_getName(list[i]);
-			ta->sprites[0] = this->_getSpriteForAnimaton(list[i]);
-			i++;
-			ta->sprites[1] = this->_getSpriteForAnimaton(list[i]);
-			i++;
-			ta->sprites[2] = this->_getSpriteForAnimaton(list[i]);
-			i++;
-			this->animations.push_back(ta);
-		}
-	}
-}
-
-std::vector<std::string> BackGround::_findAnimations(std::string path)
-{
-	std::vector<std::string> result;
-	path = path.substr(0, path.size() - 4);
-
-
-	for (const std::string& str : this->_fileNames) {
-		if (str.find(path) != std::string::npos) {
-			result.push_back(str);
-		}
-	}
-
-	return result;
-}
-
-SDL_Texture* BackGround::_getSpriteForAnimaton(std::string path)
+SDL_Texture* BackGround::_tryGetAnimationTexture(std::string path)
 {
 	SDL_Surface* surface = IMG_Load(path.c_str());
 	if (surface == NULL) {
@@ -104,9 +106,4 @@ SDL_Texture* BackGround::_getSpriteForAnimaton(std::string path)
 
 	SDL_FreeSurface(surface);
 	return texture;
-}
-
-std::string BackGround::_getName(std::string path)
-{
-	return path.substr(path.size() - 9, 3);
 }

@@ -46,6 +46,11 @@ void BackGroundMusic::free()
 	Mix_FreeChunk(this->_musicLoop);
 }
 
+std::string BackGroundMusic::getPath()
+{
+	return this->_path;
+}
+
 void BackGroundMusic::_load()
 {
 	this->_musicInt = Mix_LoadWAV(this->_nameInt.c_str());

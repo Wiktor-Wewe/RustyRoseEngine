@@ -28,6 +28,9 @@ public:
 	};
 	
 	Script(std::string path);
+	std::string getPath();
+	std::vector<Event*> getEvents();
+
 
 private:
 	std::string _path;

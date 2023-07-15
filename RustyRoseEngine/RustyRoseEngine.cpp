@@ -9,7 +9,7 @@
 #include "Voice.h"
 #include "SoundEffect.h"
 #include "BackGroundMusic.h"
-#include "Episode.h"
+#include "GameContext.h"
 
 int main(int argc, char* argv[]) {
 
@@ -78,10 +78,13 @@ int main(int argc, char* argv[]) {
         list.push_back(buff);
     }
 
-    BackGround bg = BackGround(renderer, list[458], list);
-
     Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script.GPK~\\ENGLISH\\00\\00-00-C00.rose");
     printf("script\n");
+
+    GameContext context = GameContext(renderer);
+    context.addScript(&script);
+    context.loadContentFromScripts();
+    int q = 2137;
     
     Voice v = Voice(list[3011]);
     SoundEffect se = SoundEffect(list[2553]);
@@ -101,12 +104,13 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
     
+    auto bg = context.getBackGround("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-C00/00-00-C00-002C");
 
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, bg.getTexture(), NULL, NULL);
+    SDL_RenderCopy(renderer, bg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
-    for (int i = 0; i < 5; i++) {
-        SDL_RenderCopy(renderer, bg.getNextAnimationTexture("SEK"), NULL, NULL);
+    for (int i = 0; i < 50; i++) {
+        SDL_RenderCopy(renderer, bg->getNextAnimationTexture("SEK"), NULL, NULL);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }

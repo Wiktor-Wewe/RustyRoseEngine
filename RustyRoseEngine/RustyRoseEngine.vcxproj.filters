@@ -45,9 +45,6 @@
     <ClCompile Include="Script.cpp">
       <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
-    <ClCompile Include="Episode.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
     <ClCompile Include="System.cpp">
       <Filter>Pliki źródłowe\GameElements</Filter>
     </ClCompile>
@@ -72,9 +69,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="Script.h">
-      <Filter>Pliki nagłówkowe\GameElements</Filter>
-    </ClInclude>
-    <ClInclude Include="Episode.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
     <ClInclude Include="System.h">

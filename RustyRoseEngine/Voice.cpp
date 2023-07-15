@@ -25,6 +25,11 @@ void Voice::free()
 	Mix_FreeChunk(this->_soundEffect);
 }
 
+std::string Voice::getPath()
+{
+	return this->_path;
+}
+
 void Voice::_load()
 {
 	this->_soundEffect = Mix_LoadWAV(this->_path.c_str());

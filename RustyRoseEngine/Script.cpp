@@ -22,6 +22,16 @@ Script::Script(std::string path)
 	file.close();
 }
 
+std::string Script::getPath()
+{
+	return this->_path;
+}
+
+std::vector<Script::Event*> Script::getEvents()
+{
+	return this->_events;
+}
+
 bool Script::_loadScript(std::fstream* file)
 {
 	uint32_t buff32; uint16_t buff16; uint8_t buff8; char buffS[255];

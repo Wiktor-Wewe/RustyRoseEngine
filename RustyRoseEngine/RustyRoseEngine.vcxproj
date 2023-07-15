@@ -153,7 +153,6 @@
   <ItemGroup>
     <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
-    <ClCompile Include="Episode.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
     <ClCompile Include="Script.cpp" />
@@ -165,7 +164,6 @@
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
     <ClInclude Include="BackGroundMusic.h" />
-    <ClInclude Include="Episode.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="SoundEffect.h" />

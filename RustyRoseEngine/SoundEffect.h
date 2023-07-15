@@ -9,6 +9,7 @@ public:
 	void play();
 	void stop();
 	void free();
+	std::string getPath();
 
 private:
 	std::string _path;

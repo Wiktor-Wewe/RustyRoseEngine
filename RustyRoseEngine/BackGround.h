@@ -14,22 +14,20 @@ public:
 		SDL_Texture* sprites[3];
 	};
 
-	BackGround(SDL_Renderer* renderer, std::string path, std::vector<std::string> fileNames);
+	BackGround(SDL_Renderer* renderer, std::string path);
+	void tryLoadAnimation(std::string shortName);
 	SDL_Texture* getTexture();
 	SDL_Texture* getNextAnimationTexture(std::string shortName);
+	std::string getPath();
 
 private:
 	SDL_Renderer* _renderer;
 
-	std::vector<std::string> _fileNames;
 	std::string _path;
 	SDL_Texture* _texture;
 	std::vector<TalkAnimation*> animations;
-	void _loadImage();
-	void _loadAnimation();
 
-	std::vector<std::string> _findAnimations(std::string path);
-	SDL_Texture* _getSpriteForAnimaton(std::string path);
-	std::string _getName(std::string path);
+	void _loadImage();
+	SDL_Texture* _tryGetAnimationTexture(std::string path);
 };
 

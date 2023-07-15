@@ -13,6 +13,8 @@ public:
 	void stop();
 	void free();
 
+	std::string getPath();
+
 private:
 	std::string _path;
 	std::string _nameInt;
