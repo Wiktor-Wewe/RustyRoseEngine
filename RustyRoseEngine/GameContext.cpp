@@ -33,7 +33,7 @@ bool GameContext::loadContentFromScripts()
 				break;
 
 			case 0xCC02: { // bgm
-				BackGroundMusic* backGroundMusic = new BackGroundMusic(debugString + currentScript->getEvents()[j]->data + ".OGG");
+				BackGroundMusic* backGroundMusic = new BackGroundMusic(debugString + currentScript->getEvents()[j]->data);
 				this->_backGroundMusics.push_back(backGroundMusic);
 				}
 				break;
@@ -51,6 +51,39 @@ bool GameContext::loadContentFromScripts()
 	return true;
 }
 
+void GameContext::clear()
+{
+	for (int i = 0; i < this->_scripts.size(); i++) {
+		this->_scripts[i]->free();
+		//delete(this->_scripts[i]);
+	}
+	this->_scripts.clear();
+
+	for (int i = 0; i < this->_voices.size(); i++) {
+		this->_voices[i]->free();
+		//delete(this->_voices[i]);
+	}
+	this->_voices.clear();
+
+	for (int i = 0; i < this->_soundEffects.size(); i++) {
+		this->_soundEffects[i]->free();
+		//delete(this->_soundEffects[i]);
+	}
+	this->_soundEffects.clear();
+
+	for (int i = 0; i < this->_backGroundMusics.size(); i++) {
+		this->_backGroundMusics[i]->free();
+		//delete(this->_backGroundMusics[i]);
+	}
+	this->_backGroundMusics.clear();
+
+	for (int i = 0; i < this->_backGrounds.size(); i++) {
+		this->_backGrounds[i]->free();
+		//delete(this->_backGrounds[i]);
+	}
+	this->_backGrounds.clear();
+}
+
 void GameContext::_loadAnimationForBackGround(Script* script, BackGround* backGround, int currentEvent)
 {
 	currentEvent++;
@@ -63,6 +96,46 @@ void GameContext::_loadAnimationForBackGround(Script* script, BackGround* backGr
 			backGround->tryLoadAnimation(script->getEvents()[i]->shortName);
 		}
 	}
+}
+
+Script* GameContext::getScript(std::string path)
+{
+	for (int i = 0; i < this->_scripts.size(); i++) {
+		if (this->_scripts[i]->getPath() == path) {
+			return this->_scripts[i];
+		}
+	}
+	return nullptr;
+}
+
+Voice* GameContext::getVoice(std::string path)
+{
+	for (int i = 0; i < this->_voices.size(); i++) {
+		if (this->_voices[i]->getPath() == path) {
+			return this->_voices[i];
+		}
+	}
+	return nullptr;
+}
+
+SoundEffect* GameContext::getSoundEffect(std::string path)
+{
+	for (int i = 0; i < this->_soundEffects.size(); i++) {
+		if (this->_soundEffects[i]->getPath() == path) {
+			return this->_soundEffects[i];
+		}
+	}
+	return nullptr;
+}
+
+BackGroundMusic* GameContext::getBackGroundMusic(std::string path)
+{
+	for (int i = 0; i < this->_backGroundMusics.size(); i++) {
+		if (this->_backGroundMusics[i]->getPath() == path) {
+			return this->_backGroundMusics[i];
+		}
+	}
+	return nullptr;
 }
 
 BackGround* GameContext::getBackGround(std::string path)

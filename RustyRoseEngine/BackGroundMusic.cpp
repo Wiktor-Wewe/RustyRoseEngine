@@ -3,8 +3,8 @@
 BackGroundMusic::BackGroundMusic(std::string path)
 {
 	this->_path = path;
-	this->_nameInt = path + "_INT.OGG";
-	this->_nameLoop = path + "_LOOP.OGG";
+	this->_nameInt = this->_endUppercase(path) + "_INT.OGG";
+	this->_nameLoop = this->_endUppercase(path) + "_LOOP.OGG";
 	this->_load();
 }
 
@@ -63,4 +63,18 @@ void BackGroundMusic::_load()
 	if (this->_musicLoop == NULL) {
 		printf("unable to load background muisc loop: %s\n", this->_nameLoop.c_str());
 	}
+}
+
+std::string BackGroundMusic::_endUppercase(std::string text)
+{
+	for (int i = text.size() - 1; i >= 0; i--) {
+		if (text[i] == '/') {
+			break;
+		}
+
+		if (text[i] > 96 && text[i] < 123) {
+			text[i] = text[i] - 32;
+		}
+	}
+	return text;
 }

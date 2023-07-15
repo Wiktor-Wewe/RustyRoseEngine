@@ -19,6 +19,7 @@ public:
 	SDL_Texture* getTexture();
 	SDL_Texture* getNextAnimationTexture(std::string shortName);
 	std::string getPath();
+	void free();
 
 private:
 	SDL_Renderer* _renderer;

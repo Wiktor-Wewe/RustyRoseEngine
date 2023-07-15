@@ -12,11 +12,8 @@ Script::Script(std::string path)
 		return;
 	}
 
-	if (file.good()) {
-		this->_loadScript(&file);
-	}
-	else {
-		printf("file: %s is not good\n", this->_path.c_str());
+	if (!this->_loadScript(&file)) {
+		printf("something went wrong while load script '%s' - loading stop\n", this->_path.c_str());
 	}
 
 	file.close();
@@ -30,6 +27,13 @@ std::string Script::getPath()
 std::vector<Script::Event*> Script::getEvents()
 {
 	return this->_events;
+}
+
+void Script::free() 
+{
+	for (int i = 0; i < this->_events.size(); i++) {
+		delete(this->_events[i]);
+	}
 }
 
 bool Script::_loadScript(std::fstream* file)
@@ -107,7 +111,7 @@ bool Script::_loadScript(std::fstream* file)
 			break;
 
 		default:
-			printf("ERROR - unknown command: %u\n", buff16);
+			printf("ERROR - unknown command: 0x%X\n", buff16);
 			return false;
 			break;
 		}

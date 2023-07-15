@@ -13,8 +13,7 @@ public:
 	
 	void addScript(Script* script);
 	bool loadContentFromScripts();
-	void clearScripts();
-	void clearContestFromScripts();
+	void clear();
 
 	void setSystem(System* system);
 	System* getSystem();

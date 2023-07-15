@@ -64,37 +64,17 @@ int main(int argc, char* argv[]) {
     vdecoder.setPath(path);
     vdecoder.start();
 
-    std::fstream file;
-    file.open("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\list.rre", std::ios::in);
-    if (!file.good()) {
-        printf("cant open file\n");
-        return 1;
-    }
-
-    std::vector<std::string> list;
-    while (!file.eof()) {
-        std::string buff;
-        std::getline(file, buff);
-        list.push_back(buff);
-    }
-
-    Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script.GPK~\\ENGLISH\\00\\00-00-C00.rose");
+    Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script.GPK~\\ENGLISH\\00\\00-00-L00.rose");
     printf("script\n");
 
     GameContext context = GameContext(renderer);
     context.addScript(&script);
     context.loadContentFromScripts();
-    int q = 2137;
-    
-    Voice v = Voice(list[3011]);
-    SoundEffect se = SoundEffect(list[2553]);
-    BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM.GPK~\\SD_BGM\\SDBGM01");
 
-    v.play();
-    printf("voice\n");
-    
-    se.play();
-    printf("se\n");
+    context.getVoice("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Voice00/00-00/00-00-L00/00-00-L00-0240.OGG")->play();
+    context.getSoundEffect("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Se00/00-00/00-00-L00/SE00-00-L00-003.OGG")->play();
+
+    BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM/SD_BGM/sdbgm07");
 
     bgm.playInt();
     printf("ms int\n");
@@ -104,17 +84,29 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
     
-    auto bg = context.getBackGround("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-C00/00-00-C00-002C");
+    auto bg = context.getBackGround("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-L00/00-00-L00-009");
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, bg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 80; i++) {
         SDL_RenderCopy(renderer, bg->getNextAnimationTexture("SEK"), NULL, NULL);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, bg->getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    for (int i = 0; i < 80; i++) {
+        SDL_RenderCopy(renderer, bg->getNextAnimationTexture("MAK"), NULL, NULL);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(100);
+    }
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, bg->getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
     
+    context.clear();
 
     SDL_Delay(10000);
     while (vdecoder.decodeFrame()) {

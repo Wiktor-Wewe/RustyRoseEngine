@@ -19,7 +19,7 @@ void BackGround::tryLoadAnimation(std::string shortName)
 	SDL_Texture* texture = this->_tryGetAnimationTexture(animPath);
 	
 	if (texture == NULL) {
-		printf("unable to load animation image - file does not excist: %s\n", animPath.c_str());
+		//printf("unable to load animation image - file does not excist: %s\n", animPath.c_str());
 		return;
 	}
 
@@ -74,6 +74,18 @@ SDL_Texture* BackGround::getNextAnimationTexture(std::string shortName)
 std::string BackGround::getPath()
 {
 	return this->_path;
+}
+
+void BackGround::free()
+{
+	SDL_DestroyTexture(this->_texture);
+	for (int i = 0; i < this->animations.size(); i++) {
+		SDL_DestroyTexture(this->animations[i]->sprites[0]);
+		SDL_DestroyTexture(this->animations[i]->sprites[1]);
+		SDL_DestroyTexture(this->animations[i]->sprites[2]);
+		//delete(this->animations[i]);
+	}
+	this->animations.clear();
 }
 
 void BackGround::_loadImage()

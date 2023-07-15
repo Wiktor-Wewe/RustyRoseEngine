@@ -24,6 +24,6 @@ private:
 	Mix_Chunk* _musicInt;
 	Mix_Chunk* _musicLoop;
 	void _load();
-
+	std::string _endUppercase(std::string text);
 };
 

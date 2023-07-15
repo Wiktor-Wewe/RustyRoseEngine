@@ -30,6 +30,8 @@ public:
 	Script(std::string path);
 	std::string getPath();
 	std::vector<Event*> getEvents();
+	
+	void free();
 
 
 private:
