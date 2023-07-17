@@ -10,6 +10,7 @@
 #include "SoundEffect.h"
 #include "BackGroundMusic.h"
 #include "GameContext.h"
+#include "SysImg.h"
 
 int main(int argc, char* argv[]) {
 
@@ -76,13 +77,21 @@ int main(int argc, char* argv[]) {
 
     BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM/SD_BGM/sdbgm07");
 
-    bgm.playInt();
-    printf("ms int\n");
-    while (!bgm.isReadyForLoop()) {
-        SDL_Delay(1);
-    }
+    //bgm.playInt();
+    //printf("ms int\n");
+    //while (!bgm.isReadyForLoop()) {
+    //    SDL_Delay(1);
+    //}
     bgm.playLoop();
     printf("ms loop\n");
+
+    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System.GPK~\\TITLE\\00-00-D00-004C.PNG";
+    SysImg sysimg = SysImg(sysimgstr, renderer);
+    sysimg.addButton("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System.GPK~\\TITLE\\TITLE.CMAP.bin");
+    sysimg.trimTexture(1);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(10000);
     
     auto bg = context.getBackGround("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-L00/00-00-L00-009");
 
