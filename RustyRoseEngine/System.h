@@ -1,25 +1,28 @@
 #include <vector>
 #include "SysImg.h"
 #include "SoundEffect.h"
+#include <fstream>
+#include <SDL_ttf.h>
 
 class System
 {
 public:
-	System(SDL_Renderer* renderer); //, SDL_Font
+	System(SDL_Renderer* renderer);
 	void setSystem(std::string path);
-	bool loadSystem();
+	void loadSystem();
 	void freeSystem();
 	
 	SoundEffect* getSoundEffect(std::string path);
 	SysImg* getSystemImage(std::string path);
-	//SDL_Font* getFont();
+	TTF_Font* getFont();
 
 private:
 	SDL_Renderer* _renderer;
-	// add SDL_Font _font
+	TTF_Font* _font;
 	std::vector<std::string> _list;
 
 	std::vector<SoundEffect*> _soundEffects;
 	std::vector<SysImg*> _systemImages;
 
+	void _setFont(std::string path);
 };

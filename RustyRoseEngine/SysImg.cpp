@@ -43,7 +43,7 @@ void SysImg::trimTexture(int id)
 	SDL_FreeSurface(tempSurface);
 }
 
-void SysImg::addButton(std::string path)
+void SysImg::addButtons(std::string path)
 {
 	std::fstream file;
 	file.open(path.c_str(), std::ios::in | std::ios::binary);
@@ -95,6 +95,17 @@ void SysImg::addButton(std::string path)
 std::string SysImg::getPath()
 {
 	return this->_path;
+}
+
+void SysImg::free()
+{
+	SDL_DestroyTexture(this->_texture);
+	SDL_FreeSurface(this->_surface);
+	delete(this->_originalSize);
+
+	for (int i = 0; i < this->_buttons.size(); i++) {
+		delete(this->_buttons[i]);
+	}
 }
 
 bool SysImg::_load()

@@ -25,7 +25,7 @@ public:
 	SDL_Texture* getTexture();
 	void trimTexture(int id); //id = id of button to trim, 0 = all texture
 
-	void addButton(std::string path);
+	void addButtons(std::string path);
 	std::string getPath();
 	void free();
 

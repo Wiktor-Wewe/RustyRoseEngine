@@ -11,6 +11,7 @@
 #include "BackGroundMusic.h"
 #include "GameContext.h"
 #include "SysImg.h"
+#include "System.h"
 
 int main(int argc, char* argv[]) {
 
@@ -21,6 +22,13 @@ int main(int argc, char* argv[]) {
     // Inicjalizacja SDL2
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         printf("Błąd: Nie można zainicjalizować SDL: %s\n", SDL_GetError());
+        return -1;
+    }
+
+    // Inicjalizacja SDL2 TTF
+    if (TTF_Init() == -1) {
+        // Obsługa błędu
+        printf("Nie można zainicjalizować SDL_ttf: %s\n", TTF_GetError());
         return -1;
     }
 
@@ -65,7 +73,7 @@ int main(int argc, char* argv[]) {
     vdecoder.setPath(path);
     vdecoder.start();
 
-    Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script.GPK~\\ENGLISH\\00\\00-00-L00.rose");
+    Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-L00.rose");
     printf("script\n");
 
     GameContext context = GameContext(renderer);
@@ -77,6 +85,15 @@ int main(int argc, char* argv[]) {
 
     BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM/SD_BGM/sdbgm07");
 
+    System sys = System(renderer);
+    sys.setSystem("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\systemList.rose");
+    sys.loadSystem();
+    SDL_Texture* systemtexture = sys.getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\ENDTITLE\\END-05-A2-B00.PNG")->getTexture();
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, systemtexture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
+
     //bgm.playInt();
     //printf("ms int\n");
     //while (!bgm.isReadyForLoop()) {
@@ -85,13 +102,45 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
 
-    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System.GPK~\\TITLE\\00-00-D00-004C.PNG";
+    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\TITLE\\TITLE.PNG";
     SysImg sysimg = SysImg(sysimgstr, renderer);
-    sysimg.addButton("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System.GPK~\\TITLE\\TITLE.CMAP.bin");
+    sysimg.addButtons("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\TITLE\\TITLE.CMAP.bin");
+    
     sysimg.trimTexture(1);
+    SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
-    SDL_Delay(10000);
+    SDL_Delay(4000);
+
+    sysimg.trimTexture(2);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
+
+    sysimg.trimTexture(3);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
+
+    sysimg.trimTexture(4);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
+
+    sysimg.trimTexture(5);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
+
+    sysimg.trimTexture(0);
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_Delay(4000);
     
     auto bg = context.getBackGround("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-L00/00-00-L00-009");
 
