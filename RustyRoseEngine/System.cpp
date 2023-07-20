@@ -30,21 +30,32 @@ void System::loadSystem()
 {
 	for (int i = 0; i < this->_list.size(); i++) {
 		int size = this->_list[i].size();
-		std::string buff = this->_list[i];
-		if (buff[size - 4] == '.') {
-			if (buff[size - 1] == 'G' && buff[size - 2] == 'N' && buff[size - 3] == 'P') {
-				SysImg* sysimg = new SysImg(buff, this->_renderer);
-				this->_systemImages.push_back(sysimg);
+		std::string path = this->_list[i];
+
+		std::string format = this->_getFileFormat(path);
+		if (format == ".PNG") {
+			SysImg* sysimg = new SysImg(path, this->_renderer);
+			this->_systemImages.push_back(sysimg);
+		}
+		else if (format == ".OGG") {
+			SoundEffect* soundeffect = new SoundEffect(path);
+			this->_soundEffects.push_back(soundeffect);
+		}
+		else if (format == ".ttf") {
+			this->_setFont(path);
+		}
+		else if (format == ".rrm") {
+			std::string name = this->_getFileName(path);
+			auto img = this->getSystemImage(name + ".PNG");
+			if (img != nullptr) {
+				img->addButtons(path);
 			}
-			if (buff[size - 1] == 'G' && buff[size - 2] == 'G' && buff[size - 3] == 'O') {
-				SoundEffect* soundeffect = new SoundEffect(buff);
-				this->_soundEffects.push_back(soundeffect);
+			else {
+				printf("cant match image to rrm: %s\n", path.c_str());
 			}
-			if (buff[size - 1] == 'f' && buff[size - 2] == 't' && buff[size - 3] == 't') {
-				this->_setFont(buff);
-			}
-			// add if buff > 5 ???
-			// add handle cmap/bin
+		}
+		else {
+			printf("cant recognize format: %s in %s\n", format.c_str(), path.c_str());
 		}
 	}
 }
@@ -99,4 +110,26 @@ void System::_setFont(std::string path)
 	if (this->_font == NULL) {
 		printf("unable to load font: %s\nSDL said: %s\n", path.c_str(), TTF_GetError());
 	}
+}
+
+std::string System::_getFileName(std::string path)
+{
+	size_t pos = path.find_last_of(".");
+	
+	if (pos == std::string::npos) {
+		return "none";
+	}
+
+	return path.substr(0, pos);
+}
+
+std::string System::_getFileFormat(std::string path)
+{
+	size_t pos = path.find_last_of(".");
+
+	if (pos == std::string::npos) {
+		return "none";
+	}
+
+	return path.substr(pos, path.size()-1);
 }

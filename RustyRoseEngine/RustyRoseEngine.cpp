@@ -102,43 +102,29 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
 
-    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.PNG";
-    SysImg sysimg = SysImg(sysimgstr, renderer);
-    sysimg.addButtons("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.bmp.rrm");
+    SysImg* sysimg = sys.getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.PNG");
     
-    sysimg.trimTexture(1);
+    sysimg->trimTexture(1);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderCopy(renderer, sysimg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
     SDL_Delay(4000);
 
-    sysimg.trimTexture(2);
+    sysimg->trimTexture(2);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderCopy(renderer, sysimg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
     SDL_Delay(4000);
 
-    sysimg.trimTexture(3);
+    sysimg->trimTexture(3);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderCopy(renderer, sysimg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
     SDL_Delay(4000);
 
-    sysimg.trimTexture(4);
+    sysimg->trimTexture(0);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
-    SDL_RenderPresent(renderer);
-    SDL_Delay(4000);
-
-    sysimg.trimTexture(5);
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
-    SDL_RenderPresent(renderer);
-    SDL_Delay(4000);
-
-    sysimg.trimTexture(0);
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, sysimg.getTexture(), NULL, NULL);
+    SDL_RenderCopy(renderer, sysimg->getTexture(), NULL, NULL);
     SDL_RenderPresent(renderer);
     SDL_Delay(4000);
     

@@ -25,4 +25,7 @@ private:
 	std::vector<SysImg*> _systemImages;
 
 	void _setFont(std::string path);
+	std::string _getFileName(std::string path);
+	std::string _getFileFormat(std::string path);
+
 };
