@@ -2,10 +2,10 @@
 #include <vector>
 #include "Script.h"
 #include "Voice.h"
-//#include "System.h"
 #include "SoundEffect.h"
 #include "BackGroundMusic.h"
 #include "BackGround.h"
+#include "System.h"
 
 
 class GameContext
@@ -17,8 +17,8 @@ public:
 	bool loadContentFromScripts();
 	void clear();
 
-	//void setSystem(System* system);
-	//System* getSystem();
+	void setSystem(System* system);
+	System* getSystem();
 
 	Script* getScript(std::string path);
 	Voice* getVoice(std::string path);
@@ -28,7 +28,7 @@ public:
 
 private:
 	SDL_Renderer* _renderer;
-	//System _system;
+	System* _system;
 
 	std::vector<Script*> _scripts;
 	std::vector<Voice*> _voices;

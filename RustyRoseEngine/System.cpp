@@ -49,6 +49,22 @@ void System::loadSystem()
 	}
 }
 
+void System::freeSystem()
+{
+	// delete(font)???
+	for (int i = 0; i < this->_systemImages.size(); i++) {
+		this->_systemImages[i]->free();
+		//delete(this->_systemImages[i]);
+	}
+	this->_systemImages.clear();
+
+	for (int i = 0; i < this->_soundEffects.size(); i++) {
+		this->_soundEffects[i]->free();
+		//delete(this->_soundEffects[i]);
+	}
+	this->_systemImages.clear();
+}
+
 SoundEffect* System::getSoundEffect(std::string path)
 {
 	for (int i = 0; i < this->_soundEffects.size(); i++) {

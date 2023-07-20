@@ -84,6 +84,19 @@ void GameContext::clear()
 	this->_backGrounds.clear();
 }
 
+void GameContext::setSystem(System* system)
+{
+	this->_system = system;
+}
+
+System* GameContext::getSystem()
+{
+	if (this->_system == nullptr) {
+		printf("warning: system is nullptr\n");
+	}
+	return this->_system;
+}
+
 void GameContext::_loadAnimationForBackGround(Script* script, BackGround* backGround, int currentEvent)
 {
 	currentEvent++;

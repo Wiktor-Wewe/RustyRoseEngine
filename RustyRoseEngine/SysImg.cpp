@@ -54,12 +54,12 @@ void SysImg::addButtons(std::string path)
 
 	OriginalSize* originalSize = new OriginalSize;
 
-	uint32_t buff32; uint16_t buff16;
+	uint32_t buff32;
 	
-	char header[8];
-	file.read(reinterpret_cast<char*>(&header[0]), 8);
+	char header[4];
+	file.read(reinterpret_cast<char*>(&header[0]), 4);
 	
-	if (strncmp(header, "CMAPbin ", 8) != 0) {
+	if (strncmp(header, "rrmf", 4) != 0) {
 		printf("unable to add button: %s\nheader error\n", path.c_str());
 		return;
 	}
@@ -76,8 +76,8 @@ void SysImg::addButtons(std::string path)
 
 	for (int i = 0; i < count; i++) {
 		Button* button = new Button;
-		file.read(reinterpret_cast<char*>(&buff16), sizeof(buff16));
-		button->id = buff16;
+		file.read(reinterpret_cast<char*>(&buff32), sizeof(buff32));
+		button->id = buff32;
 		file.read(reinterpret_cast<char*>(&buff32), sizeof(buff32));
 		button->x = buff32;
 		file.read(reinterpret_cast<char*>(&buff32), sizeof(buff32));

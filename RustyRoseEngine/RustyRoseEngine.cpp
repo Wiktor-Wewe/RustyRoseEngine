@@ -11,7 +11,7 @@
 #include "BackGroundMusic.h"
 #include "GameContext.h"
 #include "SysImg.h"
-#include "System.h"
+//#include "System.h"
 
 int main(int argc, char* argv[]) {
 
@@ -102,9 +102,9 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
 
-    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\TITLE\\TITLE.PNG";
+    std::string sysimgstr = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.PNG";
     SysImg sysimg = SysImg(sysimgstr, renderer);
-    sysimg.addButtons("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\TITLE\\TITLE.CMAP.bin");
+    sysimg.addButtons("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.bmp.rrm");
     
     sysimg.trimTexture(1);
     SDL_RenderClear(renderer);
