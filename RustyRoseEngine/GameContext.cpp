@@ -5,6 +5,13 @@ GameContext::GameContext(SDL_Renderer* renderer)
 	this->_renderer = renderer;
 }
 
+void GameContext::playScript(Script* script)
+{
+	for (int i = 0; i < script->getEvents().size(); i++) {
+		printf("event [%i]: 0x%X\n", i, script->getEvents()[i]->action);
+	}
+}
+
 void GameContext::addScript(Script* script)
 {
 	this->_scripts.push_back(script);

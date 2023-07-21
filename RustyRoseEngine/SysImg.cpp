@@ -11,6 +11,10 @@ SysImg::SysImg(std::string path, SDL_Renderer* renderer)
 
 SDL_Texture* SysImg::getTexture()
 {
+	if (this == NULL) {
+		printf("ERROR - TRY TO GET SYSTEM IMG TEXTURE FROM NULL\n");
+		return NULL;
+	}
 	return this->_texture;
 }
 

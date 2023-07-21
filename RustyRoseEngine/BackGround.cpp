@@ -41,6 +41,10 @@ void BackGround::tryLoadAnimation(std::string shortName)
 
 SDL_Texture* BackGround::getTexture()
 {
+	if (this == NULL) {
+		printf("ERROR - TRY TO GET TEXTURE FROM NULL IN BACKGROUND\n");
+		return NULL;
+	}
 	if (this->_texture != NULL) {
 		return this->_texture;
 	}

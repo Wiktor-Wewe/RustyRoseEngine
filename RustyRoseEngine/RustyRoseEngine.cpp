@@ -11,6 +11,7 @@
 #include "BackGroundMusic.h"
 #include "GameContext.h"
 #include "SysImg.h"
+#include "Scene.h"
 //#include "System.h"
 
 int main(int argc, char* argv[]) {
@@ -76,19 +77,32 @@ int main(int argc, char* argv[]) {
     Script script = Script("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-L00.rose");
     printf("script\n");
 
+    System* sys = new System(renderer);
+    sys->setSystem("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\systemList.rose");
+    sys->loadSystem();
     GameContext context = GameContext(renderer);
+    context.setSystem(sys);
     context.addScript(&script);
     context.loadContentFromScripts();
+    Script* scriptToPlayTest = context.getScript("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-L00.rose");
+    context.playScript(scriptToPlayTest);
 
     context.getVoice("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Voice00/00-00/00-00-L00/00-00-L00-0240.OGG")->play();
     context.getSoundEffect("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Se00/00-00/00-00-L00/SE00-00-L00-003.OGG")->play();
 
     BackGroundMusic bgm = BackGroundMusic("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\BGM/SD_BGM/sdbgm07");
 
-    System sys = System(renderer);
-    sys.setSystem("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\systemList.rose");
-    sys.loadSystem();
-    SDL_Texture* systemtexture = sys.getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\ENDTITLE\\END-05-A2-B00.PNG")->getTexture();
+    Scene* scene = new Scene(renderer, context.getSystem()->getFont());
+    std::string pathToTestScene = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Event00/00-00/00-00-L00/00-00-L00-003";
+    scene->addBackGround(context.getBackGround(pathToTestScene), 0);
+    std::string pathToTestSystemScene = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\SCREEN\\TELOP\\TELOP06.PNG";
+    scene->addSysImg(context.getSystem()->getSystemImage(pathToTestSystemScene), 1);
+    scene->makeTexture();
+    scene->draw();
+    printf("Scene on window\n");
+    SDL_Delay(15000);
+    
+    SDL_Texture* systemtexture = context.getSystem()->getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\ENDTITLE\\END-05-A2-B00.PNG")->getTexture();
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, systemtexture, NULL, NULL);
     SDL_RenderPresent(renderer);
@@ -102,7 +116,7 @@ int main(int argc, char* argv[]) {
     bgm.playLoop();
     printf("ms loop\n");
 
-    SysImg* sysimg = sys.getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.PNG");
+    SysImg* sysimg = context.getSystem()->getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\EXIT\\POPUP_TITLE.PNG");
     
     sysimg->trimTexture(1);
     SDL_RenderClear(renderer);

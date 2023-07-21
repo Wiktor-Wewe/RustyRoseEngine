@@ -12,7 +12,7 @@ class GameContext
 {
 public:
 	GameContext(SDL_Renderer* renderer);
-	
+	void playScript(Script* script);
 	void addScript(Script* script);
 	bool loadContentFromScripts();
 	void clear();
