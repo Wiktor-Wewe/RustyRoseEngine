@@ -101,6 +101,11 @@ int main(int argc, char* argv[]) {
     scene->makeTexture();
     scene->draw();
     printf("Scene on window\n");
+    SDL_Delay(5000);
+    scene->clear(-2);
+    scene->addText("Dodalem sensowne zalamywanie sie lini. Teraz gdy tekst jest za dlugi to zrobi sie automatycznie.");
+    scene->makeTexture();
+    scene->draw();
     SDL_Delay(15000);
     
     SDL_Texture* systemtexture = context.getSystem()->getSystemImage("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\ENDTITLE\\END-05-A2-B00.PNG")->getTexture();

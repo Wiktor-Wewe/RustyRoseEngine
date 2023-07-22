@@ -16,7 +16,10 @@ void Scene::draw()
 
 void Scene::clear(int layer)
 {
-	if (layer == -1) {
+	if (layer == -2) {
+		this->_text.clear();
+	}
+	else if (layer == -1) {
 		this->_backGround0.clear();
 		this->_backGround1.clear();
 		this->_backGround2.clear();
@@ -114,7 +117,7 @@ void Scene::makeTexture()
 	for (int i = 0; i < this->_text.size(); i++) {
 		int w = 0, h = 0;
 		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
-		SDL_Rect rect = {(1280 / 2) - (w / 2), 600, w, h};
+		SDL_Rect rect = {(1280 / 2) - (w / 2), h<120 ? 600 : 500, w, h};
 		SDL_RenderCopy(this->_renderer, text, NULL, &rect);
 		SDL_DestroyTexture(text);
 	}
@@ -131,7 +134,7 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 	SDL_Color textColor = { 255, 255, 255, 255 };
 	SDL_Color outlineColor = { 0, 0, 0, 255 };
 
-	SDL_Surface* outlineSurface = TTF_RenderText_Solid(this->_font, text.c_str(), outlineColor);
+	SDL_Surface* outlineSurface = TTF_RenderText_Blended_Wrapped(this->_font, text.c_str(), outlineColor, 1100);
 	if (outlineSurface == NULL) {
 		printf("unable to make outline surface in text: %s\n", text.c_str());
 		return nullptr;
@@ -158,18 +161,18 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 	w = rect.w;
 	h = rect.h;
 
-	rect.x = -2;
+	rect.x = -3;
 	SDL_RenderCopy(this->_renderer, outlineTexture, NULL, &rect);
-	rect.x = 2;
+	rect.x = 3;
 	SDL_RenderCopy(this->_renderer, outlineTexture, NULL, &rect);
 	rect.x = 0;
-	rect.y = -2;
+	rect.y = -3;
 	SDL_RenderCopy(this->_renderer, outlineTexture, NULL, &rect);
-	rect.y = 2;
+	rect.y = 3;
 	SDL_RenderCopy(this->_renderer, outlineTexture, NULL, &rect);
 	rect.y = 0;
 
-	SDL_Surface* textSurface = TTF_RenderText_Solid(this->_font, text.c_str(), textColor);
+	SDL_Surface* textSurface = TTF_RenderText_Blended_Wrapped(this->_font, text.c_str(), textColor, 1100);
 	if (textSurface == NULL) {
 		printf("unable to make text surface in text: %s\n", text.c_str());
 		SDL_FreeSurface(outlineSurface);

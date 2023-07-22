@@ -10,7 +10,7 @@ public:
 	Scene(SDL_Renderer* renderer, TTF_Font* font);
 	
 	void draw();
-	void clear(int layer); //-1 = all
+	void clear(int layer); //-1 = all // -2 = text
 	void addBackGround(BackGround* bg, int layer);
 	void addSysImg(SysImg* sysimg, int layer);
 	void addText(std::string text);
