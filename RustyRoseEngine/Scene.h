@@ -13,6 +13,7 @@ public:
 	void clear(int layer); //-1 = all
 	void addBackGround(BackGround* bg, int layer);
 	void addSysImg(SysImg* sysimg, int layer);
+	void addText(std::string text);
 	void makeTexture();
 
 private:
@@ -26,5 +27,8 @@ private:
 	std::vector<SysImg*> _sysImg0;
 	std::vector<SysImg*> _sysImg1;
 	std::vector<SysImg*> _sysImg2;
+	std::vector<std::string> _text;
+
+	SDL_Texture* _makeText(std::string text, int& w, int& h);
 };
 

@@ -97,6 +97,7 @@ int main(int argc, char* argv[]) {
     scene->addBackGround(context.getBackGround(pathToTestScene), 0);
     std::string pathToTestSystemScene = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\SCREEN\\TELOP\\TELOP06.PNG";
     scene->addSysImg(context.getSystem()->getSystemImage(pathToTestSystemScene), 1);
+    scene->addText("Sample text you faggot! :D");
     scene->makeTexture();
     scene->draw();
     printf("Scene on window\n");
