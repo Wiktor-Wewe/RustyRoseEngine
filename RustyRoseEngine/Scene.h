@@ -7,8 +7,9 @@
 class Scene
 {
 public:
-	Scene(SDL_Renderer* renderer, TTF_Font* font);
+	Scene(SDL_Renderer* renderer);
 	
+	void setFont(TTF_Font* font);
 	void draw();
 	void clear(int layer); //-1 = all // -2 = text
 	void addBackGround(BackGround* bg, int layer);

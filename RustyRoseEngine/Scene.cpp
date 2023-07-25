@@ -1,11 +1,15 @@
 #include "Scene.h"
 
-Scene::Scene(SDL_Renderer* renderer, TTF_Font* font)
+Scene::Scene(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
-	this->_font = font;
 	this->_texture = this->_texture = SDL_CreateTexture(this->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1280, 720);
 	SDL_SetTextureBlendMode(this->_texture, SDL_BLENDMODE_BLEND);
+}
+
+void Scene::setFont(TTF_Font* font)
+{
+	this->_font = font;
 }
 
 void Scene::draw()
@@ -117,7 +121,7 @@ void Scene::makeTexture()
 	for (int i = 0; i < this->_text.size(); i++) {
 		int w = 0, h = 0;
 		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
-		SDL_Rect rect = {(1280 / 2) - (w / 2), h<120 ? 600 : 500, w, h};
+		SDL_Rect rect = {(1280 / 2) - (w / 2), h<120 ? 600 : 500, w, h}; // <- scaling
 		SDL_RenderCopy(this->_renderer, text, NULL, &rect);
 		SDL_DestroyTexture(text);
 	}

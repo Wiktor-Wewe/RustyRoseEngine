@@ -3,6 +3,7 @@
 GameContext::GameContext(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
+	this->_system = new System(this->_renderer);
 }
 
 void GameContext::playScript(Script* script)
@@ -89,11 +90,6 @@ void GameContext::clear()
 		//delete(this->_backGrounds[i]);
 	}
 	this->_backGrounds.clear();
-}
-
-void GameContext::setSystem(System* system)
-{
-	this->_system = system;
 }
 
 System* GameContext::getSystem()

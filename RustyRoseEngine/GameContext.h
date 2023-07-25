@@ -17,9 +17,7 @@ public:
 	bool loadContentFromScripts();
 	void clear();
 
-	void setSystem(System* system);
 	System* getSystem();
-
 	Script* getScript(std::string path);
 	Voice* getVoice(std::string path);
 	SoundEffect* getSoundEffect(std::string path);
