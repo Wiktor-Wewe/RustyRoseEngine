@@ -2,6 +2,7 @@
 
 Script::Script(std::string path)
 {
+	this->_status = false;
 	this->_path = path;
 	
 	std::fstream file;
@@ -16,6 +17,7 @@ Script::Script(std::string path)
 		printf("something went wrong while load script '%s' - loading stop\n", this->_path.c_str());
 	}
 
+	this->_status = true;
 	file.close();
 }
 
@@ -27,6 +29,11 @@ std::string Script::getPath()
 std::vector<Script::Event*> Script::getEvents()
 {
 	return this->_events;
+}
+
+bool Script::isStatusGood()
+{
+	return this->_status;
 }
 
 void Script::free() 

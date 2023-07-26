@@ -10,6 +10,12 @@ public:
 		unsigned int minute = 0;
 		unsigned int second = 0;
 		unsigned int millisecond = 0;
+
+		bool operator==(const Time& other) const {
+			return (minute == other.minute) &&
+				   (second == other.second) &&
+				   (millisecond == other.millisecond);
+		}
 	};
 
 	struct Event 
@@ -30,11 +36,12 @@ public:
 	Script(std::string path);
 	std::string getPath();
 	std::vector<Event*> getEvents();
+	bool isStatusGood();
 	
 	void free();
 
-
 private:
+	bool _status;
 	std::string _path;
 	std::vector<Event*> _events;
 

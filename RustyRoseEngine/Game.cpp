@@ -57,6 +57,7 @@ Game::Game()
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
     this->_vDecoder = new VDecoder();
+    this->_timer = new Timer();
 
     // this should looks like: 
     // this->_gameContext->getSyste()->setSyste(init.linkToSys);
@@ -68,14 +69,26 @@ Game::Game()
     this->_initStatus = true;
 }
 
-void Game::play(Script* script)
+void Game::play(std::string scriptPath)
 {
-    std::string linkToSysImg = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\System\\ENDTITLE\\END-05-KC-F00.PNG";
-    
-    this->_scene->addSysImg(this->_gameContext->getSystem()->getSystemImage(linkToSysImg), 0);
-    this->_scene->addText("Testy robic musze bo sie udusze :)");
-    this->_scene->makeTexture();
-    this->_scene->draw();
+    this->_gameContext->addScript(scriptPath);
+
+    if (!this->_gameContext->loadContentFromScripts()) {
+        printf("nie zadziala\n");
+        return;
+    }
+
+    bool end = false;
+    auto events = this->_gameContext->getScript(scriptPath)->getEvents();
+
+    this->_timer->reset();
+    while (!end) {
+        for (int i = 0; i < events.size(); i++) {
+            if (*events[i]->start == this->_timer->elapsed()) {
+                printf("action: 0x%X - data: %s\n", events[i]->action, events[i]->data.c_str());
+            }
+        }
+    }
     
     SDL_Delay(10000);
 }

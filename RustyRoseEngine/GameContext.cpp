@@ -6,20 +6,21 @@ GameContext::GameContext(SDL_Renderer* renderer)
 	this->_system = new System(this->_renderer);
 }
 
-void GameContext::playScript(Script* script)
+void GameContext::addScript(std::string scriptPath)
 {
-	for (int i = 0; i < script->getEvents().size(); i++) {
-		printf("event [%i]: 0x%X\n", i, script->getEvents()[i]->action);
+	Script* script = new Script(scriptPath);
+	if (script->isStatusGood()) {
+		this->_scripts.push_back(script);
 	}
-}
-
-void GameContext::addScript(Script* script)
-{
-	this->_scripts.push_back(script);
 }
 
 bool GameContext::loadContentFromScripts()
 {
+	if (this->_scripts.size() == 0) {
+		printf("unable to load content from script - scripts.size() == 0\n");
+		return false;
+	}
+
 	std::string debugString = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\";
 
 	Script* currentScript = nullptr;
