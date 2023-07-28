@@ -37,7 +37,7 @@ void Scene::draw()
 	}
 
 	// subtitles
-	for (int i = 0; i < this->_text.size(); i++) {
+	for (int i = 0; i < this->_text.size(); i++) { // powinienem rysowaæ je od ty³y aby napis który zosta³ napisany najpierw zosta³ na swojej pozycji a nowy poszed³ w górê
 		int w = 0, h = 0;
 		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
 		SDL_Rect rect = { (1280 / 2) - (w / 2), h < 120 ? 600 : 500, w, h }; // <- scaling

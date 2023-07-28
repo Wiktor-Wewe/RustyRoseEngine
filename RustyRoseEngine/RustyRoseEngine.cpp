@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    game.play("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-A02.rose");
+    game.play("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-I00.rose");
 
     SDL_Texture* texture = SDL_CreateTexture(game.getRenderer(), SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_STREAMING, 1280, 720);
 

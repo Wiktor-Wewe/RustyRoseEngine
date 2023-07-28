@@ -8,6 +8,11 @@ SoundEffect::SoundEffect(std::string path)
 
 void SoundEffect::play()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to play NULL in SoundEffects\n");
+		return;
+	}
+
 	this->_channel = 2;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
 	if (this->_channel == -1) {
@@ -17,11 +22,21 @@ void SoundEffect::play()
 
 void SoundEffect::stop()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to stop NULL in SoundEffects\n");
+		return;
+	}
+
 	Mix_HaltChannel(this->_channel);
 }
 
 void SoundEffect::free()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to free NULL in SoundEffects\n");
+		return;
+	}
+
 	Mix_FreeChunk(this->_soundEffect);
 }
 

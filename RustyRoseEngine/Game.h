@@ -15,6 +15,7 @@ public:
 
 private:
 	bool _initStatus;
+	std::string _debugString;
 
 	SDL_Renderer* _renderer;
 	SDL_Window* _window;
@@ -24,7 +25,7 @@ private:
 	VDecoder* _vDecoder;
 	Timer* _timer;
 
-	bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
+	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list);
 	void _findAndHandle(Script::Event* event, int operation); // <- find action -> [operation = 0] = init, [operation = 1] = end 
 	
@@ -33,6 +34,9 @@ private:
 	
 	void _PlayBgm_Init(Script::Event* event);
 	void _PlayBgm_End(Script::Event* event);
+
+	void _CreateBG_Init(Script::Event* event);
+	void _CreateBG_End(Script::Event* event);
 	
 	void _PrintText_Init(Script::Event* event);
 	void _PrintText_End(Script::Event* event);

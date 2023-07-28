@@ -59,6 +59,9 @@ Game::Game()
     this->_vDecoder = new VDecoder();
     this->_timer = new Timer();
 
+    // debug string should ne in init.debugString
+    this->_debugString = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\";
+
     // this should looks like: 
     // this->_gameContext->getSyste()->setSyste(init.linkToSys);
     std::string linkToSys = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\systemList.rose";
@@ -113,6 +116,7 @@ void Game::play(std::string scriptPath)
 
         // draw is between init and end becouse i want to draw all texture 
         this->_scene->draw();
+        SDL_Delay(10);
 
         for (int i = 0; i < inprogres.size(); i++) {
             if (this->_timer->elapsed() >= *inprogres[i]->end) {
@@ -159,6 +163,33 @@ void Game::_findAndHandle(Script::Event* event, int operation)
 {
     // operation [0] = init, [1] = end, [other] = nothing yet?
     switch (event->action) {
+    case 0xCC01:
+        if (operation == 0) {
+            this->_SkipFRAME_Init(event);
+        }
+        if (operation == 1) {
+            this->_SkipFRAME_End(event);
+        }
+        break;
+
+    case 0xCC02:
+        if (operation == 0) {
+            this->_PlayBgm_Init(event);
+        }
+        if (operation == 1) {
+            this->_PlayBgm_End(event);
+        }
+        break;
+
+    case 0xCC03:
+        if (operation == 0) {
+            this->_CreateBG_Init(event);
+        }
+        if (operation == 1) {
+            this->_CreateBG_End(event);
+        }
+        break;
+
     case 0xCC04:
         if (operation == 0) {
             this->_PrintText_Init(event);
@@ -167,10 +198,132 @@ void Game::_findAndHandle(Script::Event* event, int operation)
             this->_PrintText_End(event);
         }
         break;
+
+    case 0xCC05:
+        if (operation == 0) {
+            this->_PlayVoice_Init(event);
+        }
+        if (operation == 1) {
+            this->_PlayVoice_End(event);
+        }
+        break;
+
+    case 0xCC06:
+        if (operation == 0) {
+            this->_PlaySe_Init(event);
+        }
+        if (operation == 1) {
+            this->_PlaySe_End(event);
+        }
+        break;
+
+    case 0xCC07:
+        if (operation == 0) {
+            this->_Next_Init(event);
+        }
+        if (operation == 1) {
+            this->_Next_End(event);
+        }
+        break;
+
+    case 0xCC08:
+        if (operation == 0) {
+            this->_PlayMovie_Init(event);
+        }
+        if (operation == 1) {
+            this->_PlayMovie_End(event);
+        }
+        break;
+
+    case 0xCC09:
+        if (operation == 0) {
+            this->_BlackFade_Init(event);
+        }
+        if (operation == 1) {
+            this->_BlackFade_End(event);
+        }
+        break;
+
+    case 0xCC0A:
+        if (operation == 0) {
+            this->_WhiteFade_Init(event);
+        }
+        if (operation == 1) {
+            this->_WhiteFade_End(event);
+        }
+        break;
+
+    case 0xCC0B:
+        if (operation == 0) {
+            this->_SetSELECT_Init(event);
+        }
+        if (operation == 1) {
+            this->_SetSELECT_End(event);
+        }
+        break;
+
+    case 0xCC0C:
+        if (operation == 0) {
+            this->_EndBGM_Init(event);
+        }
+        if (operation == 1) {
+            this->_EndBGM_End(event);
+        }
+        break;
+
+    case 0xCC0D:
+        if (operation == 0) {
+            this->_EndRoll_Init(event);
+        }
+        if (operation == 1) {
+            this->_EndRoll_End(event);
+        }
+        break;
+
+    case 0xCC0E:
+        if (operation == 0) {
+            this->_MoveSom_Init(event);
+        }
+        if (operation == 1) {
+            this->_MoveSom_End(event);
+        }
+        break;
+
     default:
-        //printf("uanble to handle action: 0x%X\n", event->action);
+        printf("uanble to handle action: 0x%X\n", event->action);
         break;
     }
+}
+
+void Game::_SkipFRAME_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_SkipFRAME_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_PlayBgm_Init(Script::Event* event)
+{
+    this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG")->playLoop();
+}
+
+void Game::_PlayBgm_End(Script::Event* event)
+{
+    //this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG")->stop();
+}
+
+void Game::_CreateBG_Init(Script::Event* event)
+{
+    this->_scene->addBackGround(this->_gameContext->getBackGround(this->_debugString + event->data), 0);
+}
+
+void Game::_CreateBG_End(Script::Event* event)
+{
+    // todo
+    //this->_scene->removeBackGround()
 }
 
 void Game::_PrintText_Init(Script::Event* event)
@@ -181,4 +334,105 @@ void Game::_PrintText_Init(Script::Event* event)
 void Game::_PrintText_End(Script::Event* event)
 {
     this->_scene->removeText(event->data);
+}
+
+void Game::_PlayVoice_Init(Script::Event* event)
+{
+    this->_gameContext->getVoice(this->_debugString + event->data + ".OGG")->play();
+}
+
+void Game::_PlayVoice_End(Script::Event* event)
+{
+    //this->_gameContext->getVoice(this->_debugString + event->data + ".OGG")->stop();
+}
+
+void Game::_PlaySe_Init(Script::Event* event)
+{
+    this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG")->play();
+}
+
+void Game::_PlaySe_End(Script::Event* event)
+{
+    //this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG")->stop();
+}
+
+void Game::_Next_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_Next_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_PlayMovie_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_PlayMovie_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_BlackFade_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_BlackFade_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_WhiteFade_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_WhiteFade_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_SetSELECT_Init(Script::Event* event)
+{
+    // todo
+    this->_scene->addText(event->data);
+}
+
+void Game::_SetSELECT_End(Script::Event* event)
+{
+    this->_scene->removeText(event->data);
+}
+
+void Game::_EndBGM_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_EndBGM_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_EndRoll_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_EndRoll_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_MoveSom_Init(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_MoveSom_End(Script::Event* event)
+{
+    // todo
 }

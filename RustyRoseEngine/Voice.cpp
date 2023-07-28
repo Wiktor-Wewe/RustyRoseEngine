@@ -8,6 +8,11 @@ Voice::Voice(std::string path)
 
 void Voice::play()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to play NULL in Voices\n");
+		return;
+	}
+
 	this->_channel = 3;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
 	if (this->_channel == -1) {
@@ -17,11 +22,21 @@ void Voice::play()
 
 void Voice::stop()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to stop NULL in Voices\n");
+		return;
+	}
+
 	Mix_HaltChannel(this->_channel);
 }
 
 void Voice::free()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to free NULL in Voices\n");
+		return;
+	}
+
 	Mix_FreeChunk(this->_soundEffect);
 }
 
