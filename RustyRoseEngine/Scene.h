@@ -15,11 +15,10 @@ public:
 	void addBackGround(BackGround* bg, int layer);
 	void addSysImg(SysImg* sysimg, int layer);
 	void addText(std::string text);
-	void makeTexture();
+	void removeText(std::string text);
 
 private:
 	SDL_Renderer* _renderer;
-	SDL_Texture* _texture;
 	TTF_Font* _font;
 
 	std::vector<BackGround*> _backGround0;

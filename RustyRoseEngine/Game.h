@@ -23,5 +23,48 @@ private:
 	Scene* _scene;
 	VDecoder* _vDecoder;
 	Timer* _timer;
+
+	bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
+	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list);
+	void _findAndHandle(Script::Event* event, int operation); // <- find action -> [operation = 0] = init, [operation = 1] = end 
+	
+	void _SkipFRAME_Init(Script::Event* event);
+	void _SkipFRAME_End(Script::Event* event);
+	
+	void _PlayBgm_Init(Script::Event* event);
+	void _PlayBgm_End(Script::Event* event);
+	
+	void _PrintText_Init(Script::Event* event);
+	void _PrintText_End(Script::Event* event);
+
+	void _PlayVoice_Init(Script::Event* event);
+	void _PlayVoice_End(Script::Event* event);
+
+	void _PlaySe_Init(Script::Event* event);
+	void _PlaySe_End(Script::Event* event);
+
+	void _Next_Init(Script::Event* event);
+	void _Next_End(Script::Event* event);
+
+	void _PlayMovie_Init(Script::Event* event);
+	void _PlayMovie_End(Script::Event* event);
+
+	void _BlackFade_Init(Script::Event* event);
+	void _BlackFade_End(Script::Event* event);
+
+	void _WhiteFade_Init(Script::Event* event);
+	void _WhiteFade_End(Script::Event* event);
+
+	void _SetSELECT_Init(Script::Event* event);
+	void _SetSELECT_End(Script::Event* event);
+
+	void _EndBGM_Init(Script::Event* event);
+	void _EndBGM_End(Script::Event* event);
+
+	void _EndRoll_Init(Script::Event* event);
+	void _EndRoll_End(Script::Event* event);
+
+	void _MoveSom_Init(Script::Event* event);
+	void _MoveSom_End(Script::Event* event);
 };
 

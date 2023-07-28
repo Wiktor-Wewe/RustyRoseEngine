@@ -11,17 +11,23 @@ public:
 		unsigned int second = 0;
 		unsigned int millisecond = 0;
 
-		bool operator==(const Time& other) const {
-			return (minute == other.minute) &&
-				   (second == other.second) &&
-				   (millisecond == other.millisecond);
+		bool operator<=(const Time& other) const {
+			return (minute <= other.minute) &&
+				   (second <= other.second) &&
+				   (millisecond <= other.millisecond);
+		}
+
+		bool operator>=(const Time& other) const {
+			return (minute >= other.minute) &&
+				(second >= other.second) &&
+				(millisecond >= other.millisecond);
 		}
 	};
 
 	struct Event 
 	{
 		uint16_t action = 0;
-		Time* start;
+		Time* start = nullptr;
 		std::string bgshit;
 		int layer = 0;
 		std::string name;
@@ -30,7 +36,7 @@ public:
 		bool isMale = false;
 		bool fade = false; // [OUT] = 0 | [IN] = 1
 		std::string shortName;
-		Time* end;
+		Time* end = nullptr;
 	};
 	
 	Script(std::string path);

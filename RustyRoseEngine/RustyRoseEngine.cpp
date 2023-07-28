@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     vdecoder.setPath(path);
     vdecoder.start();
 
-    SDL_Delay(10000);
+    SDL_Delay(1000);
     while (vdecoder.decodeFrame()) {
 
         void* texturePixels;

@@ -3,8 +3,6 @@
 Scene::Scene(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
-	this->_texture = this->_texture = SDL_CreateTexture(this->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1280, 720);
-	SDL_SetTextureBlendMode(this->_texture, SDL_BLENDMODE_BLEND);
 }
 
 void Scene::setFont(TTF_Font* font)
@@ -14,7 +12,46 @@ void Scene::setFont(TTF_Font* font)
 
 void Scene::draw()
 {
-	SDL_RenderCopy(this->_renderer, this->_texture, NULL, NULL);
+	SDL_SetRenderTarget(this->_renderer, NULL);
+	SDL_RenderClear(this->_renderer);
+
+	// layer 0
+	for (int i = 0; i < this->_backGround0.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_backGround0[i]->getTexture(), NULL, NULL);
+	}
+	for (int i = 0; i < this->_sysImg0.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
+	}
+
+	// layer 1
+	for (int i = 0; i < this->_backGround1.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_backGround1[i]->getTexture(), NULL, NULL);
+	}
+	for (int i = 0; i < this->_sysImg1.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, NULL);
+	}
+
+	// layer 2
+	for (int i = 0; i < this->_backGround2.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_backGround2[i]->getTexture(), NULL, NULL);
+	}
+
+	// subtitles
+	for (int i = 0; i < this->_text.size(); i++) {
+		int w = 0, h = 0;
+		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
+		SDL_Rect rect = { (1280 / 2) - (w / 2), h < 120 ? 600 : 500, w, h }; // <- scaling
+		if (this->_text.size() - i > 1) {
+			rect.y -= rect.h * this->_text.size();
+		}
+		SDL_RenderCopy(this->_renderer, text, NULL, &rect);
+		SDL_DestroyTexture(text);
+	}
+
+	for (int i = 0; i < this->_sysImg2.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, NULL);
+	}
+
 	SDL_RenderPresent(this->_renderer);
 }
 
@@ -47,12 +84,6 @@ void Scene::clear(int layer)
 		printf("Cant clear layer with number: %i\n", layer);
 		return;
 	}
-	
-	this->_text.clear();
-	SDL_SetRenderTarget(this->_renderer, this->_texture);
-	SDL_SetRenderDrawColor(this->_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(this->_renderer);
-	SDL_SetRenderTarget(this->_renderer, NULL);
 }
 
 void Scene::addBackGround(BackGround* bg, int layer)
@@ -92,45 +123,18 @@ void Scene::addText(std::string text)
 	this->_text.push_back(text);
 }
 
-void Scene::makeTexture()
+void Scene::removeText(std::string text)
 {
-	SDL_SetRenderTarget(this->_renderer, this->_texture);
+	auto it = std::find(this->_text.begin(), this->_text.end(), text);
 
-	// layer 0
-	for (int i = 0; i < this->_backGround0.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_backGround0[i]->getTexture(), NULL, NULL);
+	if (it != this->_text.end())
+	{
+		this->_text.erase(it);
 	}
-	for (int i = 0; i < this->_sysImg0.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
+	else
+	{
+		printf("unable to remove text from scene: %s\n", text.c_str());
 	}
-
-	// layer 1
-	for (int i = 0; i < this->_backGround1.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_backGround1[i]->getTexture(), NULL, NULL);
-	}
-	for (int i = 0; i < this->_sysImg1.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, NULL);
-	}
-
-	// layer 2
-	for (int i = 0; i < this->_backGround2.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_backGround2[i]->getTexture(), NULL, NULL);
-	}
-
-	// subtitles
-	for (int i = 0; i < this->_text.size(); i++) {
-		int w = 0, h = 0;
-		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
-		SDL_Rect rect = {(1280 / 2) - (w / 2), h<120 ? 600 : 500, w, h}; // <- scaling
-		SDL_RenderCopy(this->_renderer, text, NULL, &rect);
-		SDL_DestroyTexture(text);
-	}
-
-	for (int i = 0; i < this->_sysImg2.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, NULL);
-	}
-
-	SDL_SetRenderTarget(this->_renderer, NULL);
 }
 
 SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
@@ -181,7 +185,7 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 		printf("unable to make text surface in text: %s\n", text.c_str());
 		SDL_FreeSurface(outlineSurface);
 		SDL_DestroyTexture(outlineTexture);
-		SDL_SetRenderTarget(this->_renderer, this->_texture);
+		SDL_SetRenderTarget(this->_renderer, NULL);
 		return finalTexture;
 	}
 
@@ -191,7 +195,7 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 		SDL_FreeSurface(outlineSurface);
 		SDL_FreeSurface(textSurface);
 		SDL_DestroyTexture(outlineTexture);
-		SDL_SetRenderTarget(this->_renderer, this->_texture);
+		SDL_SetRenderTarget(this->_renderer, NULL);
 		return finalTexture;
 	}
 
@@ -201,6 +205,6 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 	SDL_FreeSurface(textSurface);
 	SDL_DestroyTexture(outlineTexture);
 	SDL_DestroyTexture(textTexture);
-	SDL_SetRenderTarget(this->_renderer, this->_texture);
+	SDL_SetRenderTarget(this->_renderer, NULL);
 	return finalTexture;
 }
