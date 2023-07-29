@@ -10,7 +10,7 @@ BackGroundMusic::BackGroundMusic(std::string path)
 
 void BackGroundMusic::playInt()
 {
-	this->_channel = 1;
+	this->_channel = 0;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_musicInt, 0);
 	if (this->_channel == -1) {
 		printf("unable to play background music Init: %s\n", this->_nameInt.c_str());
@@ -20,7 +20,7 @@ void BackGroundMusic::playInt()
 
 void BackGroundMusic::playLoop()
 {
-	this->_channel = 1;
+	this->_channel = 0;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_musicLoop, 0);
 	if (this->_channel == -1) {
 		printf("unable to play background music Loop: %s\n", this->_nameLoop.c_str());

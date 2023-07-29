@@ -17,6 +17,9 @@ private:
 	bool _initStatus;
 	std::string _debugString;
 
+	std::vector<int> _freeChannelsSoundEffect;
+	std::vector<int> _freeChannelsVoice;
+
 	SDL_Renderer* _renderer;
 	SDL_Window* _window;
 
@@ -24,6 +27,9 @@ private:
 	Scene* _scene;
 	VDecoder* _vDecoder;
 	Timer* _timer;
+
+	int _getFirstFreeChannelSoundEffect();
+	int _getFirstFreeChannelVoice();
 
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list);

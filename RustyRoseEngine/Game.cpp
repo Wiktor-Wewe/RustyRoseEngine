@@ -39,7 +39,10 @@ Game::Game()
     }
 
     // set number of channels
-    Mix_AllocateChannels(16);
+    Mix_AllocateChannels(11); // <- 5 - Voice, 5 - SoundEffect, 1 - bgm
+
+    this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
+    this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
 
     this->_window = SDL_CreateWindow("School Days: Rusty Rose Edition",
         SDL_WINDOWPOS_CENTERED,
@@ -91,8 +94,14 @@ void Game::play(std::string scriptPath)
     bool quit = false;
     SDL_Event sdl_event;
 
+    const int TARGET_FPS = 30;
+    Uint32 frameStartTime;
+    Uint32 frameEndTime;
+    Uint32 frameTime;
+
     while (!quit)
     {
+        frameStartTime = SDL_GetTicks();
         while (SDL_PollEvent(&sdl_event))
         {
             if (sdl_event.type == SDL_QUIT)
@@ -114,9 +123,9 @@ void Game::play(std::string scriptPath)
             }
         }
 
-        // draw is between init and end becouse i want to draw all texture 
         this->_scene->draw();
-        SDL_Delay(10);
+        frameEndTime = SDL_GetTicks();
+        frameTime = frameEndTime - frameStartTime;
 
         for (int i = 0; i < inprogres.size(); i++) {
             if (this->_timer->elapsed() >= *inprogres[i]->end) {
@@ -128,6 +137,9 @@ void Game::play(std::string scriptPath)
             }
         }
 
+        if (frameTime < 1000 / TARGET_FPS) {
+            SDL_Delay(1000 / TARGET_FPS - frameTime);
+        }
 
         if (todo.empty() && inprogres.empty()) {
             end = true;
@@ -148,6 +160,30 @@ SDL_Window* Game::getWindow()
 bool Game::isGameGood()
 {
     return this->_initStatus;
+}
+
+int Game::_getFirstFreeChannelSoundEffect()
+{
+    if (this->_freeChannelsSoundEffect.size() == 0) {
+        printf("There is no free channels for sound effect, return 5");
+        return 1;
+    }
+
+    int freeChannel = this->_freeChannelsSoundEffect[this->_freeChannelsSoundEffect.size() - 1];
+    this->_freeChannelsSoundEffect.pop_back();
+    return freeChannel;
+}
+
+int Game::_getFirstFreeChannelVoice()
+{
+    if (this->_freeChannelsVoice.size() == 0) {
+        printf("There is no free channels for voice, return 10");
+        return 1;
+    }
+
+    int freeChannel = this->_freeChannelsVoice[this->_freeChannelsVoice.size() - 1];
+    this->_freeChannelsVoice.pop_back();
+    return freeChannel;
 }
 
 void Game::_removeFrom(Script::Event* event, std::vector<Script::Event*>& list)
@@ -338,22 +374,36 @@ void Game::_PrintText_End(Script::Event* event)
 
 void Game::_PlayVoice_Init(Script::Event* event)
 {
-    this->_gameContext->getVoice(this->_debugString + event->data + ".OGG")->play();
+    Voice* voice = this->_gameContext->getVoice(this->_debugString + event->data + ".OGG");
+    if (voice) {
+        voice->setChannel(this->_getFirstFreeChannelVoice());
+        voice->play();
+    }
 }
 
 void Game::_PlayVoice_End(Script::Event* event)
 {
-    //this->_gameContext->getVoice(this->_debugString + event->data + ".OGG")->stop();
+    Voice* voice = this->_gameContext->getVoice(this->_debugString + event->data + ".OGG");
+    if (voice) {
+        this->_freeChannelsVoice.push_back(voice->getChannel());
+    }
 }
 
 void Game::_PlaySe_Init(Script::Event* event)
 {
-    this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG")->play();
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG");
+    if (soundEffect) {
+        soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+        soundEffect->play();
+    }
 }
 
 void Game::_PlaySe_End(Script::Event* event)
 {
-    //this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG")->stop();
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG");
+    if (soundEffect) {
+        this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
+    }
 }
 
 void Game::_Next_Init(Script::Event* event)

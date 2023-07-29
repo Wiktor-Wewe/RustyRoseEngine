@@ -6,6 +6,10 @@ class Voice
 {
 public:
 	Voice(std::string path);
+
+	void setChannel(int channel);
+	int getChannel();
+
 	void play();
 	void stop();
 	void free();
