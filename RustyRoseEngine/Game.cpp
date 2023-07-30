@@ -124,8 +124,7 @@ void Game::play(std::string scriptPath)
         }
 
         this->_scene->draw();
-        frameEndTime = SDL_GetTicks();
-        frameTime = frameEndTime - frameStartTime;
+
 
         for (int i = 0; i < inprogres.size(); i++) {
             if (inprogres[i]->action == 0xCC02) { // if init bgm start look for start loop
@@ -145,6 +144,9 @@ void Game::play(std::string scriptPath)
                 this->_removeFrom(inprogres[i], inprogres);
             }
         }
+
+        frameEndTime = SDL_GetTicks();
+        frameTime = frameEndTime - frameStartTime;
 
         if (frameTime < 1000 / TARGET_FPS) {
             SDL_Delay(1000 / TARGET_FPS - frameTime);
@@ -352,7 +354,7 @@ void Game::_SkipFRAME_End(Script::Event* event)
 
 void Game::_PlayBgm_Init(Script::Event* event)
 {
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG");
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data);
     if (backGoundMusic) {
         backGoundMusic->playInt();
     }
@@ -365,7 +367,7 @@ void Game::_PlayBgm_End(Script::Event* event)
 
 void Game::_playLoopWhenReadyBGM(Script::Event* event)
 {
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG");
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data);
     if (backGoundMusic) {
         if (backGoundMusic->isReadyForLoop()) {
             backGoundMusic->playLoop();
