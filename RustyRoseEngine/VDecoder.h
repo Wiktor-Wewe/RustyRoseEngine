@@ -3,29 +3,37 @@ extern "C" {
 	#include <libavformat/avformat.h>
 	#include <libswscale/swscale.h>
 }
+#include <string>
+#include <SDL_image.h>
 
 
 class VDecoder
 {
 public:
-	VDecoder();
-	void setPath(char* path);
+	VDecoder(SDL_Renderer* renderer);
+	void setPath(std::string path);
 	bool start();
 	bool decodeFrame();
-	uint8_t** getFrameData();
-	int getWidthFrame();
-	int getHeightFrame();
-	int* getLinesize();
 	void freeDecoder();
-	
+
+	SDL_Texture* getFrame();
 
 private:
-	char* _path;
+	SDL_Renderer* _renderer;
+	std::string _path;
+
 	AVFormatContext* _formatContext;
 	int _videoStreamIndex;
 	AVCodecContext* _codecContext;
 	const AVCodec* _codec;
 	AVPacket* _packet;
 	AVFrame* _frame;
+
+	SDL_Texture* _texture;
+
+	int _getWidthFrame();
+	int _getHeightFrame();
+	int* _getLinesize();
+	uint8_t** _getFrameData();
 };
 

@@ -10,6 +10,11 @@ BackGroundMusic::BackGroundMusic(std::string path)
 
 void BackGroundMusic::playInt()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to play NULL in BGM init\n");
+		return;
+	}
+
 	this->_channel = 0;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_musicInt, 0);
 	if (this->_channel == -1) {
@@ -20,6 +25,11 @@ void BackGroundMusic::playInt()
 
 void BackGroundMusic::playLoop()
 {
+	if (this == nullptr) {
+		printf("ERROR - Trying to play NULL in BGM loop\n");
+		return;
+	}
+
 	this->_channel = 0;
 	this->_channel = Mix_PlayChannel(this->_channel, this->_musicLoop, 0);
 	if (this->_channel == -1) {

@@ -1,11 +1,13 @@
 #include "VDecoder.h"
 
-VDecoder::VDecoder()
+VDecoder::VDecoder(SDL_Renderer* renderer)
 {
 	avformat_network_init();
+	this->_renderer = renderer;
+	this->_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, 800, 452); // <- get size of frame from file
 }
 
-void VDecoder::setPath(char* path)
+void VDecoder::setPath(std::string path)
 {
 	this->_path = path;
 	this->_frame = NULL;
@@ -15,7 +17,7 @@ bool VDecoder::start()
 {
 	this->_formatContext = avformat_alloc_context();
 
-	if (avformat_open_input(&this->_formatContext, this->_path, NULL, NULL) != 0) {
+	if (avformat_open_input(&this->_formatContext, this->_path.c_str(), NULL, NULL) != 0) {
 		// Error while opening the file
 		return false;
 	}
@@ -90,35 +92,6 @@ bool VDecoder::decodeFrame()
 	return false;
 }
 
-uint8_t** VDecoder::getFrameData()
-{
-	return this->_frame->data;
-}
-
-int VDecoder::getWidthFrame()
-{
-	if (this->_frame != NULL) {
-		return this->_frame->width;
-	}
-	return 0;
-}
-
-int VDecoder::getHeightFrame()
-{
-	if (this->_frame != NULL) {
-		return this->_frame->height;
-	}
-	return 0;
-}
-
-int* VDecoder::getLinesize()
-{
-	if (this->_frame != NULL) {
-		return this->_frame->linesize;
-	}
-	return NULL;
-}
-
 void VDecoder::freeDecoder()
 {
 	if (this->_frame != NULL) {
@@ -131,5 +104,86 @@ void VDecoder::freeDecoder()
 
 	avcodec_close(this->_codecContext);
 	avformat_close_input(&this->_formatContext);
+
+	SDL_DestroyTexture(this->_texture);
 }
 
+SDL_Texture* VDecoder::getFrame()
+{
+	uint8_t* yPlane = this->_frame->data[0];
+	uint8_t* uPlane = this->_frame->data[1];
+	uint8_t* vPlane = this->_frame->data[2];
+
+	int yPitch = this->_frame->linesize[0];
+	int uPitch = this->_frame->linesize[1];
+	int vPitch = this->_frame->linesize[2];
+
+	uint8_t* rgbData = new uint8_t[800 * 452 * 3];
+	int rgbIndex = 0;
+
+	for (int y = 0; y < 452; y++)
+	{
+		for (int x = 0; x < 800; x++)
+		{
+			int uvIndex = (x >> 1) + (y >> 1) * (uPitch);
+			int yIndex = x + y * yPitch;
+
+			uint8_t Y = yPlane[yIndex];
+			uint8_t U = uPlane[uvIndex];
+			uint8_t V = vPlane[uvIndex];
+
+			int C = Y - 16;
+			int D = U - 128;
+			int E = V - 128;
+
+			uint8_t R = (298 * C + 409 * E + 128) >> 8;
+			uint8_t G = (298 * C - 100 * D - 208 * E + 128) >> 8;
+			uint8_t B = (298 * C + 516 * D + 128) >> 8;
+
+			rgbData[rgbIndex] = R;
+			rgbData[rgbIndex + 1] = G;
+			rgbData[rgbIndex + 2] = B;
+
+			rgbIndex += 3;
+		}
+	}
+
+	void* texturePixels;
+	int texturePitch;
+	SDL_LockTexture(this->_texture, nullptr, &texturePixels, &texturePitch);
+	memcpy(texturePixels, rgbData, 800 * 452 * 3);
+	SDL_UnlockTexture(this->_texture);
+
+	delete[] rgbData;
+
+	return this->_texture;
+}
+
+int VDecoder::_getWidthFrame()
+{
+	if (this->_frame != NULL) {
+		return this->_frame->width;
+	}
+	return 0;
+}
+
+int VDecoder::_getHeightFrame()
+{
+	if (this->_frame != NULL) {
+		return this->_frame->height;
+	}
+	return 0;
+}
+
+int* VDecoder::_getLinesize()
+{
+	if (this->_frame != NULL) {
+		return this->_frame->linesize;
+	}
+	return NULL;
+}
+
+uint8_t** VDecoder::_getFrameData()
+{
+	return this->_frame->data;
+}

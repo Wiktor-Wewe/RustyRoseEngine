@@ -23,6 +23,8 @@ void Scene::draw()
 		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
 	}
 
+	SDL_RenderCopy(this->_renderer, this->_videoFrame, NULL, NULL);
+
 	// layer 1
 	for (int i = 0; i < this->_backGround1.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround1[i]->getTexture(), NULL, NULL);
@@ -37,15 +39,8 @@ void Scene::draw()
 	}
 
 	// subtitles
-	for (int i = 0; i < this->_text.size(); i++) { // powinienem rysowaæ je od ty³y aby napis który zosta³ napisany najpierw zosta³ na swojej pozycji a nowy poszed³ w górê
-		int w = 0, h = 0;
-		SDL_Texture* text = this->_makeText(this->_text[i], w, h);
-		SDL_Rect rect = { (1280 / 2) - (w / 2), h < 120 ? 600 : 500, w, h }; // <- scaling
-		if (this->_text.size() - i > 1) {
-			rect.y -= rect.h * this->_text.size();
-		}
-		SDL_RenderCopy(this->_renderer, text, NULL, &rect);
-		SDL_DestroyTexture(text);
+	for (int i = 0; i < this->_text.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_textTexture[i], NULL, this->_textRect[i]);
 	}
 
 	for (int i = 0; i < this->_sysImg2.size(); i++) {
@@ -57,8 +52,13 @@ void Scene::draw()
 
 void Scene::clear(int layer)
 {
-	if (layer == -2) {
-		this->_text.clear();
+	if (layer == -3) {
+		this->_videoFrame = NULL;
+	}
+	else if (layer == -2) {
+		for (int i = 0; i < this->_text.size(); i++) {
+			this->removeText(this->_text[i]);
+		}
 	}
 	else if (layer == -1) {
 		this->_backGround0.clear();
@@ -67,6 +67,8 @@ void Scene::clear(int layer)
 		this->_sysImg0.clear();
 		this->_sysImg1.clear();
 		this->_sysImg2.clear();
+
+		this->_videoFrame = NULL;
 	}
 	else if (layer == 0) {
 		this->_backGround0.clear();
@@ -118,23 +120,47 @@ void Scene::addSysImg(SysImg* sysimg, int layer)
 	}
 }
 
+void Scene::addVideoFrame(SDL_Texture* frame)
+{
+	this->_videoFrame = frame;
+}
+
 void Scene::addText(std::string text)
 {
+	int w = 0, h = 0;
+	SDL_Texture* texture = this->_makeText(text, w, h);
+	SDL_Rect* rect = new SDL_Rect { (1280 / 2) - (w / 2), h < 120 ? 600 : 500, w, h }; // <- scaling
+	
+	rect->y -= rect->h * this->_text.size();
+
+	this->_textTexture.push_back(texture);
+	this->_textRect.push_back(rect);
 	this->_text.push_back(text);
 }
 
 void Scene::removeText(std::string text)
 {
-	auto it = std::find(this->_text.begin(), this->_text.end(), text);
+	int position = -1;
+	for (int i = 0; i < this->_text.size(); i++) {
+		if (this->_text[i] == text) {
+			position = i;
+			break;
+		}
+	}
 
-	if (it != this->_text.end())
-	{
-		this->_text.erase(it);
+	if (position == -1) {
+		printf("unable to remove string from scene->text: %s\n", text.c_str());
+		return;
 	}
-	else
-	{
-		printf("unable to remove text from scene: %s\n", text.c_str());
-	}
+
+
+	this->_text.erase(this->_text.begin() + position);
+
+	delete(this->_textRect[position]);
+	this->_textRect.erase(this->_textRect.begin() + position);
+	
+	SDL_DestroyTexture(this->_textTexture[position]);
+	this->_textTexture.erase(this->_textTexture.begin() + position);
 }
 
 SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)

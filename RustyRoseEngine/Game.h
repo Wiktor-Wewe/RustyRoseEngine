@@ -40,6 +40,7 @@ private:
 	
 	void _PlayBgm_Init(Script::Event* event);
 	void _PlayBgm_End(Script::Event* event);
+	void _playLoopWhenReadyBGM(Script::Event* event);
 
 	void _CreateBG_Init(Script::Event* event);
 	void _CreateBG_End(Script::Event* event);

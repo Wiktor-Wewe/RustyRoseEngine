@@ -59,7 +59,7 @@ Game::Game()
 
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
-    this->_vDecoder = new VDecoder();
+    this->_vDecoder = new VDecoder(this->_renderer);
     this->_timer = new Timer();
 
     // debug string should ne in init.debugString
@@ -94,7 +94,7 @@ void Game::play(std::string scriptPath)
     bool quit = false;
     SDL_Event sdl_event;
 
-    const int TARGET_FPS = 30;
+    const int TARGET_FPS = 24;
     Uint32 frameStartTime;
     Uint32 frameEndTime;
     Uint32 frameTime;
@@ -128,6 +128,15 @@ void Game::play(std::string scriptPath)
         frameTime = frameEndTime - frameStartTime;
 
         for (int i = 0; i < inprogres.size(); i++) {
+            if (inprogres[i]->action == 0xCC02) { // if init bgm start look for start loop
+                this->_playLoopWhenReadyBGM(inprogres[i]);
+            }
+            if (inprogres[i]->action == 0xCC08) { // if init video start get next frame and show
+                if (_vDecoder->decodeFrame()) {
+                    this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+                }
+            }
+
             if (this->_timer->elapsed() >= *inprogres[i]->end) {
                 // end action
                 //printf("end action: 0x%X - data: %s\n", inprogres[i]->action, inprogres[i]->data.c_str());
@@ -169,8 +178,8 @@ int Game::_getFirstFreeChannelSoundEffect()
         return 1;
     }
 
-    int freeChannel = this->_freeChannelsSoundEffect[this->_freeChannelsSoundEffect.size() - 1];
-    this->_freeChannelsSoundEffect.pop_back();
+    int freeChannel = this->_freeChannelsSoundEffect[0];
+    this->_freeChannelsSoundEffect.erase(this->_freeChannelsSoundEffect.begin());
     return freeChannel;
 }
 
@@ -181,8 +190,8 @@ int Game::_getFirstFreeChannelVoice()
         return 1;
     }
 
-    int freeChannel = this->_freeChannelsVoice[this->_freeChannelsVoice.size() - 1];
-    this->_freeChannelsVoice.pop_back();
+    int freeChannel = this->_freeChannelsVoice[0];
+    this->_freeChannelsVoice.erase(this->_freeChannelsVoice.begin());
     return freeChannel;
 }
 
@@ -343,12 +352,25 @@ void Game::_SkipFRAME_End(Script::Event* event)
 
 void Game::_PlayBgm_Init(Script::Event* event)
 {
-    this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG")->playLoop();
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG");
+    if (backGoundMusic) {
+        backGoundMusic->playInt();
+    }
 }
 
 void Game::_PlayBgm_End(Script::Event* event)
 {
     //this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG")->stop();
+}
+
+void Game::_playLoopWhenReadyBGM(Script::Event* event)
+{
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG");
+    if (backGoundMusic) {
+        if (backGoundMusic->isReadyForLoop()) {
+            backGoundMusic->playLoop();
+        }
+    }
 }
 
 void Game::_CreateBG_Init(Script::Event* event)
@@ -418,12 +440,16 @@ void Game::_Next_End(Script::Event* event)
 
 void Game::_PlayMovie_Init(Script::Event* event)
 {
-    // todo
+    this->_vDecoder->setPath(this->_debugString + event->data + ".WMV");
+    this->_vDecoder->start();
+    if (this->_vDecoder->decodeFrame()) {
+        this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+    }
 }
 
 void Game::_PlayMovie_End(Script::Event* event)
 {
-    // todo
+    this->_scene->clear(-3);
 }
 
 void Game::_BlackFade_Init(Script::Event* event)
