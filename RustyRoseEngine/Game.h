@@ -7,15 +7,24 @@
 class Game
 {
 public:
+	struct Init {
+		std::string debugString;
+		std::string startScript;
+		std::string linkToSys;
+		int windowWidth;
+		int windowHeight;
+		// and more :)
+	};
+
 	Game();
-	void play(std::string scriptPath);
+	void play();
 	SDL_Renderer* getRenderer();
 	SDL_Window* getWindow();
 	bool isGameGood();
 
 private:
-	bool _initStatus;
-	std::string _debugString;
+	Init _init;
+	bool _gameStatus;
 
 	std::vector<int> _freeChannelsSoundEffect;
 	std::vector<int> _freeChannelsVoice;
@@ -27,6 +36,9 @@ private:
 	Scene* _scene;
 	VDecoder* _vDecoder;
 	Timer* _timer;
+
+	bool _loadInit();
+	void _setDefaultInit();
 
 	int _getFirstFreeChannelSoundEffect();
 	int _getFirstFreeChannelVoice();
@@ -77,5 +89,7 @@ private:
 
 	void _MoveSom_Init(Script::Event* event);
 	void _MoveSom_End(Script::Event* event);
+
+	std::vector<std::string> _split(std::string text, char separator);
 };
 

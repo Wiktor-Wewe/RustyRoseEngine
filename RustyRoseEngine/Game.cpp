@@ -2,7 +2,10 @@
 
 Game::Game()
 {
-    this->_initStatus = false;
+    this->_gameStatus = false; 
+    if (!this->_loadInit()) {
+        this->_setDefaultInit();
+    }
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("Error: initializing SDL: %s\n", SDL_GetError());
@@ -62,22 +65,16 @@ Game::Game()
     this->_vDecoder = new VDecoder(this->_renderer);
     this->_timer = new Timer();
 
-    // debug string should ne in init.debugString
-    this->_debugString = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\";
-
-    // this should looks like: 
-    // this->_gameContext->getSyste()->setSyste(init.linkToSys);
-    std::string linkToSys = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\systemList.rose";
-    this->_gameContext->getSystem()->setSystem(linkToSys);
+    this->_gameContext->getSystem()->setSystem(this->_init.debugString + this->_init.linkToSys);
     this->_gameContext->getSystem()->loadSystem();
     this->_scene->setFont(this->_gameContext->getSystem()->getFont());
 
-    this->_initStatus = true;
+    this->_gameStatus = true;
 }
 
-void Game::play(std::string scriptPath)
+void Game::play()
 {
-    this->_gameContext->addScript(scriptPath);
+    this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\"  + this->_init.startScript + ".rose");
 
     if (!this->_gameContext->loadContentFromScripts()) {
         printf("Error - there is no content from script\n");
@@ -85,7 +82,7 @@ void Game::play(std::string scriptPath)
     }
 
     bool end = false;
-    std::vector<Script::Event*> todo = this->_gameContext->getScript(scriptPath)->getEvents();
+    std::vector<Script::Event*> todo = this->_gameContext->getScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose")->getEvents();
     std::vector<Script::Event*> inprogres;
 
     this->_timer->reset();
@@ -115,6 +112,12 @@ void Game::play(std::string scriptPath)
                 // init action
                 //printf("init action: 0x%X - data: %s\n", todo[i]->action, todo[i]->data.c_str());
                 this->_findAndHandle(todo[i], 0);
+
+                if (todo[i]->action == 0xCC07) { // if init to next script
+                    todo.clear();
+                    inprogres.clear();
+                    break;
+                }
 
                 if (todo[i]->end != nullptr) {
                     inprogres.push_back(todo[i]);
@@ -170,7 +173,80 @@ SDL_Window* Game::getWindow()
 
 bool Game::isGameGood()
 {
-    return this->_initStatus;
+    return this->_gameStatus;
+}
+
+bool Game::_loadInit()
+{
+    std::string debugString = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\";
+    
+    std::fstream initFile;
+    initFile.open(debugString + "rose.ini", std::ios::in);
+
+    if (!initFile.good()) {
+        printf("cant open rose.ini file - ini was set to default\n");
+        return false;
+    }
+
+    std::string buffs;
+    std::vector<std::string> buffv;
+
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "debugString") {
+        this->_init.debugString = buffv[1];
+    }
+    else {
+        return false;
+    }
+
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "startScript") {
+        this->_init.startScript = buffv[1];
+    }
+    else {
+        return false;
+    }
+
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "linkToSys") {
+        this->_init.linkToSys = buffv[1];
+    }
+    else {
+        return false;
+    }
+
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "windowWidth") {
+        this->_init.windowWidth = std::stoi(buffv[1]);
+    }
+    else {
+        return false;
+    }
+
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "windowHeight") {
+        this->_init.windowHeight = std::stoi(buffv[1]);
+    }
+    else {
+        return false;
+    }
+
+    initFile.close();
+    return true;
+}
+
+void Game::_setDefaultInit()
+{
+    this->_init.debugString = ".\\";
+    this->_init.linkToSys = ".\\data\\systemList.rose";
+    this->_init.startScript = "00\\00-00-A00";
+    this->_init.windowWidth = 1280;
+    this->_init.windowHeight = 720;
 }
 
 int Game::_getFirstFreeChannelSoundEffect()
@@ -354,7 +430,7 @@ void Game::_SkipFRAME_End(Script::Event* event)
 
 void Game::_PlayBgm_Init(Script::Event* event)
 {
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data);
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
         backGoundMusic->playInt();
     }
@@ -362,12 +438,15 @@ void Game::_PlayBgm_Init(Script::Event* event)
 
 void Game::_PlayBgm_End(Script::Event* event)
 {
-    //this->_gameContext->getBackGroundMusic(this->_debugString + event->data + ".OGG")->stop();
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data)->stop();
+    }
 }
 
 void Game::_playLoopWhenReadyBGM(Script::Event* event)
 {
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_debugString + event->data);
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
         if (backGoundMusic->isReadyForLoop()) {
             backGoundMusic->playLoop();
@@ -377,7 +456,7 @@ void Game::_playLoopWhenReadyBGM(Script::Event* event)
 
 void Game::_CreateBG_Init(Script::Event* event)
 {
-    this->_scene->addBackGround(this->_gameContext->getBackGround(this->_debugString + event->data), 0);
+    this->_scene->addBackGround(this->_gameContext->getBackGround(this->_init.debugString + event->data), 0);
 }
 
 void Game::_CreateBG_End(Script::Event* event)
@@ -398,7 +477,7 @@ void Game::_PrintText_End(Script::Event* event)
 
 void Game::_PlayVoice_Init(Script::Event* event)
 {
-    Voice* voice = this->_gameContext->getVoice(this->_debugString + event->data + ".OGG");
+    Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
         voice->setChannel(this->_getFirstFreeChannelVoice());
         voice->play();
@@ -407,15 +486,16 @@ void Game::_PlayVoice_Init(Script::Event* event)
 
 void Game::_PlayVoice_End(Script::Event* event)
 {
-    Voice* voice = this->_gameContext->getVoice(this->_debugString + event->data + ".OGG");
+    Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
         this->_freeChannelsVoice.push_back(voice->getChannel());
+        // no need to stop voice
     }
 }
 
 void Game::_PlaySe_Init(Script::Event* event)
 {
-    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG");
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
         soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
         soundEffect->play();
@@ -424,9 +504,10 @@ void Game::_PlaySe_Init(Script::Event* event)
 
 void Game::_PlaySe_End(Script::Event* event)
 {
-    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_debugString + event->data + ".OGG");
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
         this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
+        soundEffect->stop();
     }
 }
 
@@ -442,7 +523,7 @@ void Game::_Next_End(Script::Event* event)
 
 void Game::_PlayMovie_Init(Script::Event* event)
 {
-    this->_vDecoder->setPath(this->_debugString + event->data + ".WMV");
+    this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV");
     this->_vDecoder->start();
     if (this->_vDecoder->decodeFrame()) {
         this->_scene->addVideoFrame(this->_vDecoder->getFrame());
@@ -513,4 +594,22 @@ void Game::_MoveSom_Init(Script::Event* event)
 void Game::_MoveSom_End(Script::Event* event)
 {
     // todo
+}
+
+std::vector<std::string> Game::_split(std::string text, char separator)
+{
+    std::vector<std::string> result;
+    size_t start = 0;
+    size_t end = text.find(separator);
+
+    while (end != std::string::npos)
+    {
+        result.push_back(text.substr(start, end - start));
+        start = end + 1;
+        end = text.find(separator, start);
+    }
+
+    result.push_back(text.substr(start));
+
+    return result;
 }

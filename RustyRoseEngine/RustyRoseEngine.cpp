@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    game.play("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Script\\ENGLISH\\00\\00-00-A01.rose");
+    game.play();
 
     VDecoder vdecoder = VDecoder(game.getRenderer());
     std::string path = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Movie00\\00-00\\00-00-K00\\00-00-K00-001.WMV";
