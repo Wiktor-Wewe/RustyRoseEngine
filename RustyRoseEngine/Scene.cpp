@@ -3,6 +3,7 @@
 Scene::Scene(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
+	this->_shortName = std::string();
 }
 
 void Scene::setFont(TTF_Font* font)
@@ -18,6 +19,14 @@ void Scene::draw()
 	// layer 0
 	for (int i = 0; i < this->_backGround0.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround0[i]->getTexture(), NULL, NULL);
+	}
+	if (!this->_shortName.empty()) {
+		if (!this->_backGround0.empty()) {
+			SDL_Texture* animation = this->_backGround0[this->_backGround0.size() - 1]->getNextAnimationTexture(this->_shortName);
+			if (animation) {
+				SDL_RenderCopy(this->_renderer, animation, NULL, NULL);
+			}
+		}
 	}
 	for (int i = 0; i < this->_sysImg0.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
@@ -48,6 +57,23 @@ void Scene::draw()
 	}
 
 	SDL_RenderPresent(this->_renderer);
+}
+
+void Scene::setAnimationShortName(std::string shortName)
+{
+	this->_shortName = shortName;
+;}
+
+void Scene::setAnimationShortNameToDefalut()
+{
+	this->_shortName = std::string();
+}
+
+void Scene::setAnimationShortNameToDefaultIfName(std::string shortName)
+{
+	if (this->_shortName == shortName) {
+		this->_shortName = std::string();
+	}
 }
 
 void Scene::clear(int layer)
@@ -163,6 +189,27 @@ void Scene::removeText(std::string text)
 	this->_textTexture.erase(this->_textTexture.begin() + position);
 }
 
+void Scene::removeBackGround(BackGround* backGround, int layer)
+{
+	if (layer == -1) {
+		this->_tryRemoveBg(backGround, this->_backGround0);
+		this->_tryRemoveBg(backGround, this->_backGround1);
+		this->_tryRemoveBg(backGround, this->_backGround2);
+	}
+	else if (layer == 0) {
+		this->_tryRemoveBg(backGround, this->_backGround0);
+	}
+	else if (layer == 1) {
+		this->_tryRemoveBg(backGround, this->_backGround1);
+	}
+	else if (layer == 2) {
+		this->_tryRemoveBg(backGround, this->_backGround2);
+	}
+	else {
+		printf("unable to remove bg from scene - wrong layer\n");
+	}
+}
+
 SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 {
 	SDL_Color textColor = { 255, 255, 255, 255 };
@@ -233,4 +280,12 @@ SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
 	SDL_DestroyTexture(textTexture);
 	SDL_SetRenderTarget(this->_renderer, NULL);
 	return finalTexture;
+}
+
+void Scene::_tryRemoveBg(BackGround* bg, std::vector<BackGround*>& list)
+{
+	auto it = std::find(list.begin(), list.end(), bg);
+	if (it != list.end()) {
+		list.erase(it);
+	}
 }

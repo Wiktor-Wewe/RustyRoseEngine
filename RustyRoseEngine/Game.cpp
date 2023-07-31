@@ -461,8 +461,7 @@ void Game::_CreateBG_Init(Script::Event* event)
 
 void Game::_CreateBG_End(Script::Event* event)
 {
-    // todo
-    //this->_scene->removeBackGround()
+    this->_scene->removeBackGround(this->_gameContext->getBackGround(this->_init.debugString + event->data), 0);
 }
 
 void Game::_PrintText_Init(Script::Event* event)
@@ -482,6 +481,13 @@ void Game::_PlayVoice_Init(Script::Event* event)
         voice->setChannel(this->_getFirstFreeChannelVoice());
         voice->play();
     }
+    
+    if (event->shortName == "xxx") {
+        this->_scene->setAnimationShortNameToDefalut();
+    }
+    else {
+        this->_scene->setAnimationShortName(event->shortName);
+    }
 }
 
 void Game::_PlayVoice_End(Script::Event* event)
@@ -491,6 +497,7 @@ void Game::_PlayVoice_End(Script::Event* event)
         this->_freeChannelsVoice.push_back(voice->getChannel());
         // no need to stop voice
     }
+    this->_scene->setAnimationShortNameToDefaultIfName(event->shortName);
 }
 
 void Game::_PlaySe_Init(Script::Event* event)

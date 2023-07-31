@@ -5,16 +5,11 @@ BackGround::BackGround(SDL_Renderer* renderer, std::string path)
 	this->_renderer = renderer;
 	this->_path = path;
 	this->_loadImage();
+	this->_animationCounter = 0;
 }
 
 void BackGround::tryLoadAnimation(std::string shortName)
-{	
-	if (shortName.size() == 3) {
-		shortName[0] -= 32;
-		shortName[1] -= 32;
-		shortName[2] -= 32;
-	}
-	
+{		
 	std::string animPath = this->_path + shortName + ".A.PNG";
 	SDL_Texture* texture = this->_tryGetAnimationTexture(animPath);
 	
@@ -62,14 +57,21 @@ SDL_Texture* BackGround::getNextAnimationTexture(std::string shortName)
 	}
 
 	if (animation == nullptr) {
-		printf("animation '%s' for image '%s' not found\n", shortName.c_str(), this->_path.c_str());
+		//printf("animation '%s' for image '%s' not found\n", shortName.c_str(), this->_path.c_str());
 		return nullptr;
 	}
 
 	SDL_Texture* texture = animation->sprites[animation->i];
-	animation->i++;
-	if (animation->i > 2) {
-		animation->i = 0;
+	
+	if (this->_animationCounter >= 2) {
+		animation->i++;
+		if (animation->i > 2) {
+			animation->i = 0;
+		}
+		this->_animationCounter = 0;
+	}
+	else {
+		this->_animationCounter++;
 	}
 
 	return texture;

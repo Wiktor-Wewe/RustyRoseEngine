@@ -11,16 +11,22 @@ public:
 	
 	void setFont(TTF_Font* font);
 	void draw();
+	void setAnimationShortName(std::string shortName);
+	void setAnimationShortNameToDefalut();
+	void setAnimationShortNameToDefaultIfName(std::string shortName);
 	void clear(int layer); //-1 = all // -2 = text // -3 = video frame but only pointer
 	void addBackGround(BackGround* bg, int layer);
 	void addSysImg(SysImg* sysimg, int layer);
 	void addVideoFrame(SDL_Texture* frame);
 	void addText(std::string text);
 	void removeText(std::string text);
+	void removeBackGround(BackGround* backGround, int layer); // -1 all
 
 private:
 	SDL_Renderer* _renderer;
 	TTF_Font* _font;
+
+	std::string _shortName;
 
 	std::vector<BackGround*> _backGround0;
 	std::vector<BackGround*> _backGround1;
@@ -37,5 +43,6 @@ private:
 	SDL_Texture* _videoFrame;
 
 	SDL_Texture* _makeText(std::string text, int& w, int& h);
+	void _tryRemoveBg(BackGround* bg, std::vector<BackGround*>& list);
 };
 

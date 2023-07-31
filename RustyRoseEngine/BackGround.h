@@ -24,6 +24,7 @@ public:
 private:
 	SDL_Renderer* _renderer;
 
+	int _animationCounter;
 	std::string _path;
 	SDL_Texture* _texture;
 	std::vector<TalkAnimation*> animations;
