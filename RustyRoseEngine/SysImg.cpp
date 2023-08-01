@@ -4,9 +4,17 @@ SysImg::SysImg(std::string path, SDL_Renderer* renderer)
 {
 	this->_path = path;
 	this->_renderer = renderer;
-	if (this->_load()) {
-		this->trimTexture(0);
+}
+
+bool SysImg::load()
+{
+	this->_surface = IMG_Load(this->_path.c_str());
+	if (this->_surface == NULL) {
+		printf("unable to load SysImg surface: %s\n", this->_path.c_str());
+		return false;
 	}
+	this->trimTexture(0);
+	return true;
 }
 
 SDL_Texture* SysImg::getTexture()
@@ -110,16 +118,6 @@ void SysImg::free()
 	for (int i = 0; i < this->_buttons.size(); i++) {
 		delete(this->_buttons[i]);
 	}
-}
-
-bool SysImg::_load()
-{
-	this->_surface = IMG_Load(this->_path.c_str());
-	if (this->_surface == NULL) {
-		printf("unable to load SysImg surface: %s\n", this->_path.c_str());
-		return false;
-	}
-	return true;
 }
 
 SysImg::Button* SysImg::_getButton(int id)

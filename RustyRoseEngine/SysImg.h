@@ -21,6 +21,7 @@ public:
 	};
 
 	SysImg(std::string path, SDL_Renderer* renderer);
+	bool load();
 	
 	SDL_Texture* getTexture();
 	void trimTexture(int id); //id = id of button to trim, 0 = all texture
@@ -38,7 +39,6 @@ private:
 	std::vector<Button*> _buttons;
 	OriginalSize* _originalSize;
 
-	bool _load();
 	Button* _getButton(int id);
 
 };
