@@ -13,9 +13,9 @@ Features:<br>
 - Fast and Lightweight<br>
 <br>
 Utilizes:<br>
-- SDL2 / SDL_image / SDL_mixer<br>
+- SDL2 / SDL_image / SDL_mixer / TTF_Font<br>
 - OpenGL<br>
-- FFmpeg (Libav)<br>
+- FFmpeg<br>
 <br>
 Platforms:<br>
 - PC<br>
