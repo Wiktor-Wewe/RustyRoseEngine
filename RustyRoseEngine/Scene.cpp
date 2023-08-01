@@ -61,6 +61,7 @@ void Scene::draw()
 	// subtitles
 	SDL_LockMutex(this->_textMutex);
 	for (int i = 0; i < this->_text.size(); i++) {
+		//printf("text [i=%i] | size = %i | %s\n", i, this->_text.size(), this->_text[i].c_str());
 		SDL_RenderCopy(this->_renderer, this->_textTexture[i], NULL, this->_textRect[i]);
 	}
 	SDL_UnlockMutex(this->_textMutex);
@@ -182,10 +183,12 @@ void Scene::addText(std::string text)
 
 	int w = 0, h = 0;
 	SDL_Texture* texture = this->_makeText(text, w, h);
-	SDL_Rect* rect = new SDL_Rect { (1280 / 2) - (w / 2), 660, w, h };
+	SDL_Rect* rect = new SDL_Rect { (1280 / 2) - (w / 2), (720 - h - 5), w, h };
 	
-	for (int i = 0; i < this->_text.size(); i++) {
-		rect->y -= this->_textRect[i]->h;
+	if (!this->_textRect.empty() && this->_textRect[0]->y >= rect->y) {
+		for (int i = 0; i < this->_text.size(); i++) {
+			rect->y -= this->_textRect[i]->h - 5;
+		}
 	}
 
 	this->_textTexture.push_back(texture);
