@@ -106,7 +106,7 @@ TTF_Font* System::getFont()
 
 void System::_setFont(std::string path)
 {
-	this->_font = TTF_OpenFont(path.c_str(), 42); // <-font size should depend of resolution of window
+	this->_font = TTF_OpenFont(path.c_str(), 32); // <-font size should depend of resolution of window
 	if (this->_font == NULL) {
 		printf("unable to load font: %s\nSDL said: %s\n", path.c_str(), TTF_GetError());
 	}

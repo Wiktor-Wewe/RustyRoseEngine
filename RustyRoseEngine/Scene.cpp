@@ -4,6 +4,8 @@ Scene::Scene(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
 	this->_shortName = std::string();
+	this->_textMutex = SDL_CreateMutex();
+	this->_backGroundMutex = SDL_CreateMutex();
 }
 
 void Scene::setFont(TTF_Font* font)
@@ -17,9 +19,11 @@ void Scene::draw()
 	SDL_RenderClear(this->_renderer);
 
 	// layer 0
+	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround0.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround0[i]->getTexture(), NULL, NULL);
 	}
+
 	if (!this->_shortName.empty()) {
 		if (!this->_backGround0.empty()) {
 			SDL_Texture* animation = this->_backGround0[this->_backGround0.size() - 1]->getNextAnimationTexture(this->_shortName);
@@ -28,6 +32,8 @@ void Scene::draw()
 			}
 		}
 	}
+	SDL_UnlockMutex(this->_backGroundMutex);
+
 	for (int i = 0; i < this->_sysImg0.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
 	}
@@ -35,22 +41,29 @@ void Scene::draw()
 	SDL_RenderCopy(this->_renderer, this->_videoFrame, NULL, NULL);
 
 	// layer 1
+	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround1.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround1[i]->getTexture(), NULL, NULL);
 	}
+	SDL_UnlockMutex(this->_backGroundMutex);
+
 	for (int i = 0; i < this->_sysImg1.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, NULL);
 	}
 
 	// layer 2
+	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround2.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround2[i]->getTexture(), NULL, NULL);
 	}
+	SDL_UnlockMutex(this->_backGroundMutex);
 
 	// subtitles
+	SDL_LockMutex(this->_textMutex);
 	for (int i = 0; i < this->_text.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_textTexture[i], NULL, this->_textRect[i]);
 	}
+	SDL_UnlockMutex(this->_textMutex);
 
 	for (int i = 0; i < this->_sysImg2.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, NULL);
@@ -87,9 +100,11 @@ void Scene::clear(int layer)
 		}
 	}
 	else if (layer == -1) {
+		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround0.clear();
 		this->_backGround1.clear();
 		this->_backGround2.clear();
+		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg0.clear();
 		this->_sysImg1.clear();
 		this->_sysImg2.clear();
@@ -97,15 +112,21 @@ void Scene::clear(int layer)
 		this->_videoFrame = NULL;
 	}
 	else if (layer == 0) {
+		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround0.clear();
+		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg0.clear();
 	}
 	else if (layer == 1) {
+		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround1.clear();
+		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg1.clear();
 	}
 	else if (layer == 2) {
+		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround2.clear();
+		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg2.clear();
 	}
 	else {
@@ -116,6 +137,8 @@ void Scene::clear(int layer)
 
 void Scene::addBackGround(BackGround* bg, int layer)
 {
+	SDL_LockMutex(this->_backGroundMutex);
+
 	if (layer == 0) {
 		this->_backGround0.push_back(bg);
 	}
@@ -128,6 +151,8 @@ void Scene::addBackGround(BackGround* bg, int layer)
 	else {
 		printf("There is no layer %i in scene->backgrounds\n", layer);
 	}
+
+	SDL_UnlockMutex(this->_backGroundMutex);
 }
 
 void Scene::addSysImg(SysImg* sysimg, int layer)
@@ -153,19 +178,27 @@ void Scene::addVideoFrame(SDL_Texture* frame)
 
 void Scene::addText(std::string text)
 {
+	SDL_LockMutex(this->_textMutex);
+
 	int w = 0, h = 0;
 	SDL_Texture* texture = this->_makeText(text, w, h);
-	SDL_Rect* rect = new SDL_Rect { (1280 / 2) - (w / 2), h < 120 ? 600 : 500, w, h }; // <- scaling
+	SDL_Rect* rect = new SDL_Rect { (1280 / 2) - (w / 2), 660, w, h };
 	
-	rect->y -= rect->h * this->_text.size();
+	for (int i = 0; i < this->_text.size(); i++) {
+		rect->y -= this->_textRect[i]->h;
+	}
 
 	this->_textTexture.push_back(texture);
 	this->_textRect.push_back(rect);
 	this->_text.push_back(text);
+
+	SDL_UnlockMutex(this->_textMutex);
 }
 
 void Scene::removeText(std::string text)
 {
+	SDL_LockMutex(this->_textMutex);
+
 	int position = -1;
 	for (int i = 0; i < this->_text.size(); i++) {
 		if (this->_text[i] == text) {
@@ -187,10 +220,14 @@ void Scene::removeText(std::string text)
 	
 	SDL_DestroyTexture(this->_textTexture[position]);
 	this->_textTexture.erase(this->_textTexture.begin() + position);
+
+	SDL_UnlockMutex(this->_textMutex);
 }
 
 void Scene::removeBackGround(BackGround* backGround, int layer)
 {
+	SDL_LockMutex(this->_backGroundMutex);
+
 	if (layer == -1) {
 		this->_tryRemoveBg(backGround, this->_backGround0);
 		this->_tryRemoveBg(backGround, this->_backGround1);
@@ -208,6 +245,8 @@ void Scene::removeBackGround(BackGround* backGround, int layer)
 	else {
 		printf("unable to remove bg from scene - wrong layer\n");
 	}
+
+	SDL_UnlockMutex(this->_backGroundMutex);
 }
 
 SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)

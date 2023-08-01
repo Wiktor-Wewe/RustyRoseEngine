@@ -60,6 +60,8 @@ Game::Game()
         return;
     }
 
+    this->eventMutex = SDL_CreateMutex();
+
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
     this->_vDecoder = new VDecoder(this->_renderer);
@@ -86,7 +88,8 @@ void Game::play()
     std::vector<Script::Event*> inprogres;
 
     this->_timer->reset();
-
+    Script::Time slackTime;
+    slackTime.millisecond = 10;
 
     bool quit = false;
     SDL_Event sdl_event;
@@ -107,6 +110,7 @@ void Game::play()
             }
         }
 
+        SDL_LockMutex(this->eventMutex);
         for (int i = 0; i < todo.size(); i++) {
             if (this->_timer->elapsed() >= *todo[i]->start) {
                 // init action
@@ -125,10 +129,12 @@ void Game::play()
                 this->_removeFrom(todo[i], todo);
             }
         }
+        SDL_UnlockMutex(this->eventMutex);
 
         this->_scene->draw();
+        SDL_Delay(1);
 
-
+        SDL_LockMutex(this->eventMutex);
         for (int i = 0; i < inprogres.size(); i++) {
             if (inprogres[i]->action == 0xCC02) { // if init bgm start look for start loop
                 this->_playLoopWhenReadyBGM(inprogres[i]);
@@ -139,7 +145,7 @@ void Game::play()
                 }
             }
 
-            if (this->_timer->elapsed() >= *inprogres[i]->end) {
+            if (this->_timer->elapsed() >= (*inprogres[i]->end + slackTime)) {
                 // end action
                 //printf("end action: 0x%X - data: %s\n", inprogres[i]->action, inprogres[i]->data.c_str());
                 this->_findAndHandle(inprogres[i], 1);
@@ -147,6 +153,7 @@ void Game::play()
                 this->_removeFrom(inprogres[i], inprogres);
             }
         }
+        SDL_UnlockMutex(this->eventMutex);
 
         frameEndTime = SDL_GetTicks();
         frameTime = frameEndTime - frameStartTime;

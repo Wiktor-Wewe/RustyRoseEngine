@@ -22,6 +22,28 @@ public:
 				(second >= other.second) &&
 				(millisecond >= other.millisecond);
 		}
+
+		Time operator+(const Time& other) const {
+			Time result;
+
+			result.minute = minute + other.minute;
+			result.second = second + other.second;
+			result.millisecond = millisecond + other.millisecond;
+
+			if (result.millisecond >= 1000) {
+				unsigned int carrySeconds = result.millisecond / 1000;
+				result.second += carrySeconds;
+				result.millisecond %= 1000;
+			}
+
+			if (result.second >= 60) {
+				unsigned int carryMinutes = result.second / 60;
+				result.minute += carryMinutes;
+				result.second %= 60;
+			}
+
+			return result;
+		}
 	};
 
 	struct Event 

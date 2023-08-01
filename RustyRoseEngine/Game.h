@@ -26,6 +26,8 @@ private:
 	Init _init;
 	bool _gameStatus;
 
+	SDL_mutex* eventMutex;
+
 	std::vector<int> _freeChannelsSoundEffect;
 	std::vector<int> _freeChannelsVoice;
 
