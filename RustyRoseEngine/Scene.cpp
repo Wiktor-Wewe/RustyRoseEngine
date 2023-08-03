@@ -5,7 +5,6 @@ Scene::Scene(SDL_Renderer* renderer)
 	this->_renderer = renderer;
 	this->_shortName = std::string();
 	this->_textMutex = SDL_CreateMutex();
-	this->_backGroundMutex = SDL_CreateMutex();
 }
 
 void Scene::setFont(TTF_Font* font)
@@ -19,20 +18,22 @@ void Scene::draw()
 	SDL_RenderClear(this->_renderer);
 
 	// layer 0
-	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround0.size(); i++) {
+		SDL_LockMutex(this->_backGround0[i]->getMutex());
 		SDL_RenderCopy(this->_renderer, this->_backGround0[i]->getTexture(), NULL, NULL);
+		SDL_UnlockMutex(this->_backGround0[i]->getMutex());
 	}
 
 	if (!this->_shortName.empty()) {
 		if (!this->_backGround0.empty()) {
+			SDL_LockMutex(this->_backGround0[this->_backGround0.size() - 1]->getMutex());
 			SDL_Texture* animation = this->_backGround0[this->_backGround0.size() - 1]->getNextAnimationTexture(this->_shortName);
 			if (animation) {
 				SDL_RenderCopy(this->_renderer, animation, NULL, NULL);
 			}
+			SDL_UnlockMutex(this->_backGround0[this->_backGround0.size() - 1]->getMutex());
 		}
 	}
-	SDL_UnlockMutex(this->_backGroundMutex);
 
 	for (int i = 0; i < this->_sysImg0.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
@@ -41,22 +42,18 @@ void Scene::draw()
 	SDL_RenderCopy(this->_renderer, this->_videoFrame, NULL, NULL);
 
 	// layer 1
-	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround1.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround1[i]->getTexture(), NULL, NULL);
 	}
-	SDL_UnlockMutex(this->_backGroundMutex);
 
 	for (int i = 0; i < this->_sysImg1.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, NULL);
 	}
 
 	// layer 2
-	SDL_LockMutex(this->_backGroundMutex);
 	for (int i = 0; i < this->_backGround2.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_backGround2[i]->getTexture(), NULL, NULL);
 	}
-	SDL_UnlockMutex(this->_backGroundMutex);
 
 	// subtitles
 	SDL_LockMutex(this->_textMutex);
@@ -90,6 +87,32 @@ void Scene::setAnimationShortNameToDefaultIfName(std::string shortName)
 	}
 }
 
+BackGround* Scene::getLastBackGround(int layer)
+{
+	if (layer == 0) {
+		if (this->_backGround0.empty()) {
+			return nullptr;
+		}
+		return this->_backGround0[this->_backGround0.size() - 1];
+	}
+	else if (layer == 1) {
+		if (this->_backGround1.empty()) {
+			return nullptr;
+		}
+		return this->_backGround1[this->_backGround1.size() - 1];
+	}
+	else if (layer == 2) {
+		if (this->_backGround2.empty()) {
+			return nullptr;
+		}
+		return this->_backGround2[this->_backGround2.size() - 1];
+	}
+	else {
+		printf("unable to gerlast background from scene - wrong layer\n");
+	}
+	return nullptr;
+}
+
 void Scene::clear(int layer)
 {
 	if (layer == -3) {
@@ -101,11 +124,9 @@ void Scene::clear(int layer)
 		}
 	}
 	else if (layer == -1) {
-		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround0.clear();
 		this->_backGround1.clear();
 		this->_backGround2.clear();
-		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg0.clear();
 		this->_sysImg1.clear();
 		this->_sysImg2.clear();
@@ -113,21 +134,15 @@ void Scene::clear(int layer)
 		this->_videoFrame = NULL;
 	}
 	else if (layer == 0) {
-		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround0.clear();
-		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg0.clear();
 	}
 	else if (layer == 1) {
-		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround1.clear();
-		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg1.clear();
 	}
 	else if (layer == 2) {
-		SDL_LockMutex(this->_backGroundMutex);
 		this->_backGround2.clear();
-		SDL_UnlockMutex(this->_backGroundMutex);
 		this->_sysImg2.clear();
 	}
 	else {
@@ -138,8 +153,6 @@ void Scene::clear(int layer)
 
 void Scene::addBackGround(BackGround* bg, int layer)
 {
-	SDL_LockMutex(this->_backGroundMutex);
-
 	if (layer == 0) {
 		this->_backGround0.push_back(bg);
 	}
@@ -152,8 +165,6 @@ void Scene::addBackGround(BackGround* bg, int layer)
 	else {
 		printf("There is no layer %i in scene->backgrounds\n", layer);
 	}
-
-	SDL_UnlockMutex(this->_backGroundMutex);
 }
 
 void Scene::addSysImg(SysImg* sysimg, int layer)
@@ -229,8 +240,6 @@ void Scene::removeText(std::string text)
 
 void Scene::removeBackGround(BackGround* backGround, int layer)
 {
-	SDL_LockMutex(this->_backGroundMutex);
-
 	if (layer == -1) {
 		this->_tryRemoveBg(backGround, this->_backGround0);
 		this->_tryRemoveBg(backGround, this->_backGround1);
@@ -248,8 +257,6 @@ void Scene::removeBackGround(BackGround* backGround, int layer)
 	else {
 		printf("unable to remove bg from scene - wrong layer\n");
 	}
-
-	SDL_UnlockMutex(this->_backGroundMutex);
 }
 
 SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
@@ -329,5 +336,6 @@ void Scene::_tryRemoveBg(BackGround* bg, std::vector<BackGround*>& list)
 	auto it = std::find(list.begin(), list.end(), bg);
 	if (it != list.end()) {
 		list.erase(it);
+		bg->free();
 	}
 }

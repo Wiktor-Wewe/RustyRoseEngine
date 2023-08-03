@@ -112,7 +112,9 @@ std::string SysImg::getPath()
 void SysImg::free()
 {
 	SDL_DestroyTexture(this->_texture);
+	this->_texture = NULL;
 	SDL_FreeSurface(this->_surface);
+	this->_surface = NULL;
 	delete(this->_originalSize);
 
 	for (int i = 0; i < this->_buttons.size(); i++) {

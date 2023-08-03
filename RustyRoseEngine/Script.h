@@ -44,6 +44,27 @@ public:
 
 			return result;
 		}
+
+		Time operator-(const Time& other) const {
+			Time result;
+
+			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
+			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			int diffMilliseconds = thisTotalMilliseconds - otherTotalMilliseconds;
+
+			if (diffMilliseconds >= 0) {
+				result.minute = diffMilliseconds / (60 * 1000);
+				diffMilliseconds %= (60 * 1000);
+				result.second = diffMilliseconds / 1000;
+				result.millisecond = diffMilliseconds % 1000;
+			}
+			else {
+				result.minute = result.second = result.millisecond = 0;
+			}
+
+			return result;
+		}
+
 	};
 
 	struct Event 

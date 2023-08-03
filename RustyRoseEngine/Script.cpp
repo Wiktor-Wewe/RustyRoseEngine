@@ -59,7 +59,7 @@ bool Script::_loadScript(std::fstream* file)
 
 	while (file->tellg() != size) {
 		file->read(reinterpret_cast<char*>(&buff16), sizeof(buff16));
-		printf("offset: 0x%X, value: 0x%X\n", ((int)file->tellg())-2, buff16);
+		//printf("offset: 0x%X, value: 0x%X\n", ((int)file->tellg())-2, buff16);
 		switch (buff16) {
 		case 0xCC01:
 			this->_loadSkipFrame(file);

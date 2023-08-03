@@ -96,16 +96,21 @@ void VDecoder::freeDecoder()
 {
 	if (this->_frame != NULL) {
 		av_frame_free(&this->_frame);
+		this->_frame = NULL;
 	}
 
 	if (this->_packet != NULL) {
 		av_packet_unref(this->_packet);
+		this->_packet = NULL;
 	}
 
 	avcodec_close(this->_codecContext);
+	this->_codecContext = NULL;
 	avformat_close_input(&this->_formatContext);
+	this->_formatContext = NULL;
 
-	SDL_DestroyTexture(this->_texture);
+	//SDL_DestroyTexture(this->_texture);
+	//this->_texture = NULL;
 }
 
 SDL_Texture* VDecoder::getFrame()

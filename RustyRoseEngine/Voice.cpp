@@ -3,7 +3,6 @@
 Voice::Voice(std::string path)
 {
 	this->_path = path;
-	this->_load();
 	this->_channel = 6;
 }
 
@@ -17,6 +16,14 @@ int Voice::getChannel()
 	return this->_channel;
 }
 
+void Voice::load()
+{
+	this->_voice = Mix_LoadWAV(this->_path.c_str());
+	if (this->_voice == NULL) {
+		printf("unable to load voice: %s\n", this->_path.c_str());
+	}
+}
+
 void Voice::play()
 {
 	if (this == nullptr) {
@@ -24,7 +31,7 @@ void Voice::play()
 		return;
 	}
 
-	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
+	this->_channel = Mix_PlayChannel(this->_channel, this->_voice, 0);
 	if (this->_channel == -1) {
 		printf("unable to play voice: %s\n", this->_path.c_str());
 	}
@@ -47,18 +54,11 @@ void Voice::free()
 		return;
 	}
 
-	Mix_FreeChunk(this->_soundEffect);
+	Mix_FreeChunk(this->_voice);
+	this->_voice = NULL;
 }
 
 std::string Voice::getPath()
 {
 	return this->_path;
-}
-
-void Voice::_load()
-{
-	this->_soundEffect = Mix_LoadWAV(this->_path.c_str());
-	if (this->_soundEffect == NULL) {
-		printf("unable to load voice: %s\n", this->_path.c_str());
-	}
 }

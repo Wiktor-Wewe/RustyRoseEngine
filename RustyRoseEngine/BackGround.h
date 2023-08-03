@@ -16,20 +16,25 @@ public:
 
 	BackGround(SDL_Renderer* renderer, std::string path);
 	void tryLoadAnimation(std::string shortName);
+	void load();
+
 	SDL_Texture* getTexture();
 	SDL_Texture* getNextAnimationTexture(std::string shortName);
+	
 	std::string getPath();
+	SDL_mutex* getMutex();
 	void free();
 
 private:
 	SDL_Renderer* _renderer;
+
+	SDL_mutex* _mutex;
 
 	int _animationCounter;
 	std::string _path;
 	SDL_Texture* _texture;
 	std::vector<TalkAnimation*> animations;
 
-	void _loadImage();
 	SDL_Texture* _tryGetAnimationTexture(std::string path);
 };
 

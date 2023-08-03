@@ -15,6 +15,8 @@ public:
 	void setAnimationShortName(std::string shortName);
 	void setAnimationShortNameToDefalut();
 	void setAnimationShortNameToDefaultIfName(std::string shortName);
+
+	BackGround* getLastBackGround(int layer);
 	
 	void clear(int layer); //-1 = all // -2 = text // -3 = video frame but only pointer
 	
@@ -31,7 +33,6 @@ private:
 	TTF_Font* _font;
 
 	SDL_mutex* _textMutex;
-	SDL_mutex* _backGroundMutex;
 
 	std::string _shortName;
 

@@ -60,7 +60,7 @@ Game::Game()
         return;
     }
 
-    this->eventMutex = SDL_CreateMutex();
+    this->_eventMutex = SDL_CreateMutex();
 
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
@@ -88,8 +88,12 @@ void Game::play()
     std::vector<Script::Event*> inprogres;
 
     this->_timer->reset();
-    Script::Time slackTime;
-    slackTime.millisecond = 10;
+    
+    Script::Time slackTimeEnd;
+    slackTimeEnd.millisecond = 0;
+
+    Script::Time slackTimeInit;
+    slackTimeInit.millisecond = 0;
 
     bool quit = false;
     SDL_Event sdl_event;
@@ -110,9 +114,9 @@ void Game::play()
             }
         }
 
-        SDL_LockMutex(this->eventMutex);
+        SDL_LockMutex(this->_eventMutex);
         for (int i = 0; i < todo.size(); i++) {
-            if (this->_timer->elapsed() >= *todo[i]->start) {
+            if (this->_timer->elapsed() >= (*todo[i]->start - slackTimeInit)) {
                 // init action
                 //printf("init action: 0x%X - data: %s\n", todo[i]->action, todo[i]->data.c_str());
                 this->_findAndHandle(todo[i], 0);
@@ -129,12 +133,12 @@ void Game::play()
                 this->_removeFrom(todo[i], todo);
             }
         }
-        SDL_UnlockMutex(this->eventMutex);
+        SDL_UnlockMutex(this->_eventMutex);
 
         this->_scene->draw();
         SDL_Delay(1);
 
-        SDL_LockMutex(this->eventMutex);
+        SDL_LockMutex(this->_eventMutex);
         for (int i = 0; i < inprogres.size(); i++) {
             if (inprogres[i]->action == 0xCC02) { // if init bgm start look for start loop
                 this->_playLoopWhenReadyBGM(inprogres[i]);
@@ -145,7 +149,7 @@ void Game::play()
                 }
             }
 
-            if (this->_timer->elapsed() >= (*inprogres[i]->end + slackTime)) {
+            if (this->_timer->elapsed() >= (*inprogres[i]->end + slackTimeEnd)) {
                 // end action
                 //printf("end action: 0x%X - data: %s\n", inprogres[i]->action, inprogres[i]->data.c_str());
                 this->_findAndHandle(inprogres[i], 1);
@@ -153,7 +157,7 @@ void Game::play()
                 this->_removeFrom(inprogres[i], inprogres);
             }
         }
-        SDL_UnlockMutex(this->eventMutex);
+        SDL_UnlockMutex(this->_eventMutex);
 
         frameEndTime = SDL_GetTicks();
         frameTime = frameEndTime - frameStartTime;
@@ -463,12 +467,19 @@ void Game::_playLoopWhenReadyBGM(Script::Event* event)
 
 void Game::_CreateBG_Init(Script::Event* event)
 {
-    this->_scene->addBackGround(this->_gameContext->getBackGround(this->_init.debugString + event->data), 0);
+    BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
+    if (backGround) {
+        backGround->load();
+        this->_scene->addBackGround(backGround, 0);
+    }
 }
 
 void Game::_CreateBG_End(Script::Event* event)
 {
-    this->_scene->removeBackGround(this->_gameContext->getBackGround(this->_init.debugString + event->data), 0);
+    BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
+    if (backGround) {
+        this->_scene->removeBackGround(backGround, 0);
+    }
 }
 
 void Game::_PrintText_Init(Script::Event* event)
@@ -485,6 +496,7 @@ void Game::_PlayVoice_Init(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
+        voice->load();
         voice->setChannel(this->_getFirstFreeChannelVoice());
         voice->play();
     }
@@ -493,6 +505,10 @@ void Game::_PlayVoice_Init(Script::Event* event)
         this->_scene->setAnimationShortNameToDefalut();
     }
     else {
+        BackGround* backGround = this->_scene->getLastBackGround(0);
+        if (backGround) {
+            backGround->tryLoadAnimation(event->shortName);
+        }
         this->_scene->setAnimationShortName(event->shortName);
     }
 }
@@ -502,7 +518,7 @@ void Game::_PlayVoice_End(Script::Event* event)
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
         this->_freeChannelsVoice.push_back(voice->getChannel());
-        // no need to stop voice
+        voice->free();
     }
     this->_scene->setAnimationShortNameToDefaultIfName(event->shortName);
 }
@@ -537,6 +553,7 @@ void Game::_Next_End(Script::Event* event)
 
 void Game::_PlayMovie_Init(Script::Event* event)
 {
+    this->_vDecoder->freeDecoder();
     this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV");
     this->_vDecoder->start();
     if (this->_vDecoder->decodeFrame()) {

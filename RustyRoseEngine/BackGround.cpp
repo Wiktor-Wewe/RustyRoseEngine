@@ -4,7 +4,8 @@ BackGround::BackGround(SDL_Renderer* renderer, std::string path)
 {
 	this->_renderer = renderer;
 	this->_path = path;
-	this->_loadImage();
+
+	this->_mutex = SDL_CreateMutex();
 	this->_animationCounter = 0;
 }
 
@@ -31,7 +32,25 @@ void BackGround::tryLoadAnimation(std::string shortName)
 	texture = this->_tryGetAnimationTexture(animPath);
 	talkAnimation->sprites[2] = texture;
 
+	SDL_LockMutex(this->_mutex);
 	this->animations.push_back(talkAnimation);
+	SDL_UnlockMutex(this->_mutex);
+}
+
+void BackGround::load()
+{
+	std::string pathWithEnd = this->_path + ".PNG";
+	SDL_Surface* surface = IMG_Load(pathWithEnd.c_str());
+	if (surface == NULL) {
+		printf("unable to load backgroud image: %s\n", this->_path.c_str());
+	}
+
+	this->_texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
+	if (this->_texture == NULL) {
+		printf("unable to make texture from bg image: %s\n", this->_path.c_str());
+	}
+
+	SDL_FreeSurface(surface);
 }
 
 SDL_Texture* BackGround::getTexture()
@@ -82,32 +101,29 @@ std::string BackGround::getPath()
 	return this->_path;
 }
 
+SDL_mutex* BackGround::getMutex()
+{
+	return this->_mutex;
+}
+
 void BackGround::free()
 {
+	SDL_LockMutex(this->_mutex);
+	SDL_SetRenderTarget(this->_renderer, NULL);
+
 	SDL_DestroyTexture(this->_texture);
+	this->_texture = NULL;
+
+	// Destroy animation textures and clear the animations vector.
 	for (int i = 0; i < this->animations.size(); i++) {
 		SDL_DestroyTexture(this->animations[i]->sprites[0]);
 		SDL_DestroyTexture(this->animations[i]->sprites[1]);
 		SDL_DestroyTexture(this->animations[i]->sprites[2]);
-		//delete(this->animations[i]);
+		delete this->animations[i];
 	}
+
 	this->animations.clear();
-}
-
-void BackGround::_loadImage()
-{
-	std::string pathWithEnd = this->_path + ".PNG";
-	SDL_Surface* surface = IMG_Load(pathWithEnd.c_str());
-	if (surface == NULL) {
-		printf("unable to load backgroud image: %s\n", this->_path.c_str());
-	}
-
-	this->_texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
-	if (this->_texture == NULL) {
-		printf("unable to make texture from bg image: %s\n", this->_path.c_str());
-	}
-
-	SDL_FreeSurface(surface);
+	SDL_UnlockMutex(this->_mutex);
 }
 
 SDL_Texture* BackGround::_tryGetAnimationTexture(std::string path)

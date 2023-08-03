@@ -49,7 +49,7 @@ bool GameContext::loadContentFromScripts()
 
 			case 0xCC03: { //bg
 				BackGround* backGround = new BackGround(this->_renderer, debugString + currentScript->getEvents()[j]->data);
-				this->_loadAnimationForBackGround(currentScript, backGround, j);
+				//this->_loadAnimationForBackGround(currentScript, backGround, j);
 				this->_backGrounds.push_back(backGround);
 				}
 				break;

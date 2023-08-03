@@ -9,6 +9,7 @@ public:
 
 	void setChannel(int channel);
 	int getChannel();
+	void load();
 
 	void play();
 	void stop();
@@ -18,7 +19,6 @@ public:
 private:
 	std::string _path;
 	Mix_Chunk* _soundEffect;
-	void _load();
 	int _channel;
 };
 
