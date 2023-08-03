@@ -527,6 +527,7 @@ void Game::_PlaySe_Init(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
+        soundEffect->load();
         soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
         soundEffect->play();
     }
@@ -538,6 +539,7 @@ void Game::_PlaySe_End(Script::Event* event)
     if (soundEffect) {
         this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
         soundEffect->stop();
+        soundEffect->free();
     }
 }
 

@@ -3,7 +3,6 @@
 SoundEffect::SoundEffect(std::string path)
 {
 	this->_path = path;
-	this->_load();
 	this->_channel = 1;
 }
 
@@ -15,6 +14,14 @@ void SoundEffect::setChannel(int channel)
 int SoundEffect::getChannel()
 {
 	return this->_channel;
+}
+
+void SoundEffect::load()
+{
+	this->_soundEffect = Mix_LoadWAV(this->_path.c_str());
+	if (this->_soundEffect == NULL) {
+		printf("unable to load sound effect: %s\n", this->_path.c_str());
+	}
 }
 
 void SoundEffect::play()
@@ -48,17 +55,10 @@ void SoundEffect::free()
 	}
 
 	Mix_FreeChunk(this->_soundEffect);
+	this->_soundEffect = NULL;
 }
 
 std::string SoundEffect::getPath()
 {
 	return this->_path;
-}
-
-void SoundEffect::_load()
-{
-	this->_soundEffect = Mix_LoadWAV(this->_path.c_str());
-	if (this->_soundEffect == NULL) {
-		printf("unable to load sound effect: %s\n", this->_path.c_str());
-	}
 }
