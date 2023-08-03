@@ -18,7 +18,7 @@ public:
 
 private:
 	std::string _path;
-	Mix_Chunk* _soundEffect;
+	Mix_Chunk* _voice;
 	int _channel;
 };
 
