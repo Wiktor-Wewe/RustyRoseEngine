@@ -45,6 +45,8 @@ private:
 	int _getFirstFreeChannelSoundEffect();
 	int _getFirstFreeChannelVoice();
 
+	// add for voice, bgm?, sf - _PlayVoice_Load - before real event, load voice
+
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list);
 	void _findAndHandle(Script::Event* event, int operation); // <- find action -> [operation = 0] = init, [operation = 1] = end 

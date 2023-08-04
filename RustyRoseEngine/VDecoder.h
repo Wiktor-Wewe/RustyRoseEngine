@@ -22,6 +22,9 @@ private:
 	SDL_Renderer* _renderer;
 	std::string _path;
 
+	int _frameWidth;
+	int _frameHeight;
+
 	AVFormatContext* _formatContext;
 	int _videoStreamIndex;
 	AVCodecContext* _codecContext;

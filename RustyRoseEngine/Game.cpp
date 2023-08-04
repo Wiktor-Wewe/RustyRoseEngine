@@ -556,7 +556,7 @@ void Game::_Next_End(Script::Event* event)
 void Game::_PlayMovie_Init(Script::Event* event)
 {
     this->_vDecoder->freeDecoder();
-    this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV");
+    this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV"); // <- tested for mp4 h264 its better | add video_foramt to ini file
     this->_vDecoder->start();
     if (this->_vDecoder->decodeFrame()) {
         this->_scene->addVideoFrame(this->_vDecoder->getFrame());

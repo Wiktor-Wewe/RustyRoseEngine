@@ -4,7 +4,9 @@ VDecoder::VDecoder(SDL_Renderer* renderer)
 {
 	avformat_network_init();
 	this->_renderer = renderer;
-	this->_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, 800, 452); // <- get size of frame from file
+	this->_frameWidth = 800;
+	this->_frameHeight = 452;
+	this->_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, this->_frameWidth, this->_frameHeight); // <- get size of frame from file
 }
 
 void VDecoder::setPath(std::string path)
@@ -115,50 +117,49 @@ void VDecoder::freeDecoder()
 
 SDL_Texture* VDecoder::getFrame()
 {
-	uint8_t* yPlane = this->_frame->data[0];
-	uint8_t* uPlane = this->_frame->data[1];
-	uint8_t* vPlane = this->_frame->data[2];
-
-	int yPitch = this->_frame->linesize[0];
-	int uPitch = this->_frame->linesize[1];
-	int vPitch = this->_frame->linesize[2];
-
-	uint8_t* rgbData = new uint8_t[800 * 452 * 3];
-	int rgbIndex = 0;
-
-	for (int y = 0; y < 452; y++)
+	if (this->_frame == nullptr)
 	{
-		for (int x = 0; x < 800; x++)
-		{
-			int uvIndex = (x >> 1) + (y >> 1) * (uPitch);
-			int yIndex = x + y * yPitch;
-
-			uint8_t Y = yPlane[yIndex];
-			uint8_t U = uPlane[uvIndex];
-			uint8_t V = vPlane[uvIndex];
-
-			int C = Y - 16;
-			int D = U - 128;
-			int E = V - 128;
-
-			uint8_t R = (298 * C + 409 * E + 128) >> 8;
-			uint8_t G = (298 * C - 100 * D - 208 * E + 128) >> 8;
-			uint8_t B = (298 * C + 516 * D + 128) >> 8;
-
-			rgbData[rgbIndex] = R;
-			rgbData[rgbIndex + 1] = G;
-			rgbData[rgbIndex + 2] = B;
-
-			rgbIndex += 3;
-		}
+		return nullptr;
 	}
 
+	// Prepare RGB data buffer for the frame
+	uint8_t* rgbData = new uint8_t[this->_frame->width * this->_frame->height * 3];
+
+	// Set up FFmpeg's SwsContext for YUV to RGB conversion
+	int srcWidth = this->_frame->width;
+	int srcHeight = this->_frame->height;
+	AVPixelFormat srcFormat = AV_PIX_FMT_YUV420P; // Assuming the input is YUV420P
+	int dstWidth = srcWidth;
+	int dstHeight = srcHeight;
+	AVPixelFormat dstFormat = AV_PIX_FMT_RGB24; // Convert to RGB24
+
+	SwsContext* swsContext = sws_getContext(srcWidth, srcHeight, srcFormat,
+		dstWidth, dstHeight, dstFormat,
+		SWS_BILINEAR, nullptr, nullptr, nullptr);
+
+
+	// Perform YUV to RGB conversion
+	uint8_t* srcData[AV_NUM_DATA_POINTERS] = { this->_frame->data[0], this->_frame->data[1], this->_frame->data[2] };
+	int srcLinesize[AV_NUM_DATA_POINTERS] = { this->_frame->linesize[0], this->_frame->linesize[1], this->_frame->linesize[2] };
+	uint8_t* dstData[AV_NUM_DATA_POINTERS] = { rgbData, nullptr, nullptr };
+	int dstLinesize[AV_NUM_DATA_POINTERS] = { this->_frame->width * 3, 0, 0 };
+	sws_scale(swsContext, srcData, srcLinesize, 0, srcHeight, dstData, dstLinesize);
+
+	// Clean up the SwsContext
+	sws_freeContext(swsContext);
+
+	// Lock the texture to update its data.
 	void* texturePixels;
 	int texturePitch;
 	SDL_LockTexture(this->_texture, nullptr, &texturePixels, &texturePitch);
-	memcpy(texturePixels, rgbData, 800 * 452 * 3);
+
+	// Copy the converted RGB data to the texture
+	memcpy(texturePixels, rgbData, dstWidth * dstHeight * 3);
+
+	// Unlock the texture
 	SDL_UnlockTexture(this->_texture);
 
+	// Clean up the RGB data buffer
 	delete[] rgbData;
 
 	return this->_texture;
