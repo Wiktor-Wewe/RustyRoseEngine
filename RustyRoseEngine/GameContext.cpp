@@ -125,6 +125,11 @@ Script* GameContext::getScript(std::string path)
 	return nullptr;
 }
 
+std::vector<Script*> GameContext::getScripts()
+{
+	return this->_scripts;
+}
+
 Voice* GameContext::getVoice(std::string path)
 {
 	for (int i = 0; i < this->_voices.size(); i++) {

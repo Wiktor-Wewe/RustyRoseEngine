@@ -18,6 +18,7 @@ public:
 
 	System* getSystem();
 	Script* getScript(std::string path);
+	std::vector<Script*> getScripts();
 	Voice* getVoice(std::string path);
 	SoundEffect* getSoundEffect(std::string path);
 	BackGroundMusic* getBackGroundMusic(std::string path);

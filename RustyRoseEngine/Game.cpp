@@ -74,18 +74,35 @@ Game::Game()
     this->_gameStatus = true;
 }
 
-void Game::play()
+void Game::play(std::string path)
 {
-    this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\"  + this->_init.startScript + ".rose");
+    if (path.empty()) {
+        // init script
+        this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
+    }
+    else {
+        // next script
 
+    }
+
+    // if scripts is not empty, make load content for play
     if (!this->_gameContext->loadContentFromScripts()) {
         printf("Error - there is no content from script\n");
         return;
     }
 
     bool end = false;
-    std::vector<Script::Event*> todo = this->_gameContext->getScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose")->getEvents();
+
+    // load all events from scripts | but probably its only one in vector
+    std::vector<Script::Event*> todo;
     std::vector<Script::Event*> inprogres;
+
+    for (int i = 0; i < this->_gameContext->getScripts().size(); i++) {
+        for (int j = 0; j < this->_gameContext->getScripts()[i]->getEvents().size(); j++) {
+            todo.push_back(this->_gameContext->getScripts()[i]->getEvents()[j]);
+        }
+    }
+
 
     this->_timer->reset();
     
@@ -119,7 +136,7 @@ void Game::play()
             if (this->_timer->elapsed() >= (*todo[i]->start - slackTimeInit)) {
                 // init action
                 //printf("init action: 0x%X - data: %s\n", todo[i]->action, todo[i]->data.c_str());
-                this->_findAndHandle(todo[i], 0);
+                this->_findAndHandle(todo[i], Operation::start);
 
                 if (todo[i]->action == 0xCC07) { // if init to next script
                     todo.clear();
@@ -152,7 +169,7 @@ void Game::play()
             if (this->_timer->elapsed() >= (*inprogres[i]->end + slackTimeEnd)) {
                 // end action
                 //printf("end action: 0x%X - data: %s\n", inprogres[i]->action, inprogres[i]->data.c_str());
-                this->_findAndHandle(inprogres[i], 1);
+                this->_findAndHandle(inprogres[i], Operation::end);
 
                 this->_removeFrom(inprogres[i], inprogres);
             }
@@ -293,133 +310,183 @@ void Game::_removeFrom(Script::Event* event, std::vector<Script::Event*>& list)
     }
 }
 
-void Game::_findAndHandle(Script::Event* event, int operation)
+void Game::_findAndHandle(Script::Event* event, Operation operation)
 {
-    // operation [0] = init, [1] = end, [other] = nothing yet?
     switch (event->action) {
     case 0xCC01:
-        if (operation == 0) {
-            this->_SkipFRAME_Init(event);
+        if (operation == Operation::start) {
+            this->_SkipFRAME_(event);
         }
-        if (operation == 1) {
-            this->_SkipFRAME_End(event);
+        else {
+            printf("unknown operation for Skip_FRAME\n");
         }
         break;
 
     case 0xCC02:
-        if (operation == 0) {
-            this->_PlayBgm_Init(event);
+        if (operation == Operation::prepare) {
+            this->_PlayBgm_Prepare(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::start) {
+            this->_PlayBgm_Start(event);
+        }
+        else if (operation == Operation::end) {
             this->_PlayBgm_End(event);
+        }
+        else {
+            printf("unknown operation for PlayBgm\n");
         }
         break;
 
     case 0xCC03:
-        if (operation == 0) {
-            this->_CreateBG_Init(event);
+        if (operation == Operation::prepare) {
+            this->_CreateBG_Prepare(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::start) {
+            this->_CreateBG_Start(event);
+        }
+        else if (operation == Operation::end) {
             this->_CreateBG_End(event);
+        }
+        else {
+            printf("unknown operation for CreateBG\n");
         }
         break;
 
     case 0xCC04:
-        if (operation == 0) {
-            this->_PrintText_Init(event);
+        if (operation == Operation::start) {
+            this->_PrintText_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_PrintText_End(event);
+        }
+        else {
+            printf("unknown operation for PrintText\n");
         }
         break;
 
     case 0xCC05:
-        if (operation == 0) {
-            this->_PlayVoice_Init(event);
+        if (operation == Operation::prepare) {
+            this->_PlayVoice_Prepare(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::start) {
+            this->_PlayVoice_Start(event);
+        }
+        else if (operation == Operation::end) {
             this->_PlayVoice_End(event);
+        }
+        else {
+            printf("unknown operation for PlayVoice\n");
         }
         break;
 
     case 0xCC06:
-        if (operation == 0) {
-            this->_PlaySe_Init(event);
+        if (operation == Operation::prepare) {
+            this->_PlaySe_Prepare(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::start) {
+            this->_PlaySe_Start(event);
+        }
+        else if (operation == Operation::end) {
             this->_PlaySe_End(event);
+        }
+        else {
+            printf("unknown operation for PlaySe\n");
         }
         break;
 
     case 0xCC07:
-        if (operation == 0) {
-            this->_Next_Init(event);
+        if (operation == Operation::start) {
+            this->_Next_(event);
         }
-        if (operation == 1) {
-            this->_Next_End(event);
+        else {
+            printf("unknown operation for Next\n");
         }
         break;
 
     case 0xCC08:
-        if (operation == 0) {
-            this->_PlayMovie_Init(event);
+        if (operation == Operation::start) {
+            this->_PlayMovie_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_PlayMovie_End(event);
+        }
+        else {
+            printf("unknown operation for PlayMovie\n");
         }
         break;
 
     case 0xCC09:
-        if (operation == 0) {
-            this->_BlackFade_Init(event);
+        if (operation == Operation::start) {
+            this->_BlackFade_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_BlackFade_End(event);
+        }
+        else {
+            printf("unknown operation for BlackFade\n");
         }
         break;
 
     case 0xCC0A:
-        if (operation == 0) {
-            this->_WhiteFade_Init(event);
+        if (operation == Operation::start) {
+            this->_WhiteFade_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_WhiteFade_End(event);
+        }
+        else {
+            printf("unknown operation for WhiteFade\n");
         }
         break;
 
     case 0xCC0B:
-        if (operation == 0) {
-            this->_SetSELECT_Init(event);
+        if (operation == Operation::start) {
+            this->_SetSELECT_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_SetSELECT_End(event);
+        }
+        else {
+            printf("unknown operation for SetSELECT\n");
         }
         break;
 
     case 0xCC0C:
-        if (operation == 0) {
-            this->_EndBGM_Init(event);
+        if (operation == Operation::prepare) {
+            this->_EndBGM_Prepare(event);
         }
-        if (operation == 1) {
-            this->_EndBGM_End(event);
+        else if (operation == Operation::start) {
+            this->_EndBGM_Start(event);
+        }
+        else if (operation == Operation::end) {
+            this->_PlayBgm_End(event);
+        }
+        else {
+            printf("unknown operation for PlayBgm\n");
         }
         break;
 
     case 0xCC0D:
-        if (operation == 0) {
-            this->_EndRoll_Init(event);
+        if (operation == Operation::start) {
+            this->_EndRoll_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_EndRoll_End(event);
+        }
+        else {
+            printf("unknown operation for EndRoll\n");
         }
         break;
 
     case 0xCC0E:
-        if (operation == 0) {
-            this->_MoveSom_Init(event);
+        if (operation == Operation::start) {
+            this->_MoveSom_Start(event);
         }
-        if (operation == 1) {
+        else if (operation == Operation::end) {
             this->_MoveSom_End(event);
+        }
+        else {
+            printf("unknown operation for MoveSom\n");
         }
         break;
 
@@ -429,17 +496,17 @@ void Game::_findAndHandle(Script::Event* event, int operation)
     }
 }
 
-void Game::_SkipFRAME_Init(Script::Event* event)
+void Game::_SkipFRAME_(Script::Event* event)
 {
     // todo
 }
 
-void Game::_SkipFRAME_End(Script::Event* event)
+void Game::_PlayBgm_Prepare(Script::Event* event)
 {
-    // todo
+    // todo load bgm
 }
 
-void Game::_PlayBgm_Init(Script::Event* event)
+void Game::_PlayBgm_Start(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
@@ -465,7 +532,12 @@ void Game::_playLoopWhenReadyBGM(Script::Event* event)
     }
 }
 
-void Game::_CreateBG_Init(Script::Event* event)
+void Game::_CreateBG_Prepare(Script::Event* event)
+{
+    // todo load bg
+}
+
+void Game::_CreateBG_Start(Script::Event* event)
 {
     BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
     if (backGround) {
@@ -482,7 +554,7 @@ void Game::_CreateBG_End(Script::Event* event)
     }
 }
 
-void Game::_PrintText_Init(Script::Event* event)
+void Game::_PrintText_Start(Script::Event* event)
 {
     this->_scene->addText(event->data);
 }
@@ -492,7 +564,12 @@ void Game::_PrintText_End(Script::Event* event)
     this->_scene->removeText(event->data);
 }
 
-void Game::_PlayVoice_Init(Script::Event* event)
+void Game::_PlayVoice_Prepare(Script::Event* event)
+{
+    // todo load voice
+}
+
+void Game::_PlayVoice_Start(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
@@ -523,7 +600,12 @@ void Game::_PlayVoice_End(Script::Event* event)
     this->_scene->setAnimationShortNameToDefaultIfName(event->shortName);
 }
 
-void Game::_PlaySe_Init(Script::Event* event)
+void Game::_PlaySe_Prepare(Script::Event* event)
+{
+    // todo load se
+}
+
+void Game::_PlaySe_Start(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
@@ -543,17 +625,12 @@ void Game::_PlaySe_End(Script::Event* event)
     }
 }
 
-void Game::_Next_Init(Script::Event* event)
+void Game::_Next_(Script::Event* event)
 {
     // todo
 }
 
-void Game::_Next_End(Script::Event* event)
-{
-    // todo
-}
-
-void Game::_PlayMovie_Init(Script::Event* event)
+void Game::_PlayMovie_Start(Script::Event* event)
 {
     this->_vDecoder->freeDecoder();
     this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV"); // <- tested for mp4 h264 its better | add video_foramt to ini file
@@ -568,7 +645,7 @@ void Game::_PlayMovie_End(Script::Event* event)
     this->_scene->clear(-3);
 }
 
-void Game::_BlackFade_Init(Script::Event* event)
+void Game::_BlackFade_Start(Script::Event* event)
 {
     // todo
 }
@@ -578,7 +655,7 @@ void Game::_BlackFade_End(Script::Event* event)
     // todo
 }
 
-void Game::_WhiteFade_Init(Script::Event* event)
+void Game::_WhiteFade_Start(Script::Event* event)
 {
     // todo
 }
@@ -588,7 +665,7 @@ void Game::_WhiteFade_End(Script::Event* event)
     // todo
 }
 
-void Game::_SetSELECT_Init(Script::Event* event)
+void Game::_SetSELECT_Start(Script::Event* event)
 {
     // todo
     this->_scene->addText(event->data);
@@ -596,20 +673,36 @@ void Game::_SetSELECT_Init(Script::Event* event)
 
 void Game::_SetSELECT_End(Script::Event* event)
 {
+    // todo
     this->_scene->removeText(event->data);
 }
 
-void Game::_EndBGM_Init(Script::Event* event)
+void Game::_EndBGM_Prepare(Script::Event* event)
 {
-    // todo
+    // todo load endbgm
+}
+
+void Game::_EndBGM_Start(Script::Event* event)
+{
+    SoundEffect* soundEffectDummy = new SoundEffect(this->_init.debugString + event->data + ".OGG");
+    soundEffectDummy->load();
+    soundEffectDummy->play();
+    // zrób ¿eby to dzia³a³o, okazujê siê ¿e end bgm to muzyka na koniec epizodu i j¹ te¿ trzeba wczytaæ
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        backGoundMusic->playInt();
+    }
 }
 
 void Game::_EndBGM_End(Script::Event* event)
 {
-    // todo
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data)->stop();
+    }
 }
 
-void Game::_EndRoll_Init(Script::Event* event)
+void Game::_EndRoll_Start(Script::Event* event)
 {
     // todo
 }
@@ -619,7 +712,7 @@ void Game::_EndRoll_End(Script::Event* event)
     // todo
 }
 
-void Game::_MoveSom_Init(Script::Event* event)
+void Game::_MoveSom_Start(Script::Event* event)
 {
     // todo
 }
