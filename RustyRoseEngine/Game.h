@@ -19,11 +19,20 @@ public:
 		std::string linkToSys;
 		int windowWidth;
 		int windowHeight;
+		std::string linkToJump;
 		// and more :)
 	};
 
+	struct Jump
+	{
+		int id;
+		int routeId;
+		std::string scriptName;
+		int jumpToId;
+	};
+
 	Game();
-	void play(std::string path = std::string());
+	void play();
 	SDL_Renderer* getRenderer();
 	SDL_Window* getWindow();
 	bool isGameGood();
@@ -45,6 +54,11 @@ private:
 	VDecoder* _vDecoder;
 	Timer* _timer;
 
+	std::vector<Jump*> _jumps;
+
+	int _playScripts();
+
+	bool _loadJumps();
 	bool _loadInit();
 	void _setDefaultInit();
 
@@ -106,5 +120,8 @@ private:
 	void _MoveSom_End(Script::Event* event);
 
 	std::vector<std::string> _split(std::string text, char separator);
+	std::string _findNameOfScriptById(int scriptId);
+	int _findNextScrpitId(std::string currentScriptName, int playerOption);
+	void _wipeCharArr(char* arr, int size);
 };
 

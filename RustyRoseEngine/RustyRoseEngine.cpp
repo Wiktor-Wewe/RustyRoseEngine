@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     game.play();
 
     VDecoder vdecoder = VDecoder(game.getRenderer());
-    std::string path = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Movie00\\00-00\\00-00-K00\\00-00-K00-001.WMV";
+    std::string path = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\Movie00\\00-00\\00-00-L00\\00-00-L00-029.WMV";
     vdecoder.setPath(path.c_str());
     vdecoder.start();
 

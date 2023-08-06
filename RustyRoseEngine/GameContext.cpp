@@ -47,10 +47,16 @@ bool GameContext::loadContentFromScripts()
 				}
 				break;
 
-			case 0xCC03: { //bg
+			case 0xCC03: { // bg
 				BackGround* backGround = new BackGround(this->_renderer, debugString + currentScript->getEvents()[j]->data);
 				//this->_loadAnimationForBackGround(currentScript, backGround, j);
 				this->_backGrounds.push_back(backGround);
+				}
+				break;
+
+			case 0xCC0C: { // endbgm
+				SoundEffect* endBackGroundMusic = new SoundEffect(debugString + currentScript->getEvents()[j]->data + ".OGG");
+				this->_endBackGroundMusics.push_back(endBackGroundMusic);
 				}
 				break;
 			}
@@ -91,6 +97,12 @@ void GameContext::clear()
 		//delete(this->_backGrounds[i]);
 	}
 	this->_backGrounds.clear();
+
+	for (int i = 0; i < this->_endBackGroundMusics.size(); i++) {
+		this->_endBackGroundMusics[i]->free();
+		//delete(this->_soundEffects[i]);
+	}
+	this->_endBackGroundMusics.clear();
 }
 
 System* GameContext::getSystem()
@@ -113,6 +125,37 @@ void GameContext::_loadAnimationForBackGround(Script* script, BackGround* backGr
 			backGround->tryLoadAnimation(script->getEvents()[i]->shortName);
 		}
 	}
+}
+
+std::string GameContext::_getNameFromPath(std::string path)
+{
+	std::string normalizedPath = path;
+
+	for (size_t i = 0; i < normalizedPath.size(); ++i) {
+		if (normalizedPath[i] == '\\') {
+			normalizedPath[i] = '/';
+		}
+	}
+
+	size_t lastSlash = normalizedPath.find_last_of("/");
+
+	if (lastSlash == std::string::npos) {
+		return "";
+	}
+
+	size_t folderStart = normalizedPath.find_last_of("/", lastSlash - 1);
+
+	if (folderStart == std::string::npos) {
+		return normalizedPath.substr(lastSlash + 1);
+	}
+
+	size_t lastDot = normalizedPath.find_last_of(".");
+
+	if (lastDot == std::string::npos || lastDot < lastSlash) {
+		return normalizedPath.substr(folderStart + 1);
+	}
+
+	return normalizedPath.substr(folderStart + 1, lastDot - folderStart - 1);
 }
 
 Script* GameContext::getScript(std::string path)
@@ -168,4 +211,25 @@ BackGround* GameContext::getBackGround(std::string path)
 		}
 	}
 	return nullptr;
+}
+
+SoundEffect* GameContext::getEndBackGroundMusic(std::string path)
+{
+	for (int i = 0; i < this->_endBackGroundMusics.size(); i++) {
+		if (this->_endBackGroundMusics[i]->getPath() == path) {
+			return this->_endBackGroundMusics[i];
+		}
+	}
+	return nullptr;
+}
+
+std::string GameContext::getLastScriptName()
+{
+	if (this->_scripts.empty()) {
+		printf("ERROR - cant get last script | scripts are empty\n");
+		return "ERROR";
+	}
+
+	Script* script = this->_scripts[this->_scripts.size() - 1];
+	return this->_getNameFromPath(script->getPath());	
 }

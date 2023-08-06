@@ -23,6 +23,8 @@ public:
 	SoundEffect* getSoundEffect(std::string path);
 	BackGroundMusic* getBackGroundMusic(std::string path);
 	BackGround* getBackGround(std::string path);
+	SoundEffect* getEndBackGroundMusic(std::string path);
+	std::string getLastScriptName();
 
 private:
 	SDL_Renderer* _renderer;
@@ -33,7 +35,9 @@ private:
 	std::vector<SoundEffect*> _soundEffects;
 	std::vector<BackGroundMusic*> _backGroundMusics;
 	std::vector<BackGround*> _backGrounds;
+	std::vector<SoundEffect*> _endBackGroundMusics;
 
 	void _loadAnimationForBackGround(Script* script, BackGround* backGround, int currentEvent);
+	std::string _getNameFromPath(std::string path);
 };
 

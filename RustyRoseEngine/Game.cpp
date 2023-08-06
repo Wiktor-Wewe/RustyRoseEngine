@@ -3,8 +3,13 @@
 Game::Game()
 {
     this->_gameStatus = false; 
+
     if (!this->_loadInit()) {
         this->_setDefaultInit();
+    }
+
+    if (!this->_loadJumps()) {
+        return;
     }
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -74,43 +79,72 @@ Game::Game()
     this->_gameStatus = true;
 }
 
-void Game::play(std::string path)
+void Game::play()
 {
-    if (path.empty()) {
-        // init script
-        this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
+    this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
+
+    while (1) {
+
+        // if scripts is not empty, make load content for play
+        if (!this->_gameContext->loadContentFromScripts()) {
+            printf("Error - there is no content from script\n");
+            return;
+        }
+
+        int nextScriptId = this->_playScripts();
+        this->_gameContext->clear();
+
+        this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
+        this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
+
+        this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose");
     }
-    else {
-        // next script
+}
 
-    }
+SDL_Renderer* Game::getRenderer()
+{
+    return this->_renderer;
+}
 
-    // if scripts is not empty, make load content for play
-    if (!this->_gameContext->loadContentFromScripts()) {
-        printf("Error - there is no content from script\n");
-        return;
-    }
+SDL_Window* Game::getWindow()
+{
+    return this->_window;
+}
 
-    bool end = false;
+bool Game::isGameGood()
+{
+    return this->_gameStatus;
+}
 
+int Game::_playScripts()
+{
     // load all events from scripts | but probably its only one in vector
     std::vector<Script::Event*> todo;
+    std::vector<Script::Event*> ready;
     std::vector<Script::Event*> inprogres;
 
+    Script::Time extraTimeToEndVoice;
+    extraTimeToEndVoice.millisecond = 500;
+
     for (int i = 0; i < this->_gameContext->getScripts().size(); i++) {
-        for (int j = 0; j < this->_gameContext->getScripts()[i]->getEvents().size(); j++) {
-            todo.push_back(this->_gameContext->getScripts()[i]->getEvents()[j]);
+        auto _script = this->_gameContext->getScripts()[i];
+        for (int j = 0; j < _script->getEvents().size(); j++) {
+            auto _event = _script->getEvents()[j];
+            if (_event->action == 0xCC05) {
+                *_event->end = *_event->end + extraTimeToEndVoice;
+            }
+            todo.push_back(_event);
         }
     }
 
 
     this->_timer->reset();
-    
-    Script::Time slackTimeEnd;
-    slackTimeEnd.millisecond = 0;
 
-    Script::Time slackTimeInit;
-    slackTimeInit.millisecond = 0;
+    Script::Time timeForPrepare;
+    timeForPrepare.second = 2; // <- add to init file?
+
+    Script::Time extraTime;
+    extraTime.millisecond = 20;
 
     bool quit = false;
     SDL_Event sdl_event;
@@ -132,48 +166,63 @@ void Game::play(std::string path)
         }
 
         SDL_LockMutex(this->_eventMutex);
-        for (int i = 0; i < todo.size(); i++) {
-            if (this->_timer->elapsed() >= (*todo[i]->start - slackTimeInit)) {
-                // init action
-                //printf("init action: 0x%X - data: %s\n", todo[i]->action, todo[i]->data.c_str());
-                this->_findAndHandle(todo[i], Operation::start);
 
-                if (todo[i]->action == 0xCC07) { // if init to next script
-                    todo.clear();
-                    inprogres.clear();
-                    break;
-                }
+        // prepare actions 
+        for (auto currEvent = todo.begin(); currEvent != todo.end();) {
+            if (this->_timer->elapsed() >= (*(*currEvent)->start - timeForPrepare)) {
+                this->_findAndHandle(*currEvent, Operation::prepare); // if its posible
+                //printf("prepering: %s\n", todo[i]->data.c_str());
 
-                if (todo[i]->end != nullptr) {
-                    inprogres.push_back(todo[i]);
-                }
-                this->_removeFrom(todo[i], todo);
+                ready.push_back(*currEvent);
+                currEvent = todo.erase(currEvent);
+            }
+            else {
+                ++currEvent;
             }
         }
+
+        // start actions
+        for (auto currEvent = ready.begin(); currEvent != ready.end();) {
+            if (this->_timer->elapsed() >= *(*currEvent)->start) {
+                this->_findAndHandle(*currEvent, Operation::start);
+                //printf("handle start: %s\n", ready[i]->data.c_str());
+
+                if ((*currEvent)->end != nullptr) {
+                    inprogres.push_back(*currEvent);
+                }
+                currEvent = ready.erase(currEvent);
+            }
+            else {
+                ++currEvent;
+            }
+        }
+
         SDL_UnlockMutex(this->_eventMutex);
-
         this->_scene->draw();
-        SDL_Delay(1);
-
         SDL_LockMutex(this->_eventMutex);
-        for (int i = 0; i < inprogres.size(); i++) {
-            if (inprogres[i]->action == 0xCC02) { // if init bgm start look for start loop
-                this->_playLoopWhenReadyBGM(inprogres[i]);
+
+        // end actions
+        for (auto currEvent = inprogres.begin(); currEvent != inprogres.end();) {
+            if (this->_timer->elapsed() >= (*(*currEvent)->end + extraTime)) {
+                this->_findAndHandle(*currEvent, Operation::end);
+
+                currEvent = inprogres.erase(currEvent);
             }
-            if (inprogres[i]->action == 0xCC08) { // if init video start get next frame and show
-                if (_vDecoder->decodeFrame()) {
-                    this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+            else {
+                if ((*currEvent)->action == 0xCC02) { // if init bgm start look for start loop
+                    this->_playLoopWhenReadyBGM(*currEvent);
                 }
-            }
 
-            if (this->_timer->elapsed() >= (*inprogres[i]->end + slackTimeEnd)) {
-                // end action
-                //printf("end action: 0x%X - data: %s\n", inprogres[i]->action, inprogres[i]->data.c_str());
-                this->_findAndHandle(inprogres[i], Operation::end);
-
-                this->_removeFrom(inprogres[i], inprogres);
+                if ((*currEvent)->action == 0xCC08 || (*currEvent)->action == 0xCC0D) { // if init video start or end roll => get next frame and show
+                    if (_vDecoder->decodeFrame()) {
+                        this->_scene->addVideoFrame(this->_vDecoder->getFrame()); // <-  make sure that i dont skip first frame
+                    }
+                }
+                
+                ++currEvent;
             }
         }
+
         SDL_UnlockMutex(this->_eventMutex);
 
         frameEndTime = SDL_GetTicks();
@@ -183,25 +232,65 @@ void Game::play(std::string path)
             SDL_Delay(1000 / TARGET_FPS - frameTime);
         }
 
-        if (todo.empty() && inprogres.empty()) {
-            end = true;
+        if (todo.empty() && ready.empty() && inprogres.empty()) {
+            quit = true;
         }
     }
+
+    this->_scene->clear(-1);
+    this->_scene->clear(-2);
+
+    return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), 0);
 }
 
-SDL_Renderer* Game::getRenderer()
+bool Game::_loadJumps()
 {
-    return this->_renderer;
-}
+    std::fstream file;
+    file.open(this->_init.debugString + this->_init.linkToJump, std::ios::in | std::ios::binary);
 
-SDL_Window* Game::getWindow()
-{
-    return this->_window;
-}
+    if (!file.good()) {
+        printf("ERROR - unable to read jumps\n");
+        return false;
+    }
 
-bool Game::isGameGood()
-{
-    return this->_gameStatus;
+    uint32_t buffNum; char buffC[255];
+
+    // check header
+    this->_wipeCharArr(buffC, 255);
+    file.read(reinterpret_cast<char*>(&buffC), 6);
+
+    if (strncmp(buffC, "BEsrcF", 6) != 0) {
+        printf("ERROR - unable to read jumps | header error\n");
+        file.close();
+        return false;
+    }
+
+    while (!file.eof()) {
+        Jump* jump = new Jump;
+        
+        file.read(reinterpret_cast<char*>(&buffNum), sizeof(buffNum));
+        jump->id = buffNum;
+        
+        file.read(reinterpret_cast<char*>(&buffNum), sizeof(buffNum));
+        jump->routeId = buffNum;
+        
+        file.read(reinterpret_cast<char*>(&buffNum), sizeof(buffNum));
+        this->_wipeCharArr(buffC, 255);
+        file.read(reinterpret_cast<char*>(buffC), buffNum);
+        jump->scriptName = std::string(buffC);
+
+        file.read(reinterpret_cast<char*>(&buffNum), sizeof(buffNum));
+        jump->jumpToId = buffNum;
+
+        this->_jumps.push_back(jump);
+
+        if (file.eof()) {
+            break;
+        }
+    }
+
+    file.close();
+    return true;
 }
 
 bool Game::_loadInit()
@@ -264,6 +353,15 @@ bool Game::_loadInit()
         return false;
     }
 
+    std::getline(initFile, buffs);
+    buffv = this->_split(buffs, '=');
+    if (buffv[0] == "linkToJump") {
+        this->_init.linkToJump = buffv[1];
+    }
+    else {
+        return false;
+    }
+
     initFile.close();
     return true;
 }
@@ -275,6 +373,7 @@ void Game::_setDefaultInit()
     this->_init.startScript = "00\\00-00-A00";
     this->_init.windowWidth = 1280;
     this->_init.windowHeight = 720;
+    this->_init.linkToJump = ".\\data\\boatJumps.rosej";
 }
 
 int Game::_getFirstFreeChannelSoundEffect()
@@ -318,7 +417,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_SkipFRAME_(event);
         }
         else {
-            printf("unknown operation for Skip_FRAME\n");
+            //printf("unknown operation for Skip_FRAME\n");
         }
         break;
 
@@ -360,7 +459,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_PrintText_End(event);
         }
         else {
-            printf("unknown operation for PrintText\n");
+            //printf("unknown operation for PrintText\n");
         }
         break;
 
@@ -399,7 +498,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_Next_(event);
         }
         else {
-            printf("unknown operation for Next\n");
+            //printf("unknown operation for Next\n");
         }
         break;
 
@@ -411,7 +510,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_PlayMovie_End(event);
         }
         else {
-            printf("unknown operation for PlayMovie\n");
+            //printf("unknown operation for PlayMovie\n");
         }
         break;
 
@@ -423,7 +522,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_BlackFade_End(event);
         }
         else {
-            printf("unknown operation for BlackFade\n");
+            //printf("unknown operation for BlackFade\n");
         }
         break;
 
@@ -435,7 +534,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_WhiteFade_End(event);
         }
         else {
-            printf("unknown operation for WhiteFade\n");
+            //printf("unknown operation for WhiteFade\n");
         }
         break;
 
@@ -447,7 +546,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_SetSELECT_End(event);
         }
         else {
-            printf("unknown operation for SetSELECT\n");
+            //printf("unknown operation for SetSELECT\n");
         }
         break;
 
@@ -474,7 +573,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_EndRoll_End(event);
         }
         else {
-            printf("unknown operation for EndRoll\n");
+            //printf("unknown operation for EndRoll\n");
         }
         break;
 
@@ -486,7 +585,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_MoveSom_End(event);
         }
         else {
-            printf("unknown operation for MoveSom\n");
+            //printf("unknown operation for MoveSom\n");
         }
         break;
 
@@ -503,7 +602,10 @@ void Game::_SkipFRAME_(Script::Event* event)
 
 void Game::_PlayBgm_Prepare(Script::Event* event)
 {
-    // todo load bgm
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        backGoundMusic->load();
+    }
 }
 
 void Game::_PlayBgm_Start(Script::Event* event)
@@ -518,7 +620,8 @@ void Game::_PlayBgm_End(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data)->stop();
+        backGoundMusic->stop();
+        backGoundMusic->free();
     }
 }
 
@@ -534,14 +637,16 @@ void Game::_playLoopWhenReadyBGM(Script::Event* event)
 
 void Game::_CreateBG_Prepare(Script::Event* event)
 {
-    // todo load bg
+    BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
+    if (backGround) {
+        backGround->load();
+    }
 }
 
 void Game::_CreateBG_Start(Script::Event* event)
 {
     BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
     if (backGround) {
-        backGround->load();
         this->_scene->addBackGround(backGround, 0);
     }
 }
@@ -551,6 +656,7 @@ void Game::_CreateBG_End(Script::Event* event)
     BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
     if (backGround) {
         this->_scene->removeBackGround(backGround, 0);
+        backGround->free();
     }
 }
 
@@ -566,14 +672,16 @@ void Game::_PrintText_End(Script::Event* event)
 
 void Game::_PlayVoice_Prepare(Script::Event* event)
 {
-    // todo load voice
+    Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
+    if (voice) {
+        voice->load();
+    }
 }
 
 void Game::_PlayVoice_Start(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        voice->load();
         voice->setChannel(this->_getFirstFreeChannelVoice());
         voice->play();
     }
@@ -584,7 +692,7 @@ void Game::_PlayVoice_Start(Script::Event* event)
     else {
         BackGround* backGround = this->_scene->getLastBackGround(0);
         if (backGround) {
-            backGround->tryLoadAnimation(event->shortName);
+            backGround->tryLoadAnimation(event->shortName); // <- move to prepare?
         }
         this->_scene->setAnimationShortName(event->shortName);
     }
@@ -602,14 +710,16 @@ void Game::_PlayVoice_End(Script::Event* event)
 
 void Game::_PlaySe_Prepare(Script::Event* event)
 {
-    // todo load se
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
+    if (soundEffect) {
+        soundEffect->load();
+    }
 }
 
 void Game::_PlaySe_Start(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        soundEffect->load();
         soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
         soundEffect->play();
     }
@@ -679,36 +789,44 @@ void Game::_SetSELECT_End(Script::Event* event)
 
 void Game::_EndBGM_Prepare(Script::Event* event)
 {
-    // todo load endbgm
+    SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
+    if (endBackGroundMusic) {
+        endBackGroundMusic->load();
+    }
 }
 
 void Game::_EndBGM_Start(Script::Event* event)
 {
-    SoundEffect* soundEffectDummy = new SoundEffect(this->_init.debugString + event->data + ".OGG");
-    soundEffectDummy->load();
-    soundEffectDummy->play();
-    // zrób ¿eby to dzia³a³o, okazujê siê ¿e end bgm to muzyka na koniec epizodu i j¹ te¿ trzeba wczytaæ
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
-    if (backGoundMusic) {
-        backGoundMusic->playInt();
+    SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
+    if (endBackGroundMusic) {
+        endBackGroundMusic->play();
     }
 }
 
 void Game::_EndBGM_End(Script::Event* event)
 {
-    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
-    if (backGoundMusic) {
-        this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data)->stop();
+    SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
+    if (endBackGroundMusic) {
+        endBackGroundMusic->stop();
+        endBackGroundMusic->free();
     }
 }
 
 void Game::_EndRoll_Start(Script::Event* event)
 {
+    this->_vDecoder->freeDecoder();
+    this->_vDecoder->setPath(this->_init.debugString + event->data + ".WMV"); // <- tested for mp4 h264 its better | add video_foramt to ini file
+    this->_vDecoder->start();
+    if (this->_vDecoder->decodeFrame()) {
+        this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+    }
     // todo
 }
 
 void Game::_EndRoll_End(Script::Event* event)
 {
+    this->_scene->clear(-3);
+    this->_vDecoder->freeDecoder();
     // todo
 }
 
@@ -738,4 +856,28 @@ std::vector<std::string> Game::_split(std::string text, char separator)
     result.push_back(text.substr(start));
 
     return result;
+}
+
+std::string Game::_findNameOfScriptById(int scriptId)
+{
+    for (int i = 0; i < this->_jumps.size(); i++) {
+        if (this->_jumps[i]->id == scriptId) {
+            return this->_jumps[i]->scriptName;
+        }
+    }
+}
+
+int Game::_findNextScrpitId(std::string currentScriptName, int playerOption)
+{
+    for (int i = 0; i < this->_jumps.size(); i++) {
+        if (this->_jumps[i]->scriptName == currentScriptName) {
+            return this->_jumps[i + playerOption]->jumpToId;
+        }
+    }
+    return 0;
+}
+
+void Game::_wipeCharArr(char* arr, int size)
+{
+    memset(arr, 0x00, size);
 }

@@ -5,7 +5,20 @@ BackGroundMusic::BackGroundMusic(std::string path)
 	this->_path = path;
 	this->_nameInt = this->_endUppercase(path) + "_INT.OGG";
 	this->_nameLoop = this->_endUppercase(path) + "_LOOP.OGG";
-	this->_load();
+}
+
+void BackGroundMusic::load()
+{
+	this->_musicInt = Mix_LoadWAV(this->_nameInt.c_str());
+	if (this->_musicInt == NULL) {
+		printf("unable to load background muisc int: %s\n", this->_nameInt.c_str());
+		printf("its possible that this file just not exists\n");
+	}
+
+	this->_musicLoop = Mix_LoadWAV(this->_nameLoop.c_str());
+	if (this->_musicLoop == NULL) {
+		printf("unable to load background muisc loop: %s\n", this->_nameLoop.c_str());
+	}
 }
 
 void BackGroundMusic::playInt()
@@ -53,26 +66,14 @@ void BackGroundMusic::stop()
 void BackGroundMusic::free()
 {
 	Mix_FreeChunk(this->_musicInt);
+	this->_musicInt = NULL;
 	Mix_FreeChunk(this->_musicLoop);
+	this->_musicLoop = NULL;
 }
 
 std::string BackGroundMusic::getPath()
 {
 	return this->_path;
-}
-
-void BackGroundMusic::_load()
-{
-	this->_musicInt = Mix_LoadWAV(this->_nameInt.c_str());
-	if (this->_musicInt == NULL) {
-		printf("unable to load background muisc int: %s\n", this->_nameInt.c_str());
-		printf("its possible that this file just not exists\n");
-	}
-
-	this->_musicLoop = Mix_LoadWAV(this->_nameLoop.c_str());
-	if (this->_musicLoop == NULL) {
-		printf("unable to load background muisc loop: %s\n", this->_nameLoop.c_str());
-	}
 }
 
 std::string BackGroundMusic::_endUppercase(std::string text)

@@ -336,6 +336,5 @@ void Scene::_tryRemoveBg(BackGround* bg, std::vector<BackGround*>& list)
 	auto it = std::find(list.begin(), list.end(), bg);
 	if (it != list.end()) {
 		list.erase(it);
-		bg->free();
 	}
 }

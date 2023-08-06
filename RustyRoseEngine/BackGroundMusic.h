@@ -7,6 +7,7 @@ class BackGroundMusic
 public:
 	BackGroundMusic(std::string path); // <- path without _xxx/x_.ogg
 
+	void load();
 	void playInt();
 	void playLoop();
 	bool isReadyForLoop();
@@ -23,7 +24,7 @@ private:
 	bool _int;
 	Mix_Chunk* _musicInt;
 	Mix_Chunk* _musicLoop;
-	void _load();
+
 	std::string _endUppercase(std::string text);
 };
 
