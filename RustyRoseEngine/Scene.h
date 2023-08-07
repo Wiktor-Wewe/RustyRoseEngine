@@ -25,6 +25,7 @@ public:
 	void addVideoFrame(SDL_Texture* frame);
 	void addText(std::string text);
 	
+	
 	void removeText(std::string text);
 	void removeBackGround(BackGround* backGround, int layer); // -1 all
 

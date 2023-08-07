@@ -1,17 +1,9 @@
-it may be usefull:
+w momencie kiedy wykonujesz akcję NEXT ustaw warunek czy w events nie pojawia się
+setSELECT. Jeśli się powjawia to zatrzymaj anuluj text i wczytaj no ostaniej 5 sekund
+tak aby gracz mógł wybrać opcję
 
-Ini:
--ENDLIST.INI - list of background in menu after endings
--FEELINGSCRIPT.INI - all of feeling scripts staff - i dont need that but it may be usefull if i want to add
--STANDERDSCRIPT.INI - -||- ???
--STARTSCRIPT.INI - some may be usefull for menu
+dodaj do sceny możliwiść dodania tych opcji. Opcje z tego co wiem to albo 2 albo 1 
+(łącznie 3 z brakiem wybrania opcji). Scena na określony czas wyświelta je z czerwonym
+obramowaniem albo coś takiego
 
-SysSe:
-all - it's just sound effects files - for system and etc
-
-System:
-- load all png's 
-- make simple converter for CMAP (reducing size)
-- !!! there is also WMV (video) file for MENU
-- load openigs - WMV files
-- get new font or try to understand font from game and extract
+do game dodaj efekty dźwiękowe do tego
