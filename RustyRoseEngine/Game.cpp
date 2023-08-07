@@ -71,6 +71,7 @@ Game::Game()
     this->_scene = new Scene(this->_renderer);
     this->_vDecoder = new VDecoder(this->_renderer);
     this->_timer = new Timer();
+    this->_control = Control();
 
     this->_gameContext->getSystem()->setSystem(this->_init.debugString + this->_init.linkToSys);
     this->_gameContext->getSystem()->loadSystem();
@@ -82,8 +83,9 @@ Game::Game()
 void Game::play()
 {
     this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
+    bool play = true;
 
-    while (1) {
+    while (play) {
 
         // if scripts is not empty, make load content for play
         if (!this->_gameContext->loadContentFromScripts()) {
@@ -92,12 +94,18 @@ void Game::play()
         }
 
         int nextScriptId = this->_playScripts();
+        if (nextScriptId == -1) {
+            play = false;
+        }
+
         this->_gameContext->clear();
 
         this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
         this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
 
-        this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose");
+        if (nextScriptId >= 0) {
+            this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose");
+        }
     }
 }
 
@@ -137,8 +145,11 @@ int Game::_playScripts()
         }
     }
 
+    int playerOption = 0;
+    bool playerOptionIsSet = false;
 
     this->_timer->reset();
+    this->_control.clear();
 
     Script::Time timeForPrepare;
     timeForPrepare.second = 2; // <- add to init file?
@@ -157,11 +168,49 @@ int Game::_playScripts()
     while (!quit)
     {
         frameStartTime = SDL_GetTicks();
-        while (SDL_PollEvent(&sdl_event))
-        {
-            if (sdl_event.type == SDL_QUIT)
-            {
-                quit = true;
+        while (SDL_PollEvent(&sdl_event)){
+            if (sdl_event.type == SDL_QUIT){
+                return -1;
+            }
+            else if (sdl_event.type == SDL_KEYDOWN) {
+                switch (sdl_event.key.keysym.sym)
+                {
+                case SDLK_q:
+                    this->_control.add(Control::quit);
+                    break;
+
+                case SDLK_n:
+                    this->_control.add(Control::next);
+                    break;
+
+                case SDLK_SPACE:
+                    this->_control.add(Control::pause);
+                    break;
+
+                case SDLK_LEFT:
+                    this->_control.add(Control::left);
+                    break;
+
+                case SDLK_RIGHT:
+                    this->_control.add(Control::right);
+                    break;
+
+                case SDLK_UP:
+                    this->_control.add(Control::up);
+                    break;
+
+                case SDLK_DOWN:
+                    this->_control.add(Control::down);
+                    break;
+
+                case SDLK_KP_ENTER:
+                    this->_control.add(Control::enter);
+                    break;
+
+                case SDLK_BACKSPACE:
+                    this->_control.add(Control::back);
+                    break;
+                }
             }
         }
 
@@ -203,8 +252,24 @@ int Game::_playScripts()
 
         // end actions
         for (auto currEvent = inprogres.begin(); currEvent != inprogres.end();) {
+
+            if (this->_control.isAction()) {
+                if (this->_control.check(Control::next)) {
+                    quit = true;
+                }
+                if (this->_control.check(Control::quit)) {
+                    return -1;
+                }
+            }
+
             if (this->_timer->elapsed() >= (*(*currEvent)->end + extraTime)) {
                 this->_findAndHandle(*currEvent, Operation::end);
+                
+                if ((*currEvent)->action == 0xCC0B) {
+                    if (!playerOptionIsSet) {
+                        playerOption = 2;
+                    }
+                }
 
                 currEvent = inprogres.erase(currEvent);
             }
@@ -216,6 +281,21 @@ int Game::_playScripts()
                 if ((*currEvent)->action == 0xCC08 || (*currEvent)->action == 0xCC0D) { // if init video start or end roll => get next frame and show
                     if (_vDecoder->decodeFrame()) {
                         this->_scene->addVideoFrame(this->_vDecoder->getFrame()); // <-  make sure that i dont skip first frame
+                    }
+                }
+
+                if ((*currEvent)->action == 0xCC0B) { // if its setSELECT right now
+                    if (this->_control.isAction()) {
+                        if (this->_control.check(Control::left)) {
+                            quit = true;
+                            playerOption = 0;
+                            playerOptionIsSet = true;
+                        }
+                        else if (this->_control.check(Control::right)) {
+                            quit = true;
+                            playerOption = 1;
+                            playerOptionIsSet = true;
+                        }
                     }
                 }
                 
@@ -232,6 +312,8 @@ int Game::_playScripts()
             SDL_Delay(1000 / TARGET_FPS - frameTime);
         }
 
+        this->_control.clear();
+
         if (todo.empty() && ready.empty() && inprogres.empty()) {
             quit = true;
         }
@@ -240,7 +322,7 @@ int Game::_playScripts()
     this->_scene->clear(-1);
     this->_scene->clear(-2);
 
-    return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), 0);
+    return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), playerOption);
 }
 
 bool Game::_loadJumps()

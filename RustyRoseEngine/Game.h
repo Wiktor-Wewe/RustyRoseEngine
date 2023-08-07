@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "VDecoder.h"
 #include "Timer.h"
+#include "Control.h"
 
 class Game
 {
@@ -53,6 +54,7 @@ private:
 	Scene* _scene;
 	VDecoder* _vDecoder;
 	Timer* _timer;
+	Control _control;
 
 	std::vector<Jump*> _jumps;
 
