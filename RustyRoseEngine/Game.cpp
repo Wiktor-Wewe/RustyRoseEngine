@@ -98,7 +98,9 @@ void Game::play()
             play = false;
         }
 
+
         this->_gameContext->clear();
+        this->_gameContext->getSystem()->freeSystem();
 
         this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
         this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
@@ -126,6 +128,9 @@ bool Game::isGameGood()
 
 int Game::_playScripts()
 {
+    bool isOkayToSkip = true;
+    Script::Event* setSELECT = nullptr;
+
     // load all events from scripts | but probably its only one in vector
     std::vector<Script::Event*> todo;
     std::vector<Script::Event*> ready;
@@ -140,6 +145,10 @@ int Game::_playScripts()
             auto _event = _script->getEvents()[j];
             if (_event->action == 0xCC05) {
                 *_event->end = *_event->end + extraTimeToEndVoice;
+            }
+            if (_event->action == 0xCC0B) {
+                isOkayToSkip = false;
+                setSELECT = _event;
             }
             todo.push_back(_event);
         }
@@ -255,7 +264,17 @@ int Game::_playScripts()
 
             if (this->_control.isAction()) {
                 if (this->_control.check(Control::next)) {
-                    quit = true;
+                    if (isOkayToSkip) {
+                        quit = true;
+                    }
+                    else {
+                        Script::Time timeToLoad;
+                        timeToLoad.second = 5;
+
+                        this->_scene->clear(-1);
+                        this->_scene->clear(-2);
+                        this->_timer->setTimerToTime(*(setSELECT)->start - timeToLoad);
+                    }
                 }
                 if (this->_control.check(Control::quit)) {
                     return -1;
@@ -290,11 +309,35 @@ int Game::_playScripts()
                             quit = true;
                             playerOption = 0;
                             playerOptionIsSet = true;
+
+                            SoundEffect* soundEffect2 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
+                            if (soundEffect2) {
+                                soundEffect2->play();
+                            }
+                            SDL_Delay(5);
+                            SoundEffect* soundEffect1 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
+                            if (soundEffect1) {
+                                soundEffect1->play();
+                            }
+                            
+                            SDL_Delay(5000);
                         }
                         else if (this->_control.check(Control::right)) {
                             quit = true;
                             playerOption = 1;
                             playerOptionIsSet = true;
+
+                            SoundEffect* soundEffect2 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
+                            if (soundEffect2) {
+                                soundEffect2->play();
+                            }
+                            SDL_Delay(5);
+                            SoundEffect* soundEffect1 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
+                            if (soundEffect1) {
+                                soundEffect1->play();
+                            }
+                            
+                            SDL_Delay(5000);
                         }
                     }
                 }
@@ -621,7 +664,10 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         break;
 
     case 0xCC0B:
-        if (operation == Operation::start) {
+        if (operation == Operation::prepare) {
+            this->_SetSELECT_Prepare(event);
+        }
+        else if (operation == Operation::start) {
             this->_SetSELECT_Start(event);
         }
         else if (operation == Operation::end) {
@@ -857,16 +903,47 @@ void Game::_WhiteFade_End(Script::Event* event)
     // todo
 }
 
+void Game::_SetSELECT_Prepare(Script::Event* event)
+{
+    // test again - some of sound effect cant play at all :c
+    SoundEffect* soundEffect1 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
+    if (soundEffect1) {
+        soundEffect1->load();
+    }
+
+    SoundEffect* soundEffect2 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEVIEW.OGG");
+    if (soundEffect2) {
+        soundEffect2->load();
+    }
+
+    SoundEffect* soundEffect3 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
+    if (soundEffect3) {
+        soundEffect3->load();
+    }
+}
+
 void Game::_SetSELECT_Start(Script::Event* event)
 {
-    // todo
-    this->_scene->addText(event->data);
+    auto options = this->_split(event->data, '\t');
+    for (int i = 0; i < options.size(); i++) {
+        this->_scene->addPathOption(options[i]);
+    }
+
+    SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEVIEW.OGG");
+    if (soundEffect) {
+        soundEffect->play();
+    }
 }
 
 void Game::_SetSELECT_End(Script::Event* event)
 {
-    // todo
-    this->_scene->removeText(event->data);
+    this->_scene->clearPathOption();
+    
+    SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SECANCEL_01.OGG");
+    if (soundEffect) {
+        soundEffect->load();
+        soundEffect->play();
+    }
 }
 
 void Game::_EndBGM_Prepare(Script::Event* event)

@@ -332,7 +332,7 @@ bool Script::_loadSetSELECT(std::fstream* file)
 	if (buff16 != 0x0000) {
 		this->_wipeCharArr(buffS, 255);
 		file->read(&buffS[0], buff16);
-		event->data = event->data + std::string(buffS);
+		event->data = event->data + "\t" + std::string(buffS);
 	}
 	file->read(reinterpret_cast<char*>(&buff32), sizeof(buff32));
 	event->end = this->_miliSecToTime(buff32);

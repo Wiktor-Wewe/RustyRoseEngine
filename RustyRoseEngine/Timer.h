@@ -9,6 +9,7 @@ public:
 
 	void reset();
 	Script::Time elapsed();
+	void setTimerToTime(Script::Time time);
 
 private:
 	clock_t start_time;

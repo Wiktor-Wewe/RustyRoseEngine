@@ -5,6 +5,7 @@ Scene::Scene(SDL_Renderer* renderer)
 	this->_renderer = renderer;
 	this->_shortName = std::string();
 	this->_textMutex = SDL_CreateMutex();
+	this->_selectedOptionIndex = -1;
 }
 
 void Scene::setFont(TTF_Font* font)
@@ -62,6 +63,11 @@ void Scene::draw()
 		SDL_RenderCopy(this->_renderer, this->_textTexture[i], NULL, this->_textRect[i]);
 	}
 	SDL_UnlockMutex(this->_textMutex);
+
+	// select option
+	for (int i = 0; i < this->_pathOptions.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_pathOptionsTexture[i], NULL, this->_pathOptionsRect[i]);
+	}
 
 	for (int i = 0; i < this->_sysImg2.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, NULL);
@@ -130,6 +136,10 @@ void Scene::clear(int layer)
 		this->_sysImg0.clear();
 		this->_sysImg1.clear();
 		this->_sysImg2.clear();
+
+		this->_pathOptions.clear();
+		this->_pathOptionsTexture.clear();
+		this->_pathOptionsRect.clear();
 
 		this->_videoFrame = NULL;
 	}
@@ -209,6 +219,57 @@ void Scene::addText(std::string text)
 	SDL_UnlockMutex(this->_textMutex);
 }
 
+void Scene::addPathOption(std::string option)
+{
+	this->_pathOptions.push_back(option);
+
+	int w = 0, h = 0;
+	SDL_Texture* texture = this->_makeText(option, w, h, { 255, 0, 0, 255 });
+	this->_pathOptionsTexture.push_back(texture);
+
+	SDL_Rect* rect = new SDL_Rect;
+	rect->w = w;
+	rect->h = h;
+	rect->x = (1280 / 2) - (w / 2);
+	this->_pathOptionsRect.push_back(rect);
+
+	// update positions
+	int segment = 720 / (this->_pathOptions.size() + 1);
+	for (int i = 0; i < this->_pathOptions.size(); i++) {
+		this->_pathOptionsRect[i]->y = (segment + (segment * i)) - (h / 2);
+	}
+}
+
+void Scene::setPathOptionByDirection(int dy)
+{
+	int min = 0;
+	int max = this->_pathOptions.size() - 1;
+
+	int newIndex = this->_selectedOptionIndex + dy;
+
+	if (newIndex >= min && newIndex <= max) {
+		this->_selectedOptionIndex += dy;
+	}
+}
+
+void Scene::setPathOptionByIndex(int index)
+{
+	int min = 0;
+	int max = this->_pathOptions.size() - 1;
+
+	if (index >= min && index >= max) {
+		this->_selectedOptionIndex = index;
+	}
+}
+
+void Scene::clearPathOption()
+{
+	this->_selectedOptionIndex = -1;
+	this->_pathOptions.clear();
+	this->_pathOptionsTexture.clear();
+	this->_pathOptionsRect.clear();
+}
+
 void Scene::removeText(std::string text)
 {
 	SDL_LockMutex(this->_textMutex);
@@ -259,9 +320,8 @@ void Scene::removeBackGround(BackGround* backGround, int layer)
 	}
 }
 
-SDL_Texture* Scene::_makeText(std::string text, int& w, int& h)
+SDL_Texture* Scene::_makeText(std::string text, int& w, int& h, SDL_Color textColor)
 {
-	SDL_Color textColor = { 255, 255, 255, 255 };
 	SDL_Color outlineColor = { 0, 0, 0, 255 };
 
 	SDL_Surface* outlineSurface = TTF_RenderText_Blended_Wrapped(this->_font, text.c_str(), outlineColor, 1100);

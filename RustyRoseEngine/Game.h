@@ -105,6 +105,7 @@ private:
 	void _WhiteFade_Start(Script::Event* event);
 	void _WhiteFade_End(Script::Event* event);
 
+	void _SetSELECT_Prepare(Script::Event* event);
 	void _SetSELECT_Start(Script::Event* event);
 	void _SetSELECT_End(Script::Event* event);
 
@@ -126,4 +127,3 @@ private:
 	int _findNextScrpitId(std::string currentScriptName, int playerOption);
 	void _wipeCharArr(char* arr, int size);
 };
-
