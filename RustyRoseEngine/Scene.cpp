@@ -64,6 +64,9 @@ void Scene::draw()
 	}
 	SDL_UnlockMutex(this->_textMutex);
 
+	SDL_Rect time = { 0, 0, this->w, this->h };
+	SDL_RenderCopy(this->_renderer, this->_time, NULL, &time);
+
 	// select option
 	for (int i = 0; i < this->_pathOptions.size(); i++) {
 		SDL_RenderCopy(this->_renderer, this->_pathOptionsTexture[i], NULL, this->_pathOptionsRect[i]);
@@ -74,6 +77,15 @@ void Scene::draw()
 	}
 
 	SDL_RenderPresent(this->_renderer);
+}
+
+void Scene::addTime(std::string time)
+{
+	if(this->_time != NULL){
+		SDL_DestroyTexture(this->_time);
+		this->_time = NULL;
+	}
+	this->_time = this->_makeText(time, this->w, this->h);
 }
 
 void Scene::setAnimationShortName(std::string shortName)
@@ -119,20 +131,21 @@ BackGround* Scene::getLastBackGround(int layer)
 	return nullptr;
 }
 
-void Scene::clear(int layer)
+void Scene::clear(Clear option)
 {
-	if (layer == -3) {
+	if (option == Clear::videoFrame) {
 		this->_videoFrame = NULL;
 	}
-	else if (layer == -2) {
+	else if (option == Clear::text) {
 		for (int i = 0; i < this->_text.size(); i++) {
 			this->removeText(this->_text[i]);
 		}
 	}
-	else if (layer == -1) {
+	else if (option == Clear::allExceptTextAndIndex) {
 		this->_backGround0.clear();
 		this->_backGround1.clear();
 		this->_backGround2.clear();
+
 		this->_sysImg0.clear();
 		this->_sysImg1.clear();
 		this->_sysImg2.clear();
@@ -140,23 +153,30 @@ void Scene::clear(int layer)
 		this->_pathOptions.clear();
 		this->_pathOptionsTexture.clear();
 		this->_pathOptionsRect.clear();
+		//this->_selectedOptionIndex = -1;
 
 		this->_videoFrame = NULL;
 	}
-	else if (layer == 0) {
+	else if (option == Clear::layer0) {
 		this->_backGround0.clear();
 		this->_sysImg0.clear();
 	}
-	else if (layer == 1) {
+	else if (option == Clear::layer1) {
 		this->_backGround1.clear();
 		this->_sysImg1.clear();
 	}
-	else if (layer == 2) {
+	else if (option == Clear::layer2) {
 		this->_backGround2.clear();
 		this->_sysImg2.clear();
 	}
+	else if (option == Clear::pathOptions) {
+		this->_selectedOptionIndex = -1;
+		this->_pathOptions.clear();
+		this->_pathOptionsTexture.clear();
+		this->_pathOptionsRect.clear();
+	}
 	else {
-		printf("Cant clear layer with number: %i\n", layer);
+		printf("There is no option to clear: %i in scene\n", option);
 		return;
 	}
 }
@@ -274,14 +294,6 @@ int Scene::getPathOption()
 {
 	int response = this->_selectedOptionIndex;
 	return response == -1 ? 0 : response;
-}
-
-void Scene::clearPathOption()
-{
-	this->_selectedOptionIndex = -1;
-	this->_pathOptions.clear();
-	this->_pathOptionsTexture.clear();
-	this->_pathOptionsRect.clear();
 }
 
 void Scene::removeText(std::string text)

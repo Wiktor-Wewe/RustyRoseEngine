@@ -122,8 +122,9 @@ void Game::play() // <- main play, automatic playing scripts
         }
         
         // clear scene
-        this->_scene->clearPathOption();
-        this->_scene->clear();
+        this->_scene->clear(Scene::Clear::allExceptTextAndIndex);
+        this->_scene->clear(Scene::Clear::text);
+        this->_scene->clear(Scene::Clear::pathOptions);
     }
 }
 
@@ -152,7 +153,7 @@ int Game::_playScripts()
     std::vector<Script::Event*> ready;
     std::vector<Script::Event*> inprogres;
 
-    Script::Time extraTimeToEndVoice;
+    Script::Time extraTimeToEndVoice; // <- extra time to make sure that all voice ends play
     extraTimeToEndVoice.millisecond = 500;
 
     for (int i = 0; i < this->_gameContext->getScripts().size(); i++) {
@@ -170,19 +171,24 @@ int Game::_playScripts()
         }
     }
 
+    // reset timer and control
     this->_timer->reset();
     this->_control.clear();
 
+    // make time to be sure that all current events ends load before use
     Script::Time timeForPrepare;
     timeForPrepare.second = 2; // <- add to init file?
 
+    // make time to be sure that all event was free alter end | eg. not free voice that is currently playing
     Script::Time extraTime;
     extraTime.millisecond = 20;
 
     bool quit = false;
+    bool firstPrepare = true;
     SDL_Event sdl_event;
 
-    const int TARGET_FPS = 24;
+    // fps
+    const int TARGET_FPS = 24; // <- no need more | video are in 24 fps
     Uint32 frameStartTime;
     Uint32 frameEndTime;
     Uint32 frameTime;
@@ -191,9 +197,10 @@ int Game::_playScripts()
     {
         frameStartTime = SDL_GetTicks();
         while (SDL_PollEvent(&sdl_event)){
-            if (sdl_event.type == SDL_QUIT){
+            if (sdl_event.type == SDL_QUIT){ // <- close all app
                 return -1;
             }
+            // look for type sdl events and add this to this->control 
             else if (sdl_event.type == SDL_KEYDOWN) {
                 switch (sdl_event.key.keysym.sym)
                 {
@@ -237,6 +244,13 @@ int Game::_playScripts()
         }
 
         SDL_LockMutex(this->_eventMutex);
+        std::string time;
+        time += std::to_string(this->_timer->elapsed().minute);
+        time += ":";
+        time += std::to_string(this->_timer->elapsed().second);
+        time += ":";
+        time += std::to_string(this->_timer->elapsed().millisecond);
+        this->_scene->addTime(time);
 
         // prepare actions 
         for (auto currEvent = todo.begin(); currEvent != todo.end();) {
@@ -249,6 +263,11 @@ int Game::_playScripts()
             else {
                 ++currEvent;
             }
+        }
+
+        if (firstPrepare) {
+            this->_timer->reset();
+            firstPrepare = false;
         }
 
         // start actions
@@ -270,7 +289,7 @@ int Game::_playScripts()
         this->_scene->draw();
         SDL_LockMutex(this->_eventMutex);
 
-        // end actions
+        // loop and end actions
         for (auto currEvent = inprogres.begin(); currEvent != inprogres.end();) {
 
             if (this->_timer->elapsed() >= (*(*currEvent)->end + extraTime)) {
@@ -288,6 +307,7 @@ int Game::_playScripts()
 
         SDL_UnlockMutex(this->_eventMutex);
 
+        // fps stuff
         frameEndTime = SDL_GetTicks();
         frameTime = frameEndTime - frameStartTime;
 
@@ -295,15 +315,14 @@ int Game::_playScripts()
             SDL_Delay(1000 / TARGET_FPS - frameTime);
         }
 
-        this->_control.clear();
-
+        // if all vector with events are empty, end playing script
         if (todo.empty() && ready.empty() && inprogres.empty()) {
             quit = true;
         }
     }
 
-    this->_scene->clear(-1);
-    this->_scene->clear(-2);
+    this->_scene->clear(Scene::Clear::allExceptTextAndIndex);
+    this->_scene->clear(Scene::Clear::text);
 
     return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), this->_scene->getPathOption());
 }
@@ -692,6 +711,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
 
                 SDL_Delay(3000);
                 quit = true;
+                this->_control.clear();
             }
 
             if (this->_control.check(Control::right)) {
@@ -709,6 +729,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
                 }
                 SDL_Delay(3000);
                 quit = true;
+                this->_control.clear();
             }
         }
         
@@ -720,10 +741,11 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
                 Script::Time timeToLoad;
                 timeToLoad.second = 5;
 
-                this->_scene->clear(-1);
-                this->_scene->clear(-2);
+                this->_scene->clear(Scene::Clear::allExceptTextAndIndex);
+                this->_scene->clear(Scene::Clear::text);
                 this->_timer->setTimerToTime(*(setSELECT)->start - timeToLoad);
             }
+            this->_control.clear();
         }
     }
 }
@@ -885,7 +907,7 @@ void Game::_PlayMovie_Start(Script::Event* event)
 
 void Game::_PlayMovie_End(Script::Event* event)
 {
-    this->_scene->clear(-3);
+    this->_scene->clear(Scene::Clear::videoFrame);
 }
 
 void Game::_PlayMovie_Loop(Script::Event* event)
@@ -998,7 +1020,7 @@ void Game::_EndRoll_Start(Script::Event* event)
 
 void Game::_EndRoll_End(Script::Event* event)
 {
-    this->_scene->clear(-3);
+    this->_scene->clear(Scene::Clear::videoFrame);
     this->_vDecoder->freeDecoder();
     // todo
 }

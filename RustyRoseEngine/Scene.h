@@ -7,10 +7,22 @@
 class Scene
 {
 public:
+	enum Clear {
+		videoFrame,
+		text,
+		allExceptTextAndIndex,
+		layer0,
+		layer1,
+		layer2,
+		pathOptions,
+	};
+
 	Scene(SDL_Renderer* renderer);
 	
 	void setFont(TTF_Font* font);
 	void draw();
+
+	void addTime(std::string time);
 
 	void setAnimationShortName(std::string shortName);
 	void setAnimationShortNameToDefalut();
@@ -18,18 +30,18 @@ public:
 
 	BackGround* getLastBackGround(int layer);
 	
-	void clear(int layer); //-1 = all // -2 = text // -3 = video frame but only pointer
+	void clear(Clear option);
 	
 	void addBackGround(BackGround* bg, int layer);
 	void addSysImg(SysImg* sysimg, int layer);
 	void addVideoFrame(SDL_Texture* frame);
 	void addText(std::string text);
 	void addPathOption(std::string option);
+
 	void setPathOptionByDirection(int dy);
 	void setPathOptionByIndex(int index);
 	bool isPathOptionSet();
 	int getPathOption();
-	void clearPathOption();
 	
 	void removeText(std::string text);
 	void removeBackGround(BackGround* backGround, int layer); // -1 all
@@ -37,6 +49,9 @@ public:
 private:
 	SDL_Renderer* _renderer;
 	TTF_Font* _font;
+
+	SDL_Texture* _time;
+	int w, h;
 
 	SDL_mutex* _textMutex;
 
