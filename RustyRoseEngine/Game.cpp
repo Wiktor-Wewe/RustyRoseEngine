@@ -4,10 +4,12 @@ Game::Game()
 {
     this->_gameStatus = false; 
 
+    // load init
     if (!this->_loadInit()) {
         this->_setDefaultInit();
     }
 
+    // load jumps
     if (!this->_loadJumps()) {
         return;
     }
@@ -49,14 +51,17 @@ Game::Game()
     // set number of channels
     Mix_AllocateChannels(11); // <- 5 - Voice, 5 - SoundEffect, 1 - bgm
 
+
     this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
     this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
-
+    
+    // make window
     this->_window = SDL_CreateWindow("School Days: Rusty Rose Edition",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         1280, 720, 0);
 
+    // make renderer
     this->_renderer = SDL_CreateRenderer(this->_window, -1, 0);
     if (this->_renderer == NULL) {
         printf("Error: cant create renderer: %s\n", SDL_GetError());
@@ -65,14 +70,17 @@ Game::Game()
         return;
     }
 
+    // create mutex
     this->_eventMutex = SDL_CreateMutex();
 
+    // make new content, scene, video decoder, timer and control
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
     this->_vDecoder = new VDecoder(this->_renderer);
     this->_timer = new Timer();
     this->_control = Control();
 
+    // set and load basic of system | set font from system files
     this->_gameContext->getSystem()->setSystem(this->_init.debugString + this->_init.linkToSys);
     this->_gameContext->getSystem()->loadSystem();
     this->_scene->setFont(this->_gameContext->getSystem()->getFont());
@@ -80,8 +88,9 @@ Game::Game()
     this->_gameStatus = true;
 }
 
-void Game::play()
+void Game::play() // <- main play, automatic playing scripts
 {
+    // add starting script to context
     this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
     bool play = true;
 
@@ -93,21 +102,28 @@ void Game::play()
             return;
         }
 
+        // get index of next script or end loop
         int nextScriptId = this->_playScripts();
         if (nextScriptId == -1) {
             play = false;
         }
 
-
+        // clear context to old script and free system images and sounds
         this->_gameContext->clear();
         this->_gameContext->getSystem()->freeSystem();
 
+        // set channels to default
         this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
         this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
 
+        // add next script
         if (nextScriptId >= 0) {
             this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose");
         }
+        
+        // clear scene
+        this->_scene->clearPathOption();
+        this->_scene->clear();
     }
 }
 
@@ -153,9 +169,6 @@ int Game::_playScripts()
             todo.push_back(_event);
         }
     }
-
-    int playerOption = 0;
-    bool playerOptionIsSet = false;
 
     this->_timer->reset();
     this->_control.clear();
@@ -228,8 +241,7 @@ int Game::_playScripts()
         // prepare actions 
         for (auto currEvent = todo.begin(); currEvent != todo.end();) {
             if (this->_timer->elapsed() >= (*(*currEvent)->start - timeForPrepare)) {
-                this->_findAndHandle(*currEvent, Operation::prepare); // if its posible
-                //printf("prepering: %s\n", todo[i]->data.c_str());
+                this->_findAndHandle(*currEvent, Operation::prepare);
 
                 ready.push_back(*currEvent);
                 currEvent = todo.erase(currEvent);
@@ -243,7 +255,6 @@ int Game::_playScripts()
         for (auto currEvent = ready.begin(); currEvent != ready.end();) {
             if (this->_timer->elapsed() >= *(*currEvent)->start) {
                 this->_findAndHandle(*currEvent, Operation::start);
-                //printf("handle start: %s\n", ready[i]->data.c_str());
 
                 if ((*currEvent)->end != nullptr) {
                     inprogres.push_back(*currEvent);
@@ -262,85 +273,14 @@ int Game::_playScripts()
         // end actions
         for (auto currEvent = inprogres.begin(); currEvent != inprogres.end();) {
 
-            if (this->_control.isAction()) {
-                if (this->_control.check(Control::next)) {
-                    if (isOkayToSkip) {
-                        quit = true;
-                    }
-                    else {
-                        Script::Time timeToLoad;
-                        timeToLoad.second = 5;
-
-                        this->_scene->clear(-1);
-                        this->_scene->clear(-2);
-                        this->_timer->setTimerToTime(*(setSELECT)->start - timeToLoad);
-                    }
-                }
-                if (this->_control.check(Control::quit)) {
-                    return -1;
-                }
-            }
-
             if (this->_timer->elapsed() >= (*(*currEvent)->end + extraTime)) {
                 this->_findAndHandle(*currEvent, Operation::end);
-                
-                if ((*currEvent)->action == 0xCC0B) {
-                    if (!playerOptionIsSet) {
-                        playerOption = 2;
-                    }
-                }
 
                 currEvent = inprogres.erase(currEvent);
             }
             else {
-                if ((*currEvent)->action == 0xCC02) { // if init bgm start look for start loop
-                    this->_playLoopWhenReadyBGM(*currEvent);
-                }
-
-                if ((*currEvent)->action == 0xCC08 || (*currEvent)->action == 0xCC0D) { // if init video start or end roll => get next frame and show
-                    if (_vDecoder->decodeFrame()) {
-                        this->_scene->addVideoFrame(this->_vDecoder->getFrame()); // <-  make sure that i dont skip first frame
-                    }
-                }
-
-                if ((*currEvent)->action == 0xCC0B) { // if its setSELECT right now
-                    if (this->_control.isAction()) {
-                        if (this->_control.check(Control::left)) {
-                            quit = true;
-                            playerOption = 0;
-                            playerOptionIsSet = true;
-
-                            SoundEffect* soundEffect2 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
-                            if (soundEffect2) {
-                                soundEffect2->play();
-                            }
-                            SDL_Delay(5);
-                            SoundEffect* soundEffect1 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
-                            if (soundEffect1) {
-                                soundEffect1->play();
-                            }
-                            
-                            SDL_Delay(5000);
-                        }
-                        else if (this->_control.check(Control::right)) {
-                            quit = true;
-                            playerOption = 1;
-                            playerOptionIsSet = true;
-
-                            SoundEffect* soundEffect2 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
-                            if (soundEffect2) {
-                                soundEffect2->play();
-                            }
-                            SDL_Delay(5);
-                            SoundEffect* soundEffect1 = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
-                            if (soundEffect1) {
-                                soundEffect1->play();
-                            }
-                            
-                            SDL_Delay(5000);
-                        }
-                    }
-                }
+                this->_findAndHandle(*currEvent, Operation::loop);
+                this->_handleControl(quit, isOkayToSkip, setSELECT, *currEvent);
                 
                 ++currEvent;
             }
@@ -365,7 +305,7 @@ int Game::_playScripts()
     this->_scene->clear(-1);
     this->_scene->clear(-2);
 
-    return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), playerOption);
+    return this->_findNextScrpitId(this->_gameContext->getLastScriptName(), this->_scene->getPathOption());
 }
 
 bool Game::_loadJumps()
@@ -556,8 +496,11 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         else if (operation == Operation::end) {
             this->_PlayBgm_End(event);
         }
+        else if (operation == Operation::loop) {
+            this->_PlayBgm_Loop(event);
+        }
         else {
-            printf("unknown operation for PlayBgm\n");
+            //printf("unknown operation for PlayBgm\n");
         }
         break;
 
@@ -572,7 +515,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_CreateBG_End(event);
         }
         else {
-            printf("unknown operation for CreateBG\n");
+            //printf("unknown operation for CreateBG\n");
         }
         break;
 
@@ -599,7 +542,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_PlayVoice_End(event);
         }
         else {
-            printf("unknown operation for PlayVoice\n");
+            //printf("unknown operation for PlayVoice\n");
         }
         break;
 
@@ -614,7 +557,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_PlaySe_End(event);
         }
         else {
-            printf("unknown operation for PlaySe\n");
+            //printf("unknown operation for PlaySe\n");
         }
         break;
 
@@ -633,6 +576,9 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         }
         else if (operation == Operation::end) {
             this->_PlayMovie_End(event);
+        }
+        else if (operation == Operation::loop) {
+            this->_PlayMovie_Loop(event);
         }
         else {
             //printf("unknown operation for PlayMovie\n");
@@ -686,10 +632,10 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_EndBGM_Start(event);
         }
         else if (operation == Operation::end) {
-            this->_PlayBgm_End(event);
+            this->_EndBGM_End(event);
         }
         else {
-            printf("unknown operation for PlayBgm\n");
+            //printf("unknown operation for PlayBgm\n");
         }
         break;
 
@@ -699,6 +645,9 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         }
         else if (operation == Operation::end) {
             this->_EndRoll_End(event);
+        }
+        else if (operation == Operation::loop) {
+            this->_EndRoll_Loop(event);
         }
         else {
             //printf("unknown operation for EndRoll\n");
@@ -720,6 +669,62 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
     default:
         printf("uanble to handle action: 0x%X\n", event->action);
         break;
+    }
+}
+
+void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent)
+{
+    if (this->_control.isAction()) {
+        if (currEvent->action == 0xCC0B) {
+            if (this->_control.check(Control::left)) {
+                this->_scene->setPathOptionByIndex(0);
+
+                SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
+                if (soundEffect) {
+                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play();
+                }
+                soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
+                if (soundEffect) {
+                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play();
+                }
+
+                SDL_Delay(3000);
+                quit = true;
+            }
+
+            if (this->_control.check(Control::right)) {
+                this->_scene->setPathOptionByIndex(1);
+
+                SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
+                if (soundEffect) {
+                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play();
+                }
+                soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
+                if (soundEffect) {
+                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play();
+                }
+                SDL_Delay(3000);
+                quit = true;
+            }
+        }
+        
+        if (this->_control.check(Control::next)) {
+            if (isOkayToSkip) {
+                quit = true;
+            }
+            else {
+                Script::Time timeToLoad;
+                timeToLoad.second = 5;
+
+                this->_scene->clear(-1);
+                this->_scene->clear(-2);
+                this->_timer->setTimerToTime(*(setSELECT)->start - timeToLoad);
+            }
+        }
     }
 }
 
@@ -753,7 +758,7 @@ void Game::_PlayBgm_End(Script::Event* event)
     }
 }
 
-void Game::_playLoopWhenReadyBGM(Script::Event* event)
+void Game::_PlayBgm_Loop(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
@@ -883,6 +888,13 @@ void Game::_PlayMovie_End(Script::Event* event)
     this->_scene->clear(-3);
 }
 
+void Game::_PlayMovie_Loop(Script::Event* event)
+{
+    if (_vDecoder->decodeFrame()) {
+        this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+    }
+}
+
 void Game::_BlackFade_Start(Script::Event* event)
 {
     // todo
@@ -936,13 +948,15 @@ void Game::_SetSELECT_Start(Script::Event* event)
 }
 
 void Game::_SetSELECT_End(Script::Event* event)
-{
-    this->_scene->clearPathOption();
-    
+{   
     SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SECANCEL_01.OGG");
     if (soundEffect) {
         soundEffect->load();
         soundEffect->play();
+    }
+
+    if (!this->_scene->isPathOptionSet()) {
+        this->_scene->setPathOptionByIndex(2);
     }
 }
 
@@ -987,6 +1001,13 @@ void Game::_EndRoll_End(Script::Event* event)
     this->_scene->clear(-3);
     this->_vDecoder->freeDecoder();
     // todo
+}
+
+void Game::_EndRoll_Loop(Script::Event* event)
+{
+    if (_vDecoder->decodeFrame()) {
+        this->_scene->addVideoFrame(this->_vDecoder->getFrame());
+    }
 }
 
 void Game::_MoveSom_Start(Script::Event* event)

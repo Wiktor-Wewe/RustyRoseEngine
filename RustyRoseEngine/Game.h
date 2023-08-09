@@ -11,7 +11,8 @@ public:
 	enum Operation {
 		prepare = 0,
 		start = 1,
-		end = 2
+		end = 2,
+		loop = 3
 	};
 
 	struct Init {
@@ -68,15 +69,17 @@ private:
 	int _getFirstFreeChannelVoice();
 
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
-	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list);
-	void _findAndHandle(Script::Event* event, Operation operation); // <- find action -> [operation = 0] = prepare, [operation = 1] = start, [operation = 2] = end + free
+	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list); // <- nie korzystam chyba
 	
+	void _findAndHandle(Script::Event* event, Operation operation); // <- find action -> [operation = 0] = prepare, [operation = 1] = start, [operation = 2] = end + free
+	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent);
+
 	void _SkipFRAME_(Script::Event* event);
 	
 	void _PlayBgm_Prepare(Script::Event* event);
 	void _PlayBgm_Start(Script::Event* event);
 	void _PlayBgm_End(Script::Event* event);
-	void _playLoopWhenReadyBGM(Script::Event* event);
+	void _PlayBgm_Loop(Script::Event* event);
 
 	void _CreateBG_Prepare(Script::Event* event);
 	void _CreateBG_Start(Script::Event* event);
@@ -98,6 +101,7 @@ private:
 	// void _PlayMovie_Prepare?
 	void _PlayMovie_Start(Script::Event* event);
 	void _PlayMovie_End(Script::Event* event);
+	void _PlayMovie_Loop(Script::Event* event);
 
 	void _BlackFade_Start(Script::Event* event);
 	void _BlackFade_End(Script::Event* event);
@@ -117,6 +121,7 @@ private:
 	// void _EndRoll_Prepare?
 	void _EndRoll_Start(Script::Event* event);
 	void _EndRoll_End(Script::Event* event);
+	void _EndRoll_Loop(Script::Event* event);
 
 	// vibration for controler xD yeah im genius
 	void _MoveSom_Start(Script::Event* event);

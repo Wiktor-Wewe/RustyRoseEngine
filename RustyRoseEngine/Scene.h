@@ -27,6 +27,8 @@ public:
 	void addPathOption(std::string option);
 	void setPathOptionByDirection(int dy);
 	void setPathOptionByIndex(int index);
+	bool isPathOptionSet();
+	int getPathOption();
 	void clearPathOption();
 	
 	void removeText(std::string text);

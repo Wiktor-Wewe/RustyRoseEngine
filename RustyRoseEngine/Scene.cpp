@@ -262,6 +262,20 @@ void Scene::setPathOptionByIndex(int index)
 	}
 }
 
+bool Scene::isPathOptionSet()
+{
+	if (this->_selectedOptionIndex != -1) {
+		return true;
+	}
+	return false;
+}
+
+int Scene::getPathOption()
+{
+	int response = this->_selectedOptionIndex;
+	return response == -1 ? 0 : response;
+}
+
 void Scene::clearPathOption()
 {
 	this->_selectedOptionIndex = -1;
