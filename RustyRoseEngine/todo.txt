@@ -1,9 +1,11 @@
-w momencie kiedy wykonujesz akcję NEXT ustaw warunek czy w events nie pojawia się
-setSELECT. Jeśli się powjawia to zatrzymaj anuluj text i wczytaj no ostaniej 5 sekund
-tak aby gracz mógł wybrać opcję
-
-dodaj do sceny możliwiść dodania tych opcji. Opcje z tego co wiem to albo 2 albo 1 
-(łącznie 3 z brakiem wybrania opcji). Scena na określony czas wyświelta je z czerwonym
-obramowaniem albo coś takiego
-
-do game dodaj efekty dźwiękowe do tego
+- dodaj menu
+- dodaj menu bar
+- poprawić sterowania
+- dodać sterowanie myszą
+- dodać pauzę
+- dodać przyśpieszenie tępa
+- dodać zapisywanie
+- dodaj wibrację i cenuzrę
+- dodaj historię dialogów?
+- dodaj fanaberie
+- usunąć błędy
