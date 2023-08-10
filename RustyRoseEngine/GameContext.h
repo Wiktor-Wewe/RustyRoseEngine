@@ -25,6 +25,7 @@ public:
 	BackGround* getBackGround(std::string path);
 	SoundEffect* getEndBackGroundMusic(std::string path);
 	std::string getLastScriptName();
+	Script* getLastScript();
 
 private:
 	SDL_Renderer* _renderer;

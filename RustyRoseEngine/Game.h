@@ -15,6 +15,10 @@ public:
 		loop = 3
 	};
 
+	enum Command {
+		previousScript = -10
+	};
+
 	struct Init {
 		std::string debugString;
 		std::string startScript;
@@ -42,6 +46,7 @@ public:
 private:
 	Init _init;
 	bool _gameStatus;
+	std::vector<Script*> _scriptHistory;
 
 	SDL_mutex* _eventMutex;
 
@@ -69,10 +74,10 @@ private:
 	int _getFirstFreeChannelVoice();
 
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
-	void _removeFrom(Script::Event* event, std::vector<Script::Event*>& list); // <- nie korzystam chyba
+	void _removeFrom(Script* element, std::vector<Script*>& list);
 	
 	void _findAndHandle(Script::Event* event, Operation operation); // <- find action -> [operation = 0] = prepare, [operation = 1] = start, [operation = 2] = end + free
-	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent);
+	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand);
 
 	void _SkipFRAME_(Script::Event* event);
 	

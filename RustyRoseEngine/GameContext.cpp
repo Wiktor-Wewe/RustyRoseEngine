@@ -233,3 +233,12 @@ std::string GameContext::getLastScriptName()
 	Script* script = this->_scripts[this->_scripts.size() - 1];
 	return this->_getNameFromPath(script->getPath());	
 }
+
+Script* GameContext::getLastScript()
+{
+	if (this->_scripts.empty()) {
+		return nullptr;
+	}
+
+	return this->_scripts[this->_scripts.size() - 1];
+}

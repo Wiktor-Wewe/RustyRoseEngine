@@ -92,6 +92,7 @@ void Game::play() // <- main play, automatic playing scripts
 {
     // add starting script to context
     this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose");
+    this->_scriptHistory.push_back(this->_gameContext->getScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_init.startScript + ".rose"));
     bool play = true;
 
     while (play) {
@@ -104,8 +105,13 @@ void Game::play() // <- main play, automatic playing scripts
 
         // get index of next script or end loop
         int nextScriptId = this->_playScripts();
+
         if (nextScriptId == -1) {
             play = false;
+        }
+
+        if (nextScriptId == Command::previousScript) {
+            this->_removeFrom(this->_gameContext->getLastScript(), this->_scriptHistory);
         }
 
         // clear context to old script and free system images and sounds
@@ -119,6 +125,11 @@ void Game::play() // <- main play, automatic playing scripts
         // add next script
         if (nextScriptId >= 0) {
             this->_gameContext->addScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose");
+            this->_scriptHistory.push_back(this->_gameContext->getScript(this->_init.debugString + "Script\\ENGLISH\\" + this->_findNameOfScriptById(nextScriptId) + ".rose"));
+        }
+        else if (nextScriptId == Command::previousScript) {
+            Script* previousScript = this->_scriptHistory[this->_scriptHistory.size() - 1];
+            this->_gameContext->addScript(previousScript->getPath());
         }
         
         // clear scene
@@ -147,6 +158,7 @@ int Game::_playScripts()
 {
     bool isOkayToSkip = true;
     Script::Event* setSELECT = nullptr;
+    int extraCommand = -1;
 
     // load all events from scripts | but probably its only one in vector
     std::vector<Script::Event*> todo;
@@ -299,7 +311,7 @@ int Game::_playScripts()
             }
             else {
                 this->_findAndHandle(*currEvent, Operation::loop);
-                this->_handleControl(quit, isOkayToSkip, setSELECT, *currEvent);
+                this->_handleControl(quit, isOkayToSkip, setSELECT, *currEvent, extraCommand);
                 
                 ++currEvent;
             }
@@ -318,6 +330,10 @@ int Game::_playScripts()
         // if all vector with events are empty, end playing script
         if (todo.empty() && ready.empty() && inprogres.empty()) {
             quit = true;
+        }
+
+        if (extraCommand != -1) {
+            return extraCommand;
         }
     }
 
@@ -484,9 +500,16 @@ int Game::_getFirstFreeChannelVoice()
     return freeChannel;
 }
 
-void Game::_removeFrom(Script::Event* event, std::vector<Script::Event*>& list)
+void Game::_removeFrom(Script* element, std::vector<Script*>& list)
 {
-    auto it = std::find(list.begin(), list.end(), event);
+    for (int i = 0; i < list.size(); i++) {
+        if (element->getPath() == list[i]->getPath()) {
+            list.erase(list.begin() + i);
+            return;
+        }
+    }
+
+    auto it = std::find(list.begin(), list.end(), element);
     if (it != list.end())
     {
         list.erase(it);
@@ -691,7 +714,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
     }
 }
 
-void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent)
+void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand)
 {
     if (this->_control.isAction()) {
         if (currEvent->action == 0xCC0B) {
@@ -747,6 +770,11 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
             }
             this->_control.clear();
         }
+
+        if (this->_control.check(Control::back)) {
+            extraCommand = Command::previousScript;
+        }
+
     }
 }
 
