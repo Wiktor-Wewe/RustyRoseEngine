@@ -111,7 +111,9 @@ void Game::play() // <- main play, automatic playing scripts
         }
 
         if (nextScriptId == Command::previousScript) {
-            this->_removeFrom(this->_gameContext->getLastScript(), this->_scriptHistory);
+            if (this->_scriptHistory.size() > 1) {
+                this->_removeFrom(this->_gameContext->getLastScript(), this->_scriptHistory);
+            }
         }
 
         // clear context to old script and free system images and sounds
