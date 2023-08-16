@@ -37,6 +37,16 @@ void Voice::play()
 	}
 }
 
+void Voice::pause()
+{
+	Mix_Pause(this->_channel);
+}
+
+void Voice::resume()
+{
+	Mix_Resume(this->_channel);
+}
+
 void Voice::stop()
 {
 	if (this == nullptr) {

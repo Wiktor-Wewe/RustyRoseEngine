@@ -37,6 +37,16 @@ void SoundEffect::play()
 	}
 }
 
+void SoundEffect::pause()
+{
+	Mix_Pause(this->_channel);
+}
+
+void SoundEffect::resume()
+{
+	Mix_Resume(this->_channel);
+}
+
 void SoundEffect::stop()
 {
 	if (this == nullptr) {

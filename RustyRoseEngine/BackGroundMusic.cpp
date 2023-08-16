@@ -58,6 +58,16 @@ bool BackGroundMusic::isReadyForLoop()
 	return false;
 }
 
+void BackGroundMusic::pause()
+{
+	Mix_Pause(this->_channel);
+}
+
+void BackGroundMusic::resume()
+{
+	Mix_Resume(this->_channel);
+}
+
 void BackGroundMusic::stop()
 {
 	Mix_HaltChannel(this->_channel);

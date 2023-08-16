@@ -158,6 +158,7 @@ bool Game::isGameGood()
 
 int Game::_playScripts()
 {
+    bool pause = false;
     bool isOkayToSkip = true;
     Script::Event* setSELECT = nullptr;
     int extraCommand = -1;
@@ -313,7 +314,7 @@ int Game::_playScripts()
             }
             else {
                 this->_findAndHandle(*currEvent, Operation::loop);
-                this->_handleControl(quit, isOkayToSkip, setSELECT, *currEvent, extraCommand);
+                this->_handleControl(quit, isOkayToSkip, setSELECT, *currEvent, extraCommand, pause, inprogres);
                 
                 ++currEvent;
             }
@@ -355,7 +356,7 @@ bool Game::_loadJumps()
         return false;
     }
 
-    uint32_t buffNum; char buffC[255];
+    uint32_t buffNum = 0x0000; char buffC[255];
 
     // check header
     this->_wipeCharArr(buffC, 255);
@@ -543,6 +544,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         else if (operation == Operation::loop) {
             this->_PlayBgm_Loop(event);
         }
+        else if (operation == Operation::pause) {
+            this->_PlayBgm_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_PlayBgm_Resume(event);
+        }
         else {
             //printf("unknown operation for PlayBgm\n");
         }
@@ -557,6 +564,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         }
         else if (operation == Operation::end) {
             this->_CreateBG_End(event);
+        }
+        else if (operation == Operation::pause) {
+            this->_CreateBG_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_CreateBG_Resume(event);
         }
         else {
             //printf("unknown operation for CreateBG\n");
@@ -585,6 +598,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         else if (operation == Operation::end) {
             this->_PlayVoice_End(event);
         }
+        else if (operation == Operation::pause) {
+            this->_PlayVoice_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_PlayVoice_Resume(event);
+        }
         else {
             //printf("unknown operation for PlayVoice\n");
         }
@@ -599,6 +618,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         }
         else if (operation == Operation::end) {
             this->_PlaySe_End(event);
+        }
+        else if (operation == Operation::pause) {
+            this->_PlaySe_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_PlaySe_Resume(event);
         }
         else {
             //printf("unknown operation for PlaySe\n");
@@ -623,6 +648,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         }
         else if (operation == Operation::loop) {
             this->_PlayMovie_Loop(event);
+        }
+        else if (operation == Operation::pause) {
+            this->_PlayMovie_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_PlayMovie_Resume(event);
         }
         else {
             //printf("unknown operation for PlayMovie\n");
@@ -678,6 +709,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         else if (operation == Operation::end) {
             this->_EndBGM_End(event);
         }
+        else if (operation == Operation::pause) {
+            this->_EndBGM_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_EndBGM_Resume(event);
+        }
         else {
             //printf("unknown operation for PlayBgm\n");
         }
@@ -693,6 +730,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
         else if (operation == Operation::loop) {
             this->_EndRoll_Loop(event);
         }
+        else if (operation == Operation::pause) {
+            this->_EndRoll_Pause(event);
+        }
+        else if (operation == Operation::resume) {
+            this->_EndRoll_Resume(event);
+        }
         else {
             //printf("unknown operation for EndRoll\n");
         }
@@ -703,6 +746,12 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
             this->_MoveSom_Start(event);
         }
         else if (operation == Operation::end) {
+            this->_MoveSom_End(event);
+        }
+        else if (operation == Operation::pause) {
+            this->_MoveSom_End(event);
+        }
+        else if (operation == Operation::resume) {
             this->_MoveSom_End(event);
         }
         else {
@@ -716,7 +765,7 @@ void Game::_findAndHandle(Script::Event* event, Operation operation)
     }
 }
 
-void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand)
+void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand, bool& pause, std::vector<Script::Event*>& inprogres)
 {
     if (this->_control.isAction()) {
         if (currEvent->action == 0xCC0B) {
@@ -777,6 +826,29 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
             extraCommand = Command::previousScript;
         }
 
+        if (this->_control.check(Control::pause)) {
+            if (pause) {
+                pause = false;
+                this->_timer->resume();
+                
+                // resume events
+                for (int i = 0; i < inprogres.size(); i++) {
+                    this->_findAndHandle(inprogres[i], Operation::resume);
+                }
+            }
+            else {
+                pause = true;
+                this->_timer->pause();
+                
+                // pause events
+                for (int i = 0; i < inprogres.size(); i++) {
+                    this->_findAndHandle(inprogres[i], Operation::pause);
+                }
+            }
+
+            this->_control.clear();
+        }
+
     }
 }
 
@@ -820,6 +892,22 @@ void Game::_PlayBgm_Loop(Script::Event* event)
     }
 }
 
+void Game::_PlayBgm_Pause(Script::Event* event)
+{
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        backGoundMusic->pause();
+    }
+}
+
+void Game::_PlayBgm_Resume(Script::Event* event)
+{
+    BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
+    if (backGoundMusic) {
+        backGoundMusic->resume();
+    }
+}
+
 void Game::_CreateBG_Prepare(Script::Event* event)
 {
     BackGround* backGround = this->_gameContext->getBackGround(this->_init.debugString + event->data);
@@ -843,6 +931,16 @@ void Game::_CreateBG_End(Script::Event* event)
         this->_scene->removeBackGround(backGround, 0);
         backGround->free();
     }
+}
+
+void Game::_CreateBG_Pause(Script::Event* event)
+{
+    this->_scene->setAnimationShortNameToDefalut();
+}
+
+void Game::_CreateBG_Resume(Script::Event* event)
+{
+    this->_scene->setAnimationShortName(event->shortName); // <- not work 
 }
 
 void Game::_PrintText_Start(Script::Event* event)
@@ -893,6 +991,22 @@ void Game::_PlayVoice_End(Script::Event* event)
     this->_scene->setAnimationShortNameToDefaultIfName(event->shortName);
 }
 
+void Game::_PlayVoice_Pause(Script::Event* event)
+{
+    Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
+    if (voice) {
+        voice->pause();
+    }
+}
+
+void Game::_PlayVoice_Resume(Script::Event* event)
+{
+    Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
+    if (voice) {
+        voice->resume();
+    }
+}
+
 void Game::_PlaySe_Prepare(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
@@ -920,6 +1034,22 @@ void Game::_PlaySe_End(Script::Event* event)
     }
 }
 
+void Game::_PlaySe_Pause(Script::Event* event)
+{
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
+    if (soundEffect) {
+        soundEffect->pause();
+    }
+}
+
+void Game::_PlaySe_Resume(Script::Event* event)
+{
+    SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
+    if (soundEffect) {
+        soundEffect->resume();
+    }
+}
+
 void Game::_Next_(Script::Event* event)
 {
     // todo
@@ -942,9 +1072,23 @@ void Game::_PlayMovie_End(Script::Event* event)
 
 void Game::_PlayMovie_Loop(Script::Event* event)
 {
+    if (this->_timer->isPause()) {
+        return;
+    }
+
     if (_vDecoder->decodeFrame()) {
         this->_scene->addVideoFrame(this->_vDecoder->getFrame());
     }
+}
+
+void Game::_PlayMovie_Pause(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_PlayMovie_Resume(Script::Event* event)
+{
+    // todo
 }
 
 void Game::_BlackFade_Start(Script::Event* event)
@@ -1037,6 +1181,22 @@ void Game::_EndBGM_End(Script::Event* event)
     }
 }
 
+void Game::_EndBGM_Pause(Script::Event* event)
+{
+    SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
+    if (endBackGroundMusic) {
+        endBackGroundMusic->pause();
+    }
+}
+
+void Game::_EndBGM_Resume(Script::Event* event)
+{
+    SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
+    if (endBackGroundMusic) {
+        endBackGroundMusic->resume();
+    }
+}
+
 void Game::_EndRoll_Start(Script::Event* event)
 {
     this->_vDecoder->freeDecoder();
@@ -1057,9 +1217,23 @@ void Game::_EndRoll_End(Script::Event* event)
 
 void Game::_EndRoll_Loop(Script::Event* event)
 {
+    if (this->_timer->isPause()) {
+        return;
+    }
+
     if (_vDecoder->decodeFrame()) {
         this->_scene->addVideoFrame(this->_vDecoder->getFrame());
     }
+}
+
+void Game::_EndRoll_Pause(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_EndRoll_Resume(Script::Event* event)
+{
+    // todo
 }
 
 void Game::_MoveSom_Start(Script::Event* event)
@@ -1068,6 +1242,16 @@ void Game::_MoveSom_Start(Script::Event* event)
 }
 
 void Game::_MoveSom_End(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_MoveSom_Pause(Script::Event* event)
+{
+    // todo
+}
+
+void Game::_MoveSom_Resume(Script::Event* event)
 {
     // todo
 }
@@ -1097,6 +1281,7 @@ std::string Game::_findNameOfScriptById(int scriptId)
             return this->_jumps[i]->scriptName;
         }
     }
+    return std::string();
 }
 
 int Game::_findNextScrpitId(std::string currentScriptName, int playerOption)

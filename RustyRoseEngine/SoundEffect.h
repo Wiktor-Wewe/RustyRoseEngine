@@ -12,6 +12,8 @@ public:
 	void load();
 
 	void play();
+	void pause();
+	void resume();
 	void stop();
 	void free();
 	std::string getPath();

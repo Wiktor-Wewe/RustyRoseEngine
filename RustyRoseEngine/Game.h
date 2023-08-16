@@ -12,7 +12,9 @@ public:
 		prepare = 0,
 		start = 1,
 		end = 2,
-		loop = 3
+		loop = 3,
+		pause = 4,
+		resume = 5
 	};
 
 	enum Command {
@@ -23,18 +25,18 @@ public:
 		std::string debugString;
 		std::string startScript;
 		std::string linkToSys;
-		int windowWidth;
-		int windowHeight;
+		int windowWidth = 1280;
+		int windowHeight = 720;
 		std::string linkToJump;
 		// and more :)
 	};
 
 	struct Jump
 	{
-		int id;
-		int routeId;
+		int id = 0;
+		int routeId = 0;
 		std::string scriptName;
-		int jumpToId;
+		int jumpToId = 0;
 	};
 
 	Game();
@@ -76,8 +78,8 @@ private:
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script* element, std::vector<Script*>& list);
 	
-	void _findAndHandle(Script::Event* event, Operation operation); // <- find action -> [operation = 0] = prepare, [operation = 1] = start, [operation = 2] = end + free
-	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand);
+	void _findAndHandle(Script::Event* event, Operation operation);
+	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand, bool& pause, std::vector<Script::Event*>& inprogres);
 
 	void _SkipFRAME_(Script::Event* event);
 	
@@ -85,10 +87,14 @@ private:
 	void _PlayBgm_Start(Script::Event* event);
 	void _PlayBgm_End(Script::Event* event);
 	void _PlayBgm_Loop(Script::Event* event);
+	void _PlayBgm_Pause(Script::Event* event);
+	void _PlayBgm_Resume(Script::Event* event);
 
 	void _CreateBG_Prepare(Script::Event* event);
 	void _CreateBG_Start(Script::Event* event);
 	void _CreateBG_End(Script::Event* event);
+	void _CreateBG_Pause(Script::Event* event);
+	void _CreateBG_Resume(Script::Event* event);
 	
 	void _PrintText_Start(Script::Event* event);
 	void _PrintText_End(Script::Event* event);
@@ -96,10 +102,14 @@ private:
 	void _PlayVoice_Prepare(Script::Event* event);
 	void _PlayVoice_Start(Script::Event* event);
 	void _PlayVoice_End(Script::Event* event);
+	void _PlayVoice_Pause(Script::Event* event);
+	void _PlayVoice_Resume(Script::Event* event);
 
 	void _PlaySe_Prepare(Script::Event* event);
 	void _PlaySe_Start(Script::Event* event);
 	void _PlaySe_End(Script::Event* event);
+	void _PlaySe_Pause(Script::Event* event);
+	void _PlaySe_Resume(Script::Event* event);
 
 	void _Next_(Script::Event* event);
 
@@ -107,6 +117,8 @@ private:
 	void _PlayMovie_Start(Script::Event* event);
 	void _PlayMovie_End(Script::Event* event);
 	void _PlayMovie_Loop(Script::Event* event);
+	void _PlayMovie_Pause(Script::Event* event);
+	void _PlayMovie_Resume(Script::Event* event);
 
 	void _BlackFade_Start(Script::Event* event);
 	void _BlackFade_End(Script::Event* event);
@@ -121,16 +133,22 @@ private:
 	void _EndBGM_Prepare(Script::Event* event);
 	void _EndBGM_Start(Script::Event* event);
 	void _EndBGM_End(Script::Event* event);
+	void _EndBGM_Pause(Script::Event* event);
+	void _EndBGM_Resume(Script::Event* event);
 
 	// just like play movie but its end of episode, so after video show save screen
 	// void _EndRoll_Prepare?
 	void _EndRoll_Start(Script::Event* event);
 	void _EndRoll_End(Script::Event* event);
 	void _EndRoll_Loop(Script::Event* event);
+	void _EndRoll_Pause(Script::Event* event);
+	void _EndRoll_Resume(Script::Event* event);
 
 	// vibration for controler xD yeah im genius
 	void _MoveSom_Start(Script::Event* event);
 	void _MoveSom_End(Script::Event* event);
+	void _MoveSom_Pause(Script::Event* event);
+	void _MoveSom_Resume(Script::Event* event);
 
 	std::vector<std::string> _split(std::string text, char separator);
 	std::string _findNameOfScriptById(int scriptId);

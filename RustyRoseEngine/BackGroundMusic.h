@@ -11,6 +11,8 @@ public:
 	void playInt();
 	void playLoop();
 	bool isReadyForLoop();
+	void pause();
+	void resume();
 	void stop();
 	void free();
 
