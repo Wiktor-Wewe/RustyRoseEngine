@@ -49,7 +49,7 @@ Game::Game()
     }
 
     // set number of channels
-    Mix_AllocateChannels(11); // <- 5 - Voice, 5 - SoundEffect, 1 - bgm
+    Mix_AllocateChannels(12); // <- 5 - Voice, 5 - SoundEffect, 1 - bgm, 1 - click se
 
 
     this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
@@ -84,6 +84,7 @@ Game::Game()
     this->_gameContext->getSystem()->setSystem(this->_init.debugString + this->_init.linkToSys);
     this->_gameContext->getSystem()->loadSystem();
     this->_scene->setFont(this->_gameContext->getSystem()->getFont());
+    this->_loadClickSe();
 
     this->_gameStatus = true;
 }
@@ -503,6 +504,26 @@ int Game::_getFirstFreeChannelVoice()
     return freeChannel;
 }
 
+void Game::_loadClickSe()
+{
+    std::string path = this->_init.debugString + "SysSe\\NEWSYS\\SECLICK_01.OGG";
+    this->_clickSe = Mix_LoadWAV(path.c_str());
+    if (this->_clickSe == NULL) {
+        printf("unable to load click se: %s\n", path.c_str());
+    }
+}
+
+void Game::_playClickSe()
+{
+    Mix_PlayChannel(11, this->_clickSe, 0);
+}
+
+void Game::_freeClickSe()
+{
+    Mix_FreeChunk(this->_clickSe);
+    this->_clickSe = NULL;
+}
+
 void Game::_removeFrom(Script* element, std::vector<Script*>& list)
 {
     for (int i = 0; i < list.size(); i++) {
@@ -808,6 +829,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
         }
         
         if (this->_control.check(Control::next)) {
+            this->_playClickSe();
             if (isOkayToSkip) {
                 quit = true;
             }
@@ -823,10 +845,12 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
         }
 
         if (this->_control.check(Control::back)) {
+            this->_playClickSe();
             extraCommand = Command::previousScript;
         }
 
         if (this->_control.check(Control::pause)) {
+            this->_playClickSe();
             if (pause) {
                 pause = false;
                 this->_timer->resume();

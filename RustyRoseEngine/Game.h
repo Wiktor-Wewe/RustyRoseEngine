@@ -63,6 +63,7 @@ private:
 	VDecoder* _vDecoder;
 	Timer* _timer;
 	Control _control;
+	Mix_Chunk* _clickSe;
 
 	std::vector<Jump*> _jumps;
 
@@ -74,6 +75,10 @@ private:
 
 	int _getFirstFreeChannelSoundEffect();
 	int _getFirstFreeChannelVoice();
+
+	void _loadClickSe();
+	void _playClickSe();
+	void _freeClickSe();
 
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script* element, std::vector<Script*>& list);

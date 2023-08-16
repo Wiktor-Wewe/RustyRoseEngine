@@ -1,11 +1,11 @@
-- dodaj menu
-- dodaj menu bar
-- poprawić sterowania
-- dodać sterowanie myszą
-- dodać pauzę
-- dodać przyśpieszenie tępa
 - dodać zapisywanie
-- dodaj wibrację i cenuzrę
+- dodać przyśpieszenie tempa
+- dodaj menu bar
+- dodaj white fade / black fade
 - dodaj historię dialogów?
-- dodaj fanaberie
+- dodaj menu
+- poprawić sterowanie
+- dodać sterowanie myszą
+- dodaj wibrację i cenuzrę
+- dodać jakieś driobiazgi
 - usunąć błędy
