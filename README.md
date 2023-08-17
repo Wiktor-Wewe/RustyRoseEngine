@@ -14,12 +14,13 @@ Features:<br>
 <br>
 Utilizes:<br>
 - SDL2 / SDL_image / SDL_mixer / TTF_Font<br>
-- OpenGL<br>
 - FFmpeg<br>
 <br>
 Platforms:<br>
 - PC<br>
-- PsVita<br>
+- Android<br>
+- PlayStation Vita<br>
+- PlayStation Portable?<br>
 <br>
 For testing purposes, I ported the game "School Days HQ" to the Rusty Rose Engine.
 
