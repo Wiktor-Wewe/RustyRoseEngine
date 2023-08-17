@@ -22,9 +22,9 @@ Platforms:<br>
 - PsVita<br>
 <br>
 For testing purposes, I ported the game "School Days HQ" to the Rusty Rose Engine.
-<br>
+
 ![all](https://github.com/Wiktor-Wewe/RustyRoseEngine/assets/86562675/1a5e067c-6a07-4b7c-8fec-0ad20fb3178d)
-<br>
+
 This is the RAM, CPU usage (the engine operates multi-threaded), and GPU.
-<br>
+
 ![5](https://github.com/Wiktor-Wewe/RustyRoseEngine/assets/86562675/05fa9dba-7996-4389-9e4a-0e5162f8b539)
