@@ -3,58 +3,54 @@
 SoundEffect::SoundEffect(std::string path)
 {
 	this->_path = path;
-	this->_channel = 1;
-}
-
-void SoundEffect::setChannel(int channel)
-{
-	this->_channel = channel;
-}
-
-int SoundEffect::getChannel()
-{
-	return this->_channel;
+	this->_soundEffect = new SoLoud::Wav();
 }
 
 void SoundEffect::load()
 {
-	this->_soundEffect = Mix_LoadWAV(this->_path.c_str());
-	if (this->_soundEffect == NULL) {
+	if (this->_soundEffect == NULL) { // <- dont know why, but its work so dont touch it :)
+		this->_soundEffect = new SoLoud::Wav();
+	}
+
+	auto result = this->_soundEffect->load(this->_path.c_str());
+	if (result != SoLoud::SO_NO_ERROR) {
 		printf("unable to load sound effect: %s\n", this->_path.c_str());
 	}
 }
 
-void SoundEffect::play()
+void SoundEffect::play(SoLoud::Soloud* soloud)
 {
 	if (this == nullptr) {
 		printf("ERROR - Trying to play NULL in SoundEffects\n");
 		return;
 	}
 
-	this->_channel = Mix_PlayChannel(this->_channel, this->_soundEffect, 0);
-	if (this->_channel == -1) {
-		printf("unable to play sound effect: %s\n", this->_path.c_str());
+	if (this->_soundEffect == NULL) {
+		this->_soundEffect = new SoLoud::Wav();
 	}
+
+	this->_handle = soloud->play(*this->_soundEffect);
+	// add - unable to play sound effect: %s\n
 }
 
-void SoundEffect::pause()
+void SoundEffect::pause(SoLoud::Soloud* soloud)
 {
-	Mix_Pause(this->_channel);
+	soloud->setPause(this->_handle, true);
 }
 
-void SoundEffect::resume()
+void SoundEffect::resume(SoLoud::Soloud* soloud)
 {
-	Mix_Resume(this->_channel);
+	soloud->setPause(this->_handle, false);
 }
 
-void SoundEffect::stop()
+void SoundEffect::stop(SoLoud::Soloud* soloud)
 {
 	if (this == nullptr) {
 		printf("ERROR - Trying to stop NULL in SoundEffects\n");
 		return;
 	}
 
-	Mix_HaltChannel(this->_channel);
+	soloud->stop(this->_handle);
 }
 
 void SoundEffect::free()
@@ -64,7 +60,7 @@ void SoundEffect::free()
 		return;
 	}
 
-	Mix_FreeChunk(this->_soundEffect);
+	delete this->_soundEffect;
 	this->_soundEffect = NULL;
 }
 

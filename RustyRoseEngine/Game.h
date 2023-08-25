@@ -52,18 +52,18 @@ private:
 
 	SDL_mutex* _eventMutex;
 
-	std::vector<int> _freeChannelsSoundEffect;
-	std::vector<int> _freeChannelsVoice;
-
 	SDL_Renderer* _renderer;
 	SDL_Window* _window;
 
 	GameContext* _gameContext;
 	Scene* _scene;
 	VDecoder* _vDecoder;
+	SoLoud::Soloud* _soloud;
 	Timer* _timer;
 	Control _control;
-	Mix_Chunk* _clickSe;
+
+	SoLoud::Wav* _clickSe = new SoLoud::Wav();
+	SoLoud::handle _clickSeHandle;
 
 	std::vector<Jump*> _jumps;
 
@@ -72,9 +72,6 @@ private:
 	bool _loadJumps();
 	bool _loadInit();
 	void _setDefaultInit();
-
-	int _getFirstFreeChannelSoundEffect();
-	int _getFirstFreeChannelVoice();
 
 	void _loadClickSe();
 	void _playClickSe();

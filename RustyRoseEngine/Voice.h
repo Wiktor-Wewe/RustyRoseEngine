@@ -1,26 +1,25 @@
 #pragma once
-#include <SDL_mixer.h>
+#include <soloud_wav.h>
 #include <stdio.h>
 #include <string>
+
 class Voice
 {
 public:
 	Voice(std::string path);
 
-	void setChannel(int channel);
-	int getChannel();
 	void load();
 
-	void play();
-	void pause();
-	void resume();
-	void stop();
+	void play(SoLoud::Soloud* soloud);
+	void pause(SoLoud::Soloud* soloud);
+	void resume(SoLoud::Soloud* soloud);
+	void stop(SoLoud::Soloud* soloud);
 	void free();
 	std::string getPath();
 
 private:
 	std::string _path;
-	Mix_Chunk* _voice;
-	int _channel;
+	SoLoud::Wav* _voice;
+	SoLoud::handle _handle;
 };
 

@@ -3,82 +3,93 @@
 BackGroundMusic::BackGroundMusic(std::string path)
 {
 	this->_path = path;
+	this->_musicInt = new SoLoud::Wav();
+	this->_musicLoop = new SoLoud::Wav();
 	this->_nameInt = this->_endUppercase(path) + "_INT.OGG";
 	this->_nameLoop = this->_endUppercase(path) + "_LOOP.OGG";
+	this->_intDone = false;
 }
 
 void BackGroundMusic::load()
 {
-	this->_musicInt = Mix_LoadWAV(this->_nameInt.c_str());
-	if (this->_musicInt == NULL) {
-		printf("unable to load background muisc int: %s\n", this->_nameInt.c_str());
+	auto result1 = this->_musicInt->load(this->_nameInt.c_str());
+	if (result1 != SoLoud::SO_NO_ERROR) {
+		printf("unable to load background muisc int: %s\n", this->_path.c_str());
 		printf("its possible that this file just not exists\n");
 	}
 
-	this->_musicLoop = Mix_LoadWAV(this->_nameLoop.c_str());
-	if (this->_musicLoop == NULL) {
-		printf("unable to load background muisc loop: %s\n", this->_nameLoop.c_str());
+	auto result2 = this->_musicLoop->load(this->_nameLoop.c_str());
+	if (result2 != SoLoud::SO_NO_ERROR) {
+		printf("unable to load background muisc loop: %s\n", this->_path.c_str());
 	}
 }
 
-void BackGroundMusic::playInt()
+void BackGroundMusic::playInt(SoLoud::Soloud* soloud)
 {
 	if (this == nullptr) {
 		printf("ERROR - Trying to play NULL in BGM init\n");
 		return;
 	}
 
-	this->_channel = 0;
-	this->_channel = Mix_PlayChannel(this->_channel, this->_musicInt, 0);
-	if (this->_channel == -1) {
-		printf("unable to play background music Init: %s\n", this->_nameInt.c_str());
-		printf("its possible that this file just not exists\n");
-	}
+	this->_handleInt = soloud->play(*this->_musicInt);
+	// unable to play background music Init: %s\n
+	// its possible that this file just not exists\n
 }
 
-void BackGroundMusic::playLoop()
+void BackGroundMusic::playLoop(SoLoud::Soloud* soloud)
 {
 	if (this == nullptr) {
 		printf("ERROR - Trying to play NULL in BGM loop\n");
 		return;
 	}
 
-	this->_channel = 0;
-	this->_channel = Mix_PlayChannel(this->_channel, this->_musicLoop, 0);
-	if (this->_channel == -1) {
-		printf("unable to play background music Loop: %s\n", this->_nameLoop.c_str());
+	this->_handleInt = soloud->play(*this->_musicLoop);
+	// unable to play background music Loop: %s\n
+}
+
+bool BackGroundMusic::isReadyForLoop(SoLoud::Soloud* soloud)
+{
+	if (soloud->isValidVoiceHandle(this->_handleInt)) {
+		return false;
+		this->_intDone = true;
+	}
+	return true;
+}
+
+void BackGroundMusic::pause(SoLoud::Soloud* soloud)
+{
+	if (this->_intDone) {
+		soloud->setPause(this->_handleLoop, true);
+	}
+	else {
+		soloud->setPause(this->_handleInt, true);
 	}
 }
 
-bool BackGroundMusic::isReadyForLoop()
+void BackGroundMusic::resume(SoLoud::Soloud* soloud)
 {
-	if (Mix_Playing(this->_channel) == 0) {
-		return true;
+	if (this->_intDone) {
+		soloud->setPause(this->_handleLoop, false);
 	}
-	return false;
+	else {
+		soloud->setPause(this->_handleInt, false);
+	}
 }
 
-void BackGroundMusic::pause()
+void BackGroundMusic::stop(SoLoud::Soloud* soloud)
 {
-	Mix_Pause(this->_channel);
-}
-
-void BackGroundMusic::resume()
-{
-	Mix_Resume(this->_channel);
-}
-
-void BackGroundMusic::stop()
-{
-	Mix_HaltChannel(this->_channel);
+	soloud->stop(this->_handleInt);
+	soloud->stop(this->_handleLoop);
+	this->_intDone = false;
 }
 
 void BackGroundMusic::free()
 {
-	Mix_FreeChunk(this->_musicInt);
+	delete this->_musicInt;
 	this->_musicInt = NULL;
-	Mix_FreeChunk(this->_musicLoop);
+	delete this->_musicLoop;
 	this->_musicLoop = NULL;
+	this->_intDone = false;
 }
 
 std::string BackGroundMusic::getPath()

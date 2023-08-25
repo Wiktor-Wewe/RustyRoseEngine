@@ -4,6 +4,7 @@
 - dodaj white fade / black fade
 - dodaj historię dialogów?
 - dodaj menu
+- kiedy włącza się silnik/gra wyświetl logo SDL2 i soloud
 - poprawić sterowanie
 - dodać sterowanie myszą
 - dodaj wibrację i cenuzrę

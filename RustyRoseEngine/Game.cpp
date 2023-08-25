@@ -30,30 +30,6 @@ Game::Game()
         printf("Error: cant initialize SDL_ttf: %s\n", TTF_GetError());
         return;
     }
-
-    // initialization of SDL2 Mixer
-    int flags = MIX_INIT_OGG | MIX_INIT_MP3;
-    int initFlags = Mix_Init(flags);
-    if ((initFlags & flags) != flags) {
-        printf("Error: cant initialize SDL Mixer: %s\n", Mix_GetError());
-        SDL_Quit();
-        return;
-    }
-
-    // open stream audio
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
-        printf("Error: cant open audio streams: %s\n", Mix_GetError());
-        Mix_Quit();
-        SDL_Quit();
-        return;
-    }
-
-    // set number of channels
-    Mix_AllocateChannels(12); // <- 5 - Voice, 5 - SoundEffect, 1 - bgm, 1 - click se
-
-
-    this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
-    this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
     
     // make window
     this->_window = SDL_CreateWindow("School Days: Rusty Rose Edition",
@@ -77,6 +53,8 @@ Game::Game()
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
     this->_vDecoder = new VDecoder(this->_renderer);
+    this->_soloud = new SoLoud::Soloud();
+    this->_soloud->init();
     this->_timer = new Timer();
     this->_control = Control();
 
@@ -120,10 +98,6 @@ void Game::play() // <- main play, automatic playing scripts
         // clear context to old script and free system images and sounds
         this->_gameContext->clear();
         this->_gameContext->getSystem()->freeSystem();
-
-        // set channels to default
-        this->_freeChannelsSoundEffect = { 1, 2, 3, 4, 5 };
-        this->_freeChannelsVoice = { 6, 7, 8, 9, 10 };
 
         // add next script
         if (nextScriptId >= 0) {
@@ -480,47 +454,24 @@ void Game::_setDefaultInit()
     this->_init.linkToJump = ".\\data\\boatJumps.rosej";
 }
 
-int Game::_getFirstFreeChannelSoundEffect()
-{
-    if (this->_freeChannelsSoundEffect.size() == 0) {
-        printf("There is no free channels for sound effect, return 5");
-        return 1;
-    }
-
-    int freeChannel = this->_freeChannelsSoundEffect[0];
-    this->_freeChannelsSoundEffect.erase(this->_freeChannelsSoundEffect.begin());
-    return freeChannel;
-}
-
-int Game::_getFirstFreeChannelVoice()
-{
-    if (this->_freeChannelsVoice.size() == 0) {
-        printf("There is no free channels for voice, return 10");
-        return 1;
-    }
-
-    int freeChannel = this->_freeChannelsVoice[0];
-    this->_freeChannelsVoice.erase(this->_freeChannelsVoice.begin());
-    return freeChannel;
-}
-
 void Game::_loadClickSe()
 {
     std::string path = this->_init.debugString + "SysSe\\NEWSYS\\SECLICK_01.OGG";
-    this->_clickSe = Mix_LoadWAV(path.c_str());
-    if (this->_clickSe == NULL) {
+    auto result = this->_clickSe->load(path.c_str());
+    if (result != SoLoud::SO_NO_ERROR) {
         printf("unable to load click se: %s\n", path.c_str());
     }
 }
 
 void Game::_playClickSe()
 {
-    Mix_PlayChannel(11, this->_clickSe, 0);
+    this->_clickSeHandle = this->_soloud->play(*this->_clickSe);
+    // add unable to play
 }
 
 void Game::_freeClickSe()
 {
-    Mix_FreeChunk(this->_clickSe);
+    delete this->_clickSe;
     this->_clickSe = NULL;
 }
 
@@ -795,13 +746,13 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
 
                 SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
                 if (soundEffect) {
-                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
-                    soundEffect->play();
+                    //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play(this->_soloud);
                 }
                 soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
                 if (soundEffect) {
-                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
-                    soundEffect->play();
+                    //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play(this->_soloud);
                 }
 
                 SDL_Delay(3000);
@@ -814,13 +765,13 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
 
                 SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
                 if (soundEffect) {
-                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
-                    soundEffect->play();
+                    //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play(this->_soloud);
                 }
                 soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEUP.OGG");
                 if (soundEffect) {
-                    soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
-                    soundEffect->play();
+                    //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+                    soundEffect->play(this->_soloud);
                 }
                 SDL_Delay(3000);
                 quit = true;
@@ -893,7 +844,7 @@ void Game::_PlayBgm_Start(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        backGoundMusic->playInt();
+        backGoundMusic->playInt(this->_soloud);
     }
 }
 
@@ -901,7 +852,7 @@ void Game::_PlayBgm_End(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        backGoundMusic->stop();
+        backGoundMusic->stop(this->_soloud);
         backGoundMusic->free();
     }
 }
@@ -910,8 +861,8 @@ void Game::_PlayBgm_Loop(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        if (backGoundMusic->isReadyForLoop()) {
-            backGoundMusic->playLoop();
+        if (backGoundMusic->isReadyForLoop(this->_soloud)) {
+            backGoundMusic->playLoop(this->_soloud);
         }
     }
 }
@@ -920,7 +871,7 @@ void Game::_PlayBgm_Pause(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        backGoundMusic->pause();
+        backGoundMusic->pause(this->_soloud);
     }
 }
 
@@ -928,7 +879,7 @@ void Game::_PlayBgm_Resume(Script::Event* event)
 {
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
-        backGoundMusic->resume();
+        backGoundMusic->resume(this->_soloud);
     }
 }
 
@@ -989,8 +940,9 @@ void Game::_PlayVoice_Start(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        voice->setChannel(this->_getFirstFreeChannelVoice());
-        voice->play();
+        //voice->setChannel(this->_getFirstFreeChannelVoice());
+        voice->play(this->_soloud);
+        //this->_playbackSpeedModifier.setupPlaybackSpeedEffect(voice->getChunk(), 1, voice->getChannel(), true, true);
     }
     
     if (event->shortName == "xxx") {
@@ -1009,7 +961,7 @@ void Game::_PlayVoice_End(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        this->_freeChannelsVoice.push_back(voice->getChannel());
+        //this->_freeChannelsVoice.push_back(voice->getChannel());
         voice->free();
     }
     this->_scene->setAnimationShortNameToDefaultIfName(event->shortName);
@@ -1019,7 +971,7 @@ void Game::_PlayVoice_Pause(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        voice->pause();
+        voice->pause(this->_soloud);
     }
 }
 
@@ -1027,7 +979,7 @@ void Game::_PlayVoice_Resume(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        voice->resume();
+        voice->resume(this->_soloud);
     }
 }
 
@@ -1043,8 +995,8 @@ void Game::_PlaySe_Start(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
-        soundEffect->play();
+        //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
+        soundEffect->play(this->_soloud);
     }
 }
 
@@ -1052,8 +1004,8 @@ void Game::_PlaySe_End(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
-        soundEffect->stop();
+        //this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
+        soundEffect->stop(this->_soloud);
         soundEffect->free();
     }
 }
@@ -1062,7 +1014,7 @@ void Game::_PlaySe_Pause(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        soundEffect->pause();
+        soundEffect->pause(this->_soloud);
     }
 }
 
@@ -1070,7 +1022,7 @@ void Game::_PlaySe_Resume(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        soundEffect->resume();
+        soundEffect->resume(this->_soloud);
     }
 }
 
@@ -1163,7 +1115,7 @@ void Game::_SetSELECT_Start(Script::Event* event)
 
     SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SEVIEW.OGG");
     if (soundEffect) {
-        soundEffect->play();
+        soundEffect->play(this->_soloud);
     }
 }
 
@@ -1172,7 +1124,7 @@ void Game::_SetSELECT_End(Script::Event* event)
     SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SECANCEL_01.OGG");
     if (soundEffect) {
         soundEffect->load();
-        soundEffect->play();
+        soundEffect->play(this->_soloud);
     }
 
     if (!this->_scene->isPathOptionSet()) {
@@ -1192,7 +1144,7 @@ void Game::_EndBGM_Start(Script::Event* event)
 {
     SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
     if (endBackGroundMusic) {
-        endBackGroundMusic->play();
+        endBackGroundMusic->play(this->_soloud);
     }
 }
 
@@ -1200,7 +1152,7 @@ void Game::_EndBGM_End(Script::Event* event)
 {
     SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
     if (endBackGroundMusic) {
-        endBackGroundMusic->stop();
+        endBackGroundMusic->stop(this->_soloud);
         endBackGroundMusic->free();
     }
 }
@@ -1209,7 +1161,7 @@ void Game::_EndBGM_Pause(Script::Event* event)
 {
     SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
     if (endBackGroundMusic) {
-        endBackGroundMusic->pause();
+        endBackGroundMusic->pause(this->_soloud);
     }
 }
 
@@ -1217,7 +1169,7 @@ void Game::_EndBGM_Resume(Script::Event* event)
 {
     SoundEffect* endBackGroundMusic = this->_gameContext->getEndBackGroundMusic(this->_init.debugString + event->data + ".OGG");
     if (endBackGroundMusic) {
-        endBackGroundMusic->resume();
+        endBackGroundMusic->resume(this->_soloud);
     }
 }
 
