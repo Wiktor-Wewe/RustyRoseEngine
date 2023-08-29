@@ -24,6 +24,9 @@ public:
 
 	void addTime(std::string time);
 
+	void pauseAnimation();
+	void resumeAnimation();
+
 	void setAnimationShortName(std::string shortName);
 	void setAnimationShortNameToDefalut();
 	void setAnimationShortNameToDefaultIfName(std::string shortName);
@@ -56,6 +59,7 @@ private:
 	SDL_mutex* _textMutex;
 
 	std::string _shortName;
+	std::string _shortNamePause;
 
 	// backgrounds
 	std::vector<BackGround*> _backGround0;

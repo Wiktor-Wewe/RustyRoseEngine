@@ -910,12 +910,12 @@ void Game::_CreateBG_End(Script::Event* event)
 
 void Game::_CreateBG_Pause(Script::Event* event)
 {
-    this->_scene->setAnimationShortNameToDefalut();
+    this->_scene->pauseAnimation();
 }
 
 void Game::_CreateBG_Resume(Script::Event* event)
 {
-    this->_scene->setAnimationShortName(event->shortName); // <- not work 
+    this->_scene->resumeAnimation();
 }
 
 void Game::_PrintText_Start(Script::Event* event)
@@ -940,9 +940,7 @@ void Game::_PlayVoice_Start(Script::Event* event)
 {
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
-        //voice->setChannel(this->_getFirstFreeChannelVoice());
         voice->play(this->_soloud);
-        //this->_playbackSpeedModifier.setupPlaybackSpeedEffect(voice->getChunk(), 1, voice->getChannel(), true, true);
     }
     
     if (event->shortName == "xxx") {

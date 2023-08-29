@@ -4,6 +4,7 @@ Scene::Scene(SDL_Renderer* renderer)
 {
 	this->_renderer = renderer;
 	this->_shortName = std::string();
+	this->_shortNamePause = std::string();
 	this->_textMutex = SDL_CreateMutex();
 	this->_selectedOptionIndex = -1;
 }
@@ -88,10 +89,22 @@ void Scene::addTime(std::string time)
 	this->_time = this->_makeText(time, this->w, this->h);
 }
 
+void Scene::pauseAnimation()
+{
+	this->_shortNamePause = this->_shortName;
+	this->setAnimationShortNameToDefalut();
+}
+
+void Scene::resumeAnimation()
+{
+	this->setAnimationShortName(this->_shortNamePause);
+	this->_shortNamePause.clear();
+}
+
 void Scene::setAnimationShortName(std::string shortName)
 {
 	this->_shortName = shortName;
-;}
+}
 
 void Scene::setAnimationShortNameToDefalut()
 {
