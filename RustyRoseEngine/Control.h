@@ -15,7 +15,10 @@ public:
 		down = 6,
 		
 		enter = 7,
-		back = 8
+		back = 8,
+
+		save = 9,
+		load = 10
 	};
 
 	Control();

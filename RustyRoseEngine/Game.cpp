@@ -49,6 +49,10 @@ Game::Game()
     // create mutex
     this->_eventMutex = SDL_CreateMutex();
 
+    // set speed level
+    this->_speedLevels = { 1, 2, 4, 16, 32 };
+    this->_currentSpeedLevelIndex = 0;
+
     // make new content, scene, video decoder, timer and control
     this->_gameContext = new GameContext(this->_renderer);
     this->_scene = new Scene(this->_renderer);
@@ -229,18 +233,24 @@ int Game::_playScripts()
                 case SDLK_BACKSPACE:
                     this->_control.add(Control::back);
                     break;
+
+                case SDLK_s:
+                    this->_control.add(Control::save);
+                    break;
+
+                case SDLK_l:
+                    this->_control.add(Control::load);
+                    break;
                 }
             }
         }
 
         SDL_LockMutex(this->_eventMutex);
-        std::string time;
-        time += std::to_string(this->_timer->elapsed().minute);
-        time += ":";
-        time += std::to_string(this->_timer->elapsed().second);
-        time += ":";
-        time += std::to_string(this->_timer->elapsed().millisecond);
-        this->_scene->addTime(time);
+        
+        // debug info
+        this->_scene->addFloatingText(this->_timer->elapsed().getString(), 0, 0);
+        this->_scene->addFloatingText("speed: " + std::to_string(this->_getSpeed()), 0, 30);
+        this->_scene->addFloatingText("script: " + this->_getCurrentScriptName(), 0, 60);
 
         // prepare actions 
         for (auto currEvent = todo.begin(); currEvent != todo.end();) {
@@ -313,6 +323,8 @@ int Game::_playScripts()
         if (extraCommand != -1) {
             return extraCommand;
         }
+
+        this->_scene->clear(Scene::Clear::floatingTextes);
     }
 
     this->_scene->clear(Scene::Clear::allExceptTextAndIndex);
@@ -473,6 +485,34 @@ void Game::_freeClickSe()
 {
     delete this->_clickSe;
     this->_clickSe = NULL;
+}
+
+void Game::_speedUp()
+{
+    if (this->_currentSpeedLevelIndex < this->_speedLevels.size() - 1) {
+        this->_currentSpeedLevelIndex++;
+        this->_timer->setTimerSpeed(this->_getSpeed());
+    }
+}
+
+void Game::_speedDown()
+{
+    if (this->_currentSpeedLevelIndex > 0) {
+        this->_currentSpeedLevelIndex--;
+        this->_timer->setTimerSpeed(this->_getSpeed());
+    }
+}
+
+void Game::_setSpeedByIndex(int index)
+{
+    if (index >= 0 && index < this->_speedLevels.size()) {
+        this->_currentSpeedLevelIndex = index;
+    }
+}
+
+int Game::_getSpeed()
+{
+    return this->_speedLevels[this->_currentSpeedLevelIndex];
 }
 
 void Game::_removeFrom(Script* element, std::vector<Script*>& list)
@@ -741,7 +781,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
 {
     if (this->_control.isAction()) {
         if (currEvent->action == 0xCC0B) {
-            if (this->_control.check(Control::left)) {
+            if (this->_control.check(Control::up)) {
                 this->_scene->setPathOptionByIndex(0);
 
                 SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
@@ -760,7 +800,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
                 this->_control.clear();
             }
 
-            if (this->_control.check(Control::right)) {
+            if (this->_control.check(Control::down)) {
                 this->_scene->setPathOptionByIndex(1);
 
                 SoundEffect* soundEffect = this->_gameContext->getSystem()->getSoundEffect(this->_init.debugString + "SysSe\\NEWSYS\\SESELECT.OGG");
@@ -821,6 +861,29 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
                 }
             }
 
+            this->_control.clear();
+        }
+
+        if (this->_control.check(Control::save)) {
+            // std::string name this->_scene->getInfoSave(); <- to think about this
+            // this->_saveGame(std::string name);
+            this->_control.clear();
+        }
+
+        if (this->_control.check(Control::save)) {
+            //this->_saveGame(std::string name);
+            this->_control.clear();
+        }
+
+        if (this->_control.check(Control::right)) {
+            this->_speedUp();
+            this->_playClickSe();
+            this->_control.clear();
+        }
+
+        if (this->_control.check(Control::left)) {
+            this->_speedDown();
+            this->_playClickSe();
             this->_control.clear();
         }
 
@@ -1256,6 +1319,13 @@ std::string Game::_findNameOfScriptById(int scriptId)
         }
     }
     return std::string();
+}
+
+std::string Game::_getCurrentScriptName()
+{
+    std::string path = this->_scriptHistory[this->_scriptHistory.size() - 1]->getPath();
+    auto fragment = this->_split(path, '\\');
+    return fragment[fragment.size() - 1];
 }
 
 int Game::_findNextScrpitId(std::string currentScriptName, int playerOption)

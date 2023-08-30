@@ -65,6 +65,16 @@ public:
 			return result;
 		}
 
+		std::string getString(){
+			std::string time;
+			time += std::to_string(this->minute);
+			time += ":";
+			time += std::to_string(this->second);
+			time += ":";
+			time += std::to_string(this->millisecond);
+			return time;
+		}
+
 	};
 
 	struct Event 

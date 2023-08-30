@@ -15,14 +15,13 @@ public:
 		layer1,
 		layer2,
 		pathOptions,
+		floatingTextes
 	};
 
 	Scene(SDL_Renderer* renderer);
 	
 	void setFont(TTF_Font* font);
 	void draw();
-
-	void addTime(std::string time);
 
 	void pauseAnimation();
 	void resumeAnimation();
@@ -36,6 +35,7 @@ public:
 	void clear(Clear option);
 	
 	void addBackGround(BackGround* bg, int layer);
+	void addFloatingText(std::string text, int x, int y, SDL_Color color = { 255, 255, 255, 255 });
 	void addSysImg(SysImg* sysimg, int layer);
 	void addVideoFrame(SDL_Texture* frame);
 	void addText(std::string text);
@@ -47,14 +47,12 @@ public:
 	int getPathOption();
 	
 	void removeText(std::string text);
+	void removeFloatingText(std::string text);
 	void removeBackGround(BackGround* backGround, int layer); // -1 all
 
 private:
 	SDL_Renderer* _renderer;
 	TTF_Font* _font;
-
-	SDL_Texture* _time;
-	int w, h;
 
 	SDL_mutex* _textMutex;
 
@@ -65,6 +63,11 @@ private:
 	std::vector<BackGround*> _backGround0;
 	std::vector<BackGround*> _backGround1;
 	std::vector<BackGround*> _backGround2;
+
+	// floating text <- for debug
+	std::vector<std::string> _floatingText;
+	std::vector<SDL_Texture*> _floatingTextTexture;
+	std::vector<SDL_Rect*> _floatingTextRect;
 
 	// system images, menu, etc.
 	std::vector<SysImg*> _sysImg0;

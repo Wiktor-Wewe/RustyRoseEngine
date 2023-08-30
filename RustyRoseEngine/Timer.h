@@ -13,8 +13,10 @@ public:
 	bool isPause();
 	Script::Time elapsed();
 	void setTimerToTime(Script::Time time);
+	void setTimerSpeed(int speed);
 
 private:
+	int _speed;
 	bool _pause;
 	clock_t _start_time;
 	Script::Time _pause_time;

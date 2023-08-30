@@ -50,6 +50,9 @@ private:
 	bool _gameStatus;
 	std::vector<Script*> _scriptHistory;
 
+	std::vector<int> _speedLevels;
+	int _currentSpeedLevelIndex;
+
 	SDL_mutex* _eventMutex;
 
 	SDL_Renderer* _renderer;
@@ -76,6 +79,11 @@ private:
 	void _loadClickSe();
 	void _playClickSe();
 	void _freeClickSe();
+
+	void _speedUp();
+	void _speedDown();
+	void _setSpeedByIndex(int index);
+	int _getSpeed();
 
 	//bool _containEvent(Script::Event* event, std::vector<Script::Event*>& list);
 	void _removeFrom(Script* element, std::vector<Script*>& list);
@@ -154,6 +162,7 @@ private:
 
 	std::vector<std::string> _split(std::string text, char separator);
 	std::string _findNameOfScriptById(int scriptId);
+	std::string _getCurrentScriptName();
 	int _findNextScrpitId(std::string currentScriptName, int playerOption);
 	void _wipeCharArr(char* arr, int size);
 };

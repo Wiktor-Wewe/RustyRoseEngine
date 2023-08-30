@@ -65,8 +65,10 @@ void Scene::draw()
 	}
 	SDL_UnlockMutex(this->_textMutex);
 
-	SDL_Rect time = { 0, 0, this->w, this->h };
-	SDL_RenderCopy(this->_renderer, this->_time, NULL, &time);
+	// floating textes
+	for (int i = 0; i < this->_floatingText.size(); i++) {
+		SDL_RenderCopy(this->_renderer, this->_floatingTextTexture[i], NULL, this->_floatingTextRect[i]);
+	}
 
 	// select option
 	for (int i = 0; i < this->_pathOptions.size(); i++) {
@@ -78,15 +80,6 @@ void Scene::draw()
 	}
 
 	SDL_RenderPresent(this->_renderer);
-}
-
-void Scene::addTime(std::string time)
-{
-	if(this->_time != NULL){
-		SDL_DestroyTexture(this->_time);
-		this->_time = NULL;
-	}
-	this->_time = this->_makeText(time, this->w, this->h);
 }
 
 void Scene::pauseAnimation()
@@ -188,6 +181,11 @@ void Scene::clear(Clear option)
 		this->_pathOptionsTexture.clear();
 		this->_pathOptionsRect.clear();
 	}
+	else if (option == Clear::floatingTextes) {
+		for (int i = 0; i < this->_floatingText.size(); i++) {
+			this->removeFloatingText(this->_floatingText[i]);
+		}
+	}
 	else {
 		printf("There is no option to clear: %i in scene\n", option);
 		return;
@@ -207,6 +205,21 @@ void Scene::addBackGround(BackGround* bg, int layer)
 	}
 	else {
 		printf("There is no layer %i in scene->backgrounds\n", layer);
+	}
+}
+
+void Scene::addFloatingText(std::string text, int x, int y, SDL_Color color)
+{
+	SDL_Rect* rect = new SDL_Rect {x, y, 0, 0};
+	SDL_Texture* texture = this->_makeText(text, rect->w, rect->h, color);
+
+	if (texture) {
+		this->_floatingText.push_back(text);
+		this->_floatingTextTexture.push_back(texture);
+		this->_floatingTextRect.push_back(rect);
+	}
+	else {
+		printf("unable to make floating text: %s\n", text.c_str());
 	}
 }
 
@@ -336,6 +349,30 @@ void Scene::removeText(std::string text)
 	this->_textTexture.erase(this->_textTexture.begin() + position);
 
 	SDL_UnlockMutex(this->_textMutex);
+}
+
+void Scene::removeFloatingText(std::string text)
+{
+	int position = -1;
+	for (int i = 0; i < this->_floatingText.size(); i++) {
+		if (this->_floatingText[i] == text) {
+			position = i;
+			break;
+		}
+	}
+
+	if (position == -1) {
+		printf("unable to remove floating text: %s\n", text.c_str());
+		return;
+	}
+
+	this->_floatingText.erase(this->_floatingText.begin() + position);
+
+	delete(this->_floatingTextRect[position]);
+	this->_floatingTextRect.erase(this->_floatingTextRect.begin() + position);
+
+	SDL_DestroyTexture(this->_floatingTextTexture[position]);
+	this->_floatingTextTexture.erase(this->_floatingTextTexture.begin() + position);
 }
 
 void Scene::removeBackGround(BackGround* backGround, int layer)
