@@ -839,6 +839,7 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
         if (this->_control.check(Control::back)) {
             this->_playClickSe();
             extraCommand = Command::previousScript;
+            this->_control.clear();
         }
 
         if (this->_control.check(Control::pause)) {

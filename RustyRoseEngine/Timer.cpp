@@ -58,9 +58,9 @@ void Timer::setTimerToTime(Script::Time time)
 {
 	int total_milliseconds = time.millisecond + time.second * 1000 + time.minute * 60 * 1000;
 
-	clock_t current_ticks = clock();
-	clock_t desired_ticks = current_ticks - static_cast<clock_t>(total_milliseconds * CLOCKS_PER_SEC / 1000.0);
+	clock_t desired_ticks = static_cast<clock_t>(total_milliseconds * CLOCKS_PER_SEC / 1000.0);
 
+	this->_previous_time = clock();
 	this->_elapsed_time = desired_ticks;
 }
 
