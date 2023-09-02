@@ -45,6 +45,11 @@ void Voice::stop(SoLoud::Soloud* soloud)
 	soloud->stop(this->_handle);
 }
 
+void Voice::setSpeed(SoLoud::Soloud* soloud, float speed)
+{
+	soloud->setRelativePlaySpeed(this->_handle, speed);
+}
+
 void Voice::free()
 {
 	if (this == nullptr) {

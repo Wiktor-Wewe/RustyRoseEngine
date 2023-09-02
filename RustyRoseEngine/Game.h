@@ -90,6 +90,7 @@ private:
 	
 	void _findAndHandle(Script::Event* event, Operation operation);
 	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand, bool& pause, std::vector<Script::Event*>& inprogres);
+	void _setSpeedForEventsInProgres(std::vector<Script::Event*>& inprogres);
 
 	void _SkipFRAME_(Script::Event* event);
 	

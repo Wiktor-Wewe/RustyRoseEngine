@@ -83,6 +83,12 @@ void BackGroundMusic::stop(SoLoud::Soloud* soloud)
 	this->_intDone = false;
 }
 
+void BackGroundMusic::setSpeed(SoLoud::Soloud* soloud, float speed)
+{
+	soloud->setRelativePlaySpeed(this->_handleInt, speed);
+	soloud->setRelativePlaySpeed(this->_handleLoop, speed);
+}
+
 void BackGroundMusic::free()
 {
 	delete this->_musicInt;

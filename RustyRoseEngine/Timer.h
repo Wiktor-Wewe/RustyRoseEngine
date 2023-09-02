@@ -18,7 +18,7 @@ public:
 private:
 	int _speed;
 	bool _pause;
-	clock_t _start_time;
-	Script::Time _pause_time;
+	clock_t _previous_time;
+	clock_t _elapsed_time;
 };
 

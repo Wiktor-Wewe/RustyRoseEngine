@@ -13,6 +13,7 @@ public:
 	void pause(SoLoud::Soloud* soloud);
 	void resume(SoLoud::Soloud* soloud);
 	void stop(SoLoud::Soloud* soloud);
+	void setSpeed(SoLoud::Soloud* soloud, float speed);
 	void free();
 	std::string getPath();
 

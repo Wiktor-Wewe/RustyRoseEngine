@@ -53,6 +53,11 @@ void SoundEffect::stop(SoLoud::Soloud* soloud)
 	soloud->stop(this->_handle);
 }
 
+void SoundEffect::setSpeed(SoLoud::Soloud* soloud, float speed)
+{
+	soloud->setRelativePlaySpeed(this->_handle, speed);
+}
+
 void SoundEffect::free()
 {
 	if (this == nullptr) {

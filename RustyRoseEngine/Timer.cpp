@@ -2,33 +2,28 @@
 
 Timer::Timer()
 {
-	this->_start_time = clock();
+	this->_previous_time = clock();
 	this->_pause = false;
-	this->_pause_time = elapsed();
+	this->_elapsed_time = clock() - this->_previous_time;
+
 	this->_speed = 1;
 }
 
 void Timer::pause()
 {
-	this->_pause_time = this->elapsed();
 	this->_pause = true;
 }
 
 void Timer::resume()
 {
-	int paused_duration_ms = this->elapsed().millisecond - this->_pause_time.millisecond +
-		(this->elapsed().second - this->_pause_time.second) * 1000 +
-		(this->elapsed().minute - this->_pause_time.minute) * 60 * 1000;
-
-	this->_start_time += static_cast<clock_t>(paused_duration_ms * CLOCKS_PER_SEC / 1000.0);
-
+	this->_previous_time = clock();
 	this->_pause = false;
 }
 
 void Timer::reset()
 {
-	this->_start_time = clock();
-	this->_pause_time = elapsed();
+	this->_previous_time = clock();
+	this->_elapsed_time = clock() - this->_previous_time;
 	this->_pause = false;
 }
 
@@ -39,14 +34,12 @@ bool Timer::isPause()
 
 Script::Time Timer::elapsed()
 {
-	if (this->_pause) {
-		return this->_pause_time;
+	if (!this->_pause) {
+		this->_elapsed_time += (clock() - this->_previous_time) * this->_speed;
+		this->_previous_time = clock();
 	}
 
-	clock_t end_time = clock();
-	double elapsed_time_ms = (end_time - this->_start_time) * 1000.0 / CLOCKS_PER_SEC;
-
-	elapsed_time_ms *= this->_speed;
+	double elapsed_time_ms = this->_elapsed_time * 1000.0 / CLOCKS_PER_SEC;
 	
 	int total_seconds = static_cast<int>(elapsed_time_ms / 1000);
 	int miliseconds = static_cast<int>(elapsed_time_ms) % 1000;
@@ -68,7 +61,7 @@ void Timer::setTimerToTime(Script::Time time)
 	clock_t current_ticks = clock();
 	clock_t desired_ticks = current_ticks - static_cast<clock_t>(total_milliseconds * CLOCKS_PER_SEC / 1000.0);
 
-	this->_start_time = desired_ticks;
+	this->_elapsed_time = desired_ticks;
 }
 
 void Timer::setTimerSpeed(int speed)

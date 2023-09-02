@@ -383,6 +383,7 @@ bool Game::_loadJumps()
     return true;
 }
 
+#pragma warning( "Debug string" )
 bool Game::_loadInit()
 {
     std::string debugString = "C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\";
@@ -877,16 +878,45 @@ void Game::_handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELE
 
         if (this->_control.check(Control::right)) {
             this->_speedUp();
+            this->_setSpeedForEventsInProgres(inprogres);
             this->_playClickSe();
             this->_control.clear();
         }
 
         if (this->_control.check(Control::left)) {
             this->_speedDown();
+            this->_setSpeedForEventsInProgres(inprogres);
             this->_playClickSe();
             this->_control.clear();
         }
 
+    }
+}
+
+void Game::_setSpeedForEventsInProgres(std::vector<Script::Event*>& inprogres)
+{
+    // remember to add speed to video
+    for (int i = 0; i < inprogres.size(); i++) {
+        if (inprogres[i]->action == 0xCC02) { // bgm
+            BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + inprogres[i]->data);
+            if (backGoundMusic) {
+                backGoundMusic->setSpeed(this->_soloud, this->_getSpeed());
+            }
+        }
+        
+        if (inprogres[i]->action == 0xCC05) { // voice
+            Voice* voice = this->_gameContext->getVoice(this->_init.debugString + inprogres[i]->data + ".OGG");
+            if (voice) {
+                voice->setSpeed(this->_soloud, this->_getSpeed());
+            }
+        }
+
+        if (inprogres[i]->action == 0xCC06) { // se
+            SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + inprogres[i]->data + ".OGG");
+            if (soundEffect) {
+                soundEffect->setSpeed(this->_soloud, this->_getSpeed());
+            }
+        }
     }
 }
 
@@ -908,6 +938,7 @@ void Game::_PlayBgm_Start(Script::Event* event)
     BackGroundMusic* backGoundMusic = this->_gameContext->getBackGroundMusic(this->_init.debugString + event->data);
     if (backGoundMusic) {
         backGoundMusic->playInt(this->_soloud);
+        backGoundMusic->setSpeed(this->_soloud, this->_getSpeed());
     }
 }
 
@@ -1004,6 +1035,7 @@ void Game::_PlayVoice_Start(Script::Event* event)
     Voice* voice = this->_gameContext->getVoice(this->_init.debugString + event->data + ".OGG");
     if (voice) {
         voice->play(this->_soloud);
+        voice->setSpeed(this->_soloud, this->_getSpeed());
     }
     
     if (event->shortName == "xxx") {
@@ -1056,8 +1088,8 @@ void Game::_PlaySe_Start(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        //soundEffect->setChannel(this->_getFirstFreeChannelSoundEffect());
         soundEffect->play(this->_soloud);
+        soundEffect->setSpeed(this->_soloud, this->_getSpeed());
     }
 }
 
@@ -1065,7 +1097,6 @@ void Game::_PlaySe_End(Script::Event* event)
 {
     SoundEffect* soundEffect = this->_gameContext->getSoundEffect(this->_init.debugString + event->data + ".OGG");
     if (soundEffect) {
-        //this->_freeChannelsSoundEffect.push_back(soundEffect->getChannel());
         soundEffect->stop(this->_soloud);
         soundEffect->free();
     }
@@ -1113,7 +1144,12 @@ void Game::_PlayMovie_Loop(Script::Event* event)
         return;
     }
 
-    if (_vDecoder->decodeFrame()) {
+    bool pass = false;
+    for (int i = 0; i < this->_getSpeed(); i++) {
+        pass = _vDecoder->decodeFrame();
+    }
+
+    if (pass) {
         this->_scene->addVideoFrame(this->_vDecoder->getFrame());
     }
 }
