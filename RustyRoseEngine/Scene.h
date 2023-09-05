@@ -43,6 +43,7 @@ public:
 
 	void setPathOptionByDirection(int dy);
 	void setPathOptionByIndex(int index);
+
 	bool isPathOptionSet();
 	int getPathOption();
 	

@@ -156,7 +156,9 @@
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameContext.cpp" />
+    <ClCompile Include="LoadScreen.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
+    <ClCompile Include="SaveScreen.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="SoundEffect.cpp" />
@@ -172,6 +174,8 @@
     <ClInclude Include="Control.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameContext.h" />
+    <ClInclude Include="LoadScreen.h" />
+    <ClInclude Include="SaveScreen.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="SoundEffect.h" />

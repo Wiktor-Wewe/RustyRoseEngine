@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include "SysImg.h"
 #include "SoundEffect.h"

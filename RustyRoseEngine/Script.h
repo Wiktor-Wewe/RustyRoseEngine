@@ -12,15 +12,15 @@ public:
 		unsigned int millisecond = 0;
 
 		bool operator<=(const Time& other) const {
-			return (minute <= other.minute) &&
-				   (second <= other.second) &&
-				   (millisecond <= other.millisecond);
+			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
+			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			return thisTotalMilliseconds <= otherTotalMilliseconds;
 		}
 
 		bool operator>=(const Time& other) const {
-			return (minute >= other.minute) &&
-				(second >= other.second) &&
-				(millisecond >= other.millisecond);
+			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
+			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			return thisTotalMilliseconds >= otherTotalMilliseconds;
 		}
 
 		Time operator+(const Time& other) const {

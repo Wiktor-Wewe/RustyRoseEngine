@@ -67,13 +67,11 @@ void System::freeSystem()
 		this->_systemImages[i]->free();
 		//delete(this->_systemImages[i]);
 	}
-	this->_systemImages.clear();
-
+	
 	for (int i = 0; i < this->_soundEffects.size(); i++) {
 		this->_soundEffects[i]->free();
 		//delete(this->_soundEffects[i]);
 	}
-	this->_systemImages.clear();
 }
 
 SoundEffect* System::getSoundEffect(std::string path)

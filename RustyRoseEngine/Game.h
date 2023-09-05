@@ -4,21 +4,41 @@
 #include "VDecoder.h"
 #include "Timer.h"
 #include "Control.h"
+#include "SaveScreen.h"
 
 class Game
 {
 public:
+	enum Event {
+		SkipFRAME	= 0xCC01,
+		PlayBgm		= 0xCC02,
+		CreateBG	= 0xCC03,
+		PrintText	= 0xCC04,
+		PlayVoice	= 0xCC05,
+		PlaySe		= 0xCC06,
+		Next		= 0xCC07,
+		PlayMovie	= 0xCC08,
+		BlackFade	= 0xCC09,
+		WhiteFade	= 0xCC0A,
+		SetSELECT	= 0xCC0B,
+		EndBGM		= 0xCC0C,
+		EndRoll		= 0xCC0D,
+		MoveSom		= 0xCC0E
+	};
+	
 	enum Operation {
-		prepare = 0,
-		start = 1,
-		end = 2,
-		loop = 3,
-		pause = 4,
-		resume = 5
+		prepare		= 0,
+		start		= 1,
+		end			= 2,
+		loop		= 3,
+		pause		= 4,
+		resume		= 5
 	};
 
 	enum Command {
-		previousScript = -10
+		previousScript		= -10,
+		nothing				= -1,
+		partSkipForSelect	= 1
 	};
 
 	struct Init {
@@ -28,6 +48,7 @@ public:
 		int windowWidth = 1280;
 		int windowHeight = 720;
 		std::string linkToJump;
+		std::string saveDir;
 		// and more :)
 	};
 
@@ -37,6 +58,18 @@ public:
 		int routeId = 0;
 		std::string scriptName;
 		int jumpToId = 0;
+	};
+
+	struct GameplayPack {
+		std::vector<Script::Event*> todo;
+		std::vector<Script::Event*> ready;
+		std::vector<Script::Event*> inprogres;
+		bool quit = false;
+		bool isOkayToSkip = true;
+		Script::Event* setSELECT = nullptr;
+		Script::Event* currentEvent = nullptr;
+		Game::Command command = Game::Command::nothing;
+		bool pause = false;
 	};
 
 	Game();
@@ -70,6 +103,8 @@ private:
 
 	std::vector<Jump*> _jumps;
 
+	SaveScreen* _saveScreen;
+
 	int _playScripts();
 
 	bool _loadJumps();
@@ -89,8 +124,11 @@ private:
 	void _removeFrom(Script* element, std::vector<Script*>& list);
 	
 	void _findAndHandle(Script::Event* event, Operation operation);
-	void _handleControl(bool& quit, bool& isOkayToSkip, Script::Event* setSELECT, Script::Event* currEvent, int& extraCommand, bool& pause, std::vector<Script::Event*>& inprogres);
+	void _handleControl(Game::GameplayPack& pack);
+	void _handleCommand(Game::GameplayPack& pack);
 	void _setSpeedForEventsInProgres(std::vector<Script::Event*>& inprogres);
+	
+	void _saveGame();
 
 	void _SkipFRAME_(Script::Event* event);
 	

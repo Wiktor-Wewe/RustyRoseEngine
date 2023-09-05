@@ -115,11 +115,16 @@ void SysImg::free()
 	this->_texture = NULL;
 	SDL_FreeSurface(this->_surface);
 	this->_surface = NULL;
-	delete(this->_originalSize);
+
+	if (this->_originalSize) {
+		delete this->_originalSize;
+		this->_originalSize = nullptr;
+	}
 
 	for (int i = 0; i < this->_buttons.size(); i++) {
-		delete(this->_buttons[i]);
+		delete this->_buttons[i];
 	}
+	this->_buttons.clear();
 }
 
 SysImg::Button* SysImg::_getButton(int id)
