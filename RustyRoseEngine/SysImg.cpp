@@ -4,6 +4,7 @@ SysImg::SysImg(std::string path, SDL_Renderer* renderer)
 {
 	this->_path = path;
 	this->_renderer = renderer;
+	this->_destRect = NULL;
 }
 
 bool SysImg::load()
@@ -33,6 +34,11 @@ void SysImg::trimTexture(int id)
 		return;
 	}
 
+	if (this->_texture != NULL) {
+		SDL_DestroyTexture(this->_texture);
+		this->_texture = NULL;
+	}
+
 	if (id == 0) {
 		this->_texture = SDL_CreateTextureFromSurface(this->_renderer, this->_surface);
 		if (this->_texture == NULL) {
@@ -47,12 +53,29 @@ void SysImg::trimTexture(int id)
 		return;
 	}
 
-	SDL_Surface* tempSurface = SDL_CreateRGBSurfaceWithFormat(0, button->w, button->h, 32, SDL_PIXELFORMAT_RGBA32);
+	float scalex = 1280.f / 800.f;
+	float scaley = 720.f / 450.f;
+
 	SDL_Rect srcRect = { button->x, button->y, button->w, button->h };
-	SDL_Rect dstRect = { 0, 0, button->w, button->h };
-	SDL_BlitSurface(this->_surface, &srcRect, tempSurface, &dstRect);
-	this->_texture = SDL_CreateTextureFromSurface(this->_renderer, tempSurface);
-	SDL_FreeSurface(tempSurface);
+	SDL_Rect dstRect = { button->x * scalex, button->y * scaley, button->w * scalex, button->h * scaley };
+	
+	this->_texture = SDL_CreateTexture(this->_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1280, 720);
+	SDL_SetTextureBlendMode(this->_texture, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderTarget(this->_renderer, this->_texture);
+	SDL_Texture* tempTexture = SDL_CreateTextureFromSurface(this->_renderer, this->_surface);
+	SDL_RenderCopy(this->_renderer, tempTexture, &srcRect, &dstRect);
+	SDL_DestroyTexture(tempTexture);
+	SDL_SetRenderTarget(this->_renderer, NULL);
+}
+
+void SysImg::setDestRect(SDL_Rect* rect)
+{
+	this->_destRect = rect;
+}
+
+SDL_Rect* SysImg::getDestRect()
+{
+	return this->_destRect;
 }
 
 void SysImg::addButtons(std::string path)
@@ -104,6 +127,27 @@ void SysImg::addButtons(std::string path)
 	file.close();
 }
 
+SDL_Rect SysImg::getButtonRect(int id)
+{
+	auto button = this->_getButton(id);
+	if (!button) {
+		return SDL_Rect{ 0, 0, 0, 0 };
+	}
+
+	SDL_Rect rect;
+	rect.x = button->x;
+	rect.y = button->y;
+	rect.w = button->w;
+	rect.h = button->h;
+	
+	return rect;
+}
+
+SDL_Rect SysImg::getRealSizeOfImage()
+{
+	return SDL_Rect {0, 0, this->_surface->w, this->_surface->h};
+}
+
 std::string SysImg::getPath()
 {
 	return this->_path;
@@ -124,6 +168,12 @@ void SysImg::free()
 	for (int i = 0; i < this->_buttons.size(); i++) {
 		delete this->_buttons[i];
 	}
+
+	if (this->_destRect) {
+		delete this->_destRect;
+		this->_destRect = NULL;
+	}
+
 	this->_buttons.clear();
 }
 

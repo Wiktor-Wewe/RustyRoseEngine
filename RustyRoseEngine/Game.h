@@ -38,7 +38,8 @@ public:
 	enum Command {
 		previousScript		= -10,
 		nothing				= -1,
-		partSkipForSelect	= 1
+		partSkipForSelect	= 1,
+		saveGame			= 2
 	};
 
 	struct Init {
@@ -127,8 +128,6 @@ private:
 	void _handleControl(Game::GameplayPack& pack);
 	void _handleCommand(Game::GameplayPack& pack);
 	void _setSpeedForEventsInProgres(std::vector<Script::Event*>& inprogres);
-	
-	void _saveGame();
 
 	void _SkipFRAME_(Script::Event* event);
 	

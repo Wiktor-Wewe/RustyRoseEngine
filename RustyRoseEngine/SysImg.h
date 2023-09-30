@@ -26,7 +26,11 @@ public:
 	SDL_Texture* getTexture();
 	void trimTexture(int id); //id = id of button to trim, 0 = all texture
 
+	void setDestRect(SDL_Rect* rect);
+	SDL_Rect* getDestRect();
 	void addButtons(std::string path);
+	SDL_Rect getButtonRect(int id);
+	SDL_Rect getRealSizeOfImage();
 	std::string getPath();
 	void free();
 
@@ -38,6 +42,7 @@ private:
 	SDL_Surface* _surface;
 	std::vector<Button*> _buttons;
 	OriginalSize* _originalSize;
+	SDL_Rect* _destRect;
 
 	Button* _getButton(int id);
 

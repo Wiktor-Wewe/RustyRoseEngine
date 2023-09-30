@@ -17,7 +17,7 @@ void Scene::setFont(TTF_Font* font)
 void Scene::draw()
 {
 	SDL_SetRenderTarget(this->_renderer, NULL);
-	SDL_RenderClear(this->_renderer);
+	//SDL_RenderClear(this->_renderer);
 
 	// layer 0
 	for (int i = 0; i < this->_backGround0.size(); i++) {
@@ -38,7 +38,7 @@ void Scene::draw()
 	}
 
 	for (int i = 0; i < this->_sysImg0.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, NULL);
+		SDL_RenderCopy(this->_renderer, this->_sysImg0[i]->getTexture(), NULL, this->_sysImg0[i]->getDestRect());
 	}
 
 	SDL_RenderCopy(this->_renderer, this->_videoFrame, NULL, NULL);
@@ -49,7 +49,7 @@ void Scene::draw()
 	}
 
 	for (int i = 0; i < this->_sysImg1.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, NULL);
+		SDL_RenderCopy(this->_renderer, this->_sysImg1[i]->getTexture(), NULL, this->_sysImg1[i]->getDestRect());
 	}
 
 	// layer 2
@@ -76,7 +76,7 @@ void Scene::draw()
 	}
 
 	for (int i = 0; i < this->_sysImg2.size(); i++) {
-		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, NULL);
+		SDL_RenderCopy(this->_renderer, this->_sysImg2[i]->getTexture(), NULL, this->_sysImg2[i]->getDestRect());
 	}
 
 	SDL_RenderPresent(this->_renderer);

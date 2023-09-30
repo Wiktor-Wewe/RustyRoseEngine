@@ -61,7 +61,7 @@ Game::Game()
     this->_soloud->init();
     this->_timer = new Timer();
     this->_control = Control();
-    this->_saveScreen = new SaveScreen(this->_renderer, this->_gameContext->getSystem(), &this->_control, this->_init.debugString, this->_init.windowWidth, this->_init.windowHeight);;
+    this->_saveScreen = new SaveScreen(this->_renderer, this->_gameContext->getSystem(), &this->_control, this->_init.debugString, this->_init.windowWidth, this->_init.windowHeight, 0.8);
 
     // set and load basic of system | set font from system files
     this->_gameContext->getSystem()->setSystem(this->_init.debugString + this->_init.linkToSys);
@@ -879,7 +879,7 @@ void Game::_handleControl(Game::GameplayPack& pack)
         }
 
         if (this->_control.check(Control::save)) {
-            this->_saveGame();
+            pack.command = Game::Command::saveGame;
             this->_control.clear();
         }
 
@@ -903,9 +903,7 @@ void Game::_handleControl(Game::GameplayPack& pack)
 void Game::_handleCommand(Game::GameplayPack& pack)
 {
     switch (pack.command) {
-    case Game::Command::partSkipForSelect: {
-        Script::Time time;
-        time.second = 5;
+    case Game::Command::partSkipForSelect:
 
         for (auto it = pack.ready.begin(); it != pack.ready.end();) {
             if ((*it)->end != nullptr) {
@@ -952,13 +950,32 @@ void Game::_handleCommand(Game::GameplayPack& pack)
                 ++it;
             }
         }
-
-        int dupa = 112;
-    }
         break;
+
     case Game::Command::previousScript:
         return;
         break;
+
+    case Game::Command::saveGame:
+        this->_playClickSe();
+        for (auto it = pack.inprogres.begin(); it != pack.inprogres.end();) {
+            this->_timer->pause();
+            this->_findAndHandle(*it, Game::Operation::pause);
+            ++it;
+        }
+
+        this->_saveScreen->load();
+        this->_saveScreen->show();
+        this->_saveScreen->free();
+
+        for (auto it = pack.inprogres.begin(); it != pack.inprogres.end();) {
+            this->_timer->resume();
+            this->_findAndHandle(*it, Game::Operation::resume);
+            ++it;
+        }
+
+        break;
+
     }
 
     pack.command = Game::Command::nothing;
@@ -996,16 +1013,6 @@ void Game::_setSpeedForEventsInProgres(std::vector<Script::Event*>& inprogres)
         }
 
     }
-}
-
-void Game::_saveGame()
-{
-    // pause all
-    
-    this->_saveScreen->show();
-    //this->_saveGame->free();
-    
-    // resume all
 }
 
 void Game::_SkipFRAME_(Script::Event* event)
