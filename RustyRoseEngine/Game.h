@@ -5,6 +5,7 @@
 #include "Timer.h"
 #include "Control.h"
 #include "SaveScreen.h"
+#include <RustyRenderWindow.h>
 
 class Game
 {
@@ -89,6 +90,7 @@ private:
 
 	SDL_mutex* _eventMutex;
 
+	RustyRenderWindow* _renderWindow;
 	SDL_Renderer* _renderer;
 	SDL_Window* _window;
 
