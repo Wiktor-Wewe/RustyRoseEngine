@@ -16,6 +16,7 @@ Utilizes:<br>
 - SDL2 / SDL_image / TTF_Font<br>
 - FFmpeg<br>
 - SoLoud<br>
+- RustyRoseWindow (on my github)<br>
 <br>
 Platforms:<br>
 - PC<br>
