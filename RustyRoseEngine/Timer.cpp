@@ -32,7 +32,7 @@ bool Timer::isPause()
 	return this->_pause;
 }
 
-Script::Time Timer::elapsed()
+Timer::Time Timer::elapsed()
 {
 	if (!this->_pause) {
 		this->_elapsed_time += (clock() - this->_previous_time) * this->_speed;
@@ -46,7 +46,7 @@ Script::Time Timer::elapsed()
 	int minutes = total_seconds / 60;
 	int seconds = total_seconds % 60;
 
-	Script::Time time;
+	Timer::Time time;
 	time.millisecond = miliseconds;
 	time.second = seconds;
 	time.minute = minutes;
@@ -54,7 +54,7 @@ Script::Time Timer::elapsed()
 	return time;
 }
 
-void Timer::setTimerToTime(Script::Time time)
+void Timer::setTimerToTime(Timer::Time time)
 {
 	int total_milliseconds = time.millisecond + time.second * 1000 + time.minute * 60 * 1000;
 

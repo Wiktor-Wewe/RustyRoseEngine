@@ -1,118 +1,118 @@
 #include "BackGroundMusic.h"
 
-BackGroundMusic::BackGroundMusic(std::string path)
+BackGroundMusic::BackGroundMusic(std::string path, SoLoud::Soloud* soloud) : Sound(path, soloud)
 {
-	this->_path = path;
-	this->_musicInt = new SoLoud::Wav();
-	this->_musicLoop = new SoLoud::Wav();
-	this->_nameInt = this->_endUppercase(path) + "_INT.OGG";
-	this->_nameLoop = this->_endUppercase(path) + "_LOOP.OGG";
-	this->_intDone = false;
+	this->_initDone = false;
+	this->_waveLoop = new SoLoud::Wav();
+	this->_pathInit = RRE_NormalizePath(path + "_INT.OGG");
+	this->_pathLoop = RRE_NormalizePath(path + "_LOOP.OGG");
 }
 
 void BackGroundMusic::load()
 {
-	auto result1 = this->_musicInt->load(this->_nameInt.c_str());
+	if (this == NULL) {
+		printf("ERROR - Trying to load NULL in sound\n");
+		return;
+	}
+
+	auto result1 = this->_wave->load(this->_pathInit.c_str());
 	if (result1 != SoLoud::SO_NO_ERROR) {
 		printf("unable to load background muisc int: %s\n", this->_path.c_str());
 		printf("its possible that this file just not exists\n");
 	}
 
-	auto result2 = this->_musicLoop->load(this->_nameLoop.c_str());
+	auto result2 = this->_waveLoop->load(this->_pathLoop.c_str());
 	if (result2 != SoLoud::SO_NO_ERROR) {
 		printf("unable to load background muisc loop: %s\n", this->_path.c_str());
 	}
 }
 
-void BackGroundMusic::playInt(SoLoud::Soloud* soloud)
+void BackGroundMusic::play()
 {
-	if (this == nullptr) {
-		printf("ERROR - Trying to play NULL in BGM init\n");
+	if (this == NULL) {
+		printf("ERROR - Trying to play NULL in sound\n");
 		return;
 	}
 
-	this->_handleInt = soloud->play(*this->_musicInt);
-	// unable to play background music Init: %s\n
-	// its possible that this file just not exists\n
-}
-
-void BackGroundMusic::playLoop(SoLoud::Soloud* soloud)
-{
-	if (this == nullptr) {
-		printf("ERROR - Trying to play NULL in BGM loop\n");
-		return;
+	if (this->_initDone) {
+		this->_handle = this->_soloud->play(*this->_waveLoop);
+		this->_soloud->setLooping(this->_handle, true);
 	}
-
-	this->_handleInt = soloud->play(*this->_musicLoop);
-	// unable to play background music Loop: %s\n
+	else {
+		this->_handle = this->_soloud->play(*this->_wave);
+	}
 }
 
-bool BackGroundMusic::isReadyForLoop(SoLoud::Soloud* soloud)
+bool BackGroundMusic::isInitDone()
 {
-	if (soloud->isValidVoiceHandle(this->_handleInt)) {
+	if (this == NULL) {
+		printf("ERROR - Trying to check init status in NULL in sound\n");
 		return false;
-		this->_intDone = true;
 	}
-	return true;
+
+	if (this->_soloud->isValidVoiceHandle(this->_handle)) {
+		this->_initDone = true;
+	}
+	return this->_initDone;
 }
 
-void BackGroundMusic::pause(SoLoud::Soloud* soloud)
+void BackGroundMusic::pause()
 {
-	if (this->_intDone) {
-		soloud->setPause(this->_handleLoop, true);
+	if (this == NULL) {
+		printf("ERROR - Trying to pause NULL in sound\n");
+		return;
 	}
-	else {
-		soloud->setPause(this->_handleInt, true);
-	}
+
+	this->_soloud->setPause(this->_handle, true);
 }
 
-void BackGroundMusic::resume(SoLoud::Soloud* soloud)
+void BackGroundMusic::resume()
 {
-	if (this->_intDone) {
-		soloud->setPause(this->_handleLoop, false);
+	if (this == NULL) {
+		printf("ERROR - Trying to pause NULL in sound\n");
+		return;
 	}
-	else {
-		soloud->setPause(this->_handleInt, false);
-	}
+
+	this->_soloud->setPause(this->_handle, false);
 }
 
-void BackGroundMusic::stop(SoLoud::Soloud* soloud)
+void BackGroundMusic::stop()
 {
-	soloud->stop(this->_handleInt);
-	soloud->stop(this->_handleLoop);
-	this->_intDone = false;
+	if (this == NULL) {
+		printf("ERROR - Trying to stop NULL in sound\n");
+		return;
+	}
+
+	this->_soloud->stop(this->_handle);
+	this->_initDone = false;
 }
 
-void BackGroundMusic::setSpeed(SoLoud::Soloud* soloud, float speed)
+void BackGroundMusic::setSpeed(float speed)
 {
-	soloud->setRelativePlaySpeed(this->_handleInt, speed);
-	soloud->setRelativePlaySpeed(this->_handleLoop, speed);
+	if (this == NULL) {
+		printf("ERROR - Trying to set speed in NULL in sound\n");
+		return;
+	}
+
+	this->_soloud->setRelativePlaySpeed(this->_handle, speed);
 }
 
 void BackGroundMusic::free()
 {
-	delete this->_musicInt;
-	this->_musicInt = NULL;
-	delete this->_musicLoop;
-	this->_musicLoop = NULL;
-	this->_intDone = false;
-}
-
-std::string BackGroundMusic::getPath()
-{
-	return this->_path;
-}
-
-std::string BackGroundMusic::_endUppercase(std::string text)
-{
-	for (int i = text.size() - 1; i >= 0; i--) {
-		if (text[i] == '/') {
-			break;
-		}
-
-		if (text[i] > 96 && text[i] < 123) {
-			text[i] = text[i] - 32;
-		}
+	if (this->_wave) {
+		delete this->_wave;
 	}
-	return text;
+
+	if (this->_waveLoop) {
+		delete this->_waveLoop;
+	}
+
+	this->_initDone = false;
+}
+
+BackGroundMusic::~BackGroundMusic()
+{
+	if (this->_waveLoop) {
+		delete this->_waveLoop;
+	}
 }

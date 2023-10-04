@@ -3,8 +3,7 @@ extern "C" {
 	#include <libavformat/avformat.h>
 	#include <libswscale/swscale.h>
 }
-#include <string>
-#include <SDL_image.h>
+#include "SharedUtils.h"
 
 
 class VDecoder

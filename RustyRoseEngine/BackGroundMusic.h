@@ -1,34 +1,26 @@
 #pragma once
-#include <soloud_wav.h>
-#include <stdio.h>
-#include <string>
-class BackGroundMusic
+#include "Sound.h"
+
+class BackGroundMusic : Sound
 {
 public:
-	BackGroundMusic(std::string path); // <- path without _xxx/x_.ogg
-
+	BackGroundMusic(std::string path, SoLoud::Soloud* soloud);
 	void load();
-	void playInt(SoLoud::Soloud* soloud);
-	void playLoop(SoLoud::Soloud* soloud);
-	bool isReadyForLoop(SoLoud::Soloud* soloud);
-	void pause(SoLoud::Soloud* soloud);
-	void resume(SoLoud::Soloud* soloud);
-	void stop(SoLoud::Soloud* soloud);
-	void setSpeed(SoLoud::Soloud* soloud, float speed);
+	void play();
+	bool isInitDone();
+	void pause();
+	void resume();
+	void stop();
+	void setSpeed(float speed);
 	void free();
 
-	std::string getPath();
+	~BackGroundMusic();
 
 private:
-	bool _intDone;
-	std::string _path;
-	std::string _nameInt;
-	std::string _nameLoop;
-	SoLoud::handle _handleInt;
-	SoLoud::handle _handleLoop;
-	SoLoud::Wav* _musicInt;
-	SoLoud::Wav* _musicLoop;
+	bool _initDone;
+	std::string _pathInit;
+	std::string _pathLoop;
 
-	std::string _endUppercase(std::string text);
+	SoLoud::Wav* _waveLoop;
 };
 

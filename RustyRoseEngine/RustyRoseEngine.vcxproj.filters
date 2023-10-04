@@ -9,15 +9,21 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\GameElements">
-      <UniqueIdentifier>{d7affb37-3f72-4252-bc3c-15b57720f99f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pliki źródłowe\GameElements">
-      <UniqueIdentifier>{ba0f7ee3-e77e-4162-bcbf-2fa92c01754e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pliki źródłowe\Pliki zasobów">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\BaseClasses">
+      <UniqueIdentifier>{062859a6-5fde-485b-a5f2-235428cb62db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Pliki zasobów\BaseClasses">
+      <UniqueIdentifier>{06a202aa-5fae-48f9-b4cb-42a024e913ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\GameElements">
+      <UniqueIdentifier>{c0bfd072-2b97-4f25-82b6-509f2c3a2a4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Pliki zasobów\GameElements">
+      <UniqueIdentifier>{1a1b9cfe-3ee9-420a-8141-70a247ca362e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,94 +33,49 @@
     <ClCompile Include="VDecoder.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="GameContext.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="BackGround.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="BackGroundMusic.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundEffect.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Voice.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Script.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="System.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="SysImg.cpp">
-      <Filter>Pliki źródłowe\GameElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="Control.cpp">
-      <Filter>Pliki źródłowe</Filter>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\BaseClasses</Filter>
     </ClCompile>
-    <ClCompile Include="SaveScreen.cpp">
-      <Filter>Pliki źródłowe</Filter>
+    <ClCompile Include="Voice.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
     </ClCompile>
-    <ClCompile Include="LoadScreen.cpp">
-      <Filter>Pliki źródłowe</Filter>
+    <ClCompile Include="SoundEffect.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGroundMusic.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedUtils.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\BaseClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VDecoder.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="BackGround.h">
-      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    <ClInclude Include="Timer.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="BackGroundMusic.h">
+    <ClInclude Include="Sound.h">
+      <Filter>Pliki nagłówkowe\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Voice.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
     <ClInclude Include="SoundEffect.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
-    <ClInclude Include="Voice.h">
+    <ClInclude Include="BackGroundMusic.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
-    <ClInclude Include="GameContext.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Script.h">
-      <Filter>Pliki nagłówkowe\GameElements</Filter>
-    </ClInclude>
-    <ClInclude Include="System.h">
-      <Filter>Pliki nagłówkowe\GameElements</Filter>
-    </ClInclude>
-    <ClInclude Include="SysImg.h">
-      <Filter>Pliki nagłówkowe\GameElements</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Control.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="SaveScreen.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="LoadScreen.h">
-      <Filter>Pliki nagłówkowe</Filter>
+    <ClInclude Include="Image.h">
+      <Filter>Pliki nagłówkowe\BaseClasses</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

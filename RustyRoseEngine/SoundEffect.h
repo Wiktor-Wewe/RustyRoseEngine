@@ -1,25 +1,12 @@
 #pragma once
-#include <soloud_wav.h>
-#include <stdio.h>
-#include <string>
-class SoundEffect
+#include "Sound.h"
+
+class SoundEffect : Sound
 {
 public:
-	SoundEffect(std::string path);
-	
-	void load();
-
-	void play(SoLoud::Soloud* soloud);
-	void pause(SoLoud::Soloud* soloud);
-	void resume(SoLoud::Soloud* soloud);
-	void stop(SoLoud::Soloud* soloud);
-	void setSpeed(SoLoud::Soloud* soloud, float speed);
-	void free();
-	std::string getPath();
+	SoundEffect(std::string path, SoLoud::Soloud* soloud);
 
 private:
-	std::string _path;
-	SoLoud::Wav* _soundEffect;
-	SoLoud::handle _handle;
+
 };
 

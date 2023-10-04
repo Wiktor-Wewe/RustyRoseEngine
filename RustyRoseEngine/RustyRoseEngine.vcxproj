@@ -151,36 +151,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
-    <ClCompile Include="Control.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameContext.cpp" />
-    <ClCompile Include="LoadScreen.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
-    <ClCompile Include="SaveScreen.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="SharedUtils.h" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundEffect.cpp" />
-    <ClCompile Include="SysImg.cpp" />
-    <ClCompile Include="System.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="VDecoder.cpp" />
     <ClCompile Include="Voice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BackGround.h" />
     <ClInclude Include="BackGroundMusic.h" />
-    <ClInclude Include="Control.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameContext.h" />
-    <ClInclude Include="LoadScreen.h" />
-    <ClInclude Include="SaveScreen.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Script.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />
-    <ClInclude Include="SysImg.h" />
-    <ClInclude Include="System.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="VDecoder.h" />
     <ClInclude Include="Voice.h" />
