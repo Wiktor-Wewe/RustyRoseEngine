@@ -154,6 +154,7 @@
     <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="SharedUtils.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="BackGround.h" />
     <ClInclude Include="BackGroundMusic.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="IniFile.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />

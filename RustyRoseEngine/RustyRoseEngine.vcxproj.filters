@@ -67,7 +67,10 @@
       <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
     </ClCompile>
     <ClCompile Include="Script.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
+    </ClCompile>
+    <ClCompile Include="IniFile.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,7 +102,10 @@
       <Filter>Pliki nagłówkowe\EngineElements</Filter>
     </ClInclude>
     <ClInclude Include="Script.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="IniFile.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
