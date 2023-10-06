@@ -151,21 +151,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
+    <ClCompile Include="Script.cpp" />
     <ClCompile Include="SharedUtils.h" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundEffect.cpp" />
+    <ClCompile Include="SysImg.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="VDecoder.cpp" />
     <ClCompile Include="Voice.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackGround.h" />
     <ClInclude Include="BackGroundMusic.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="Script.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />
+    <ClInclude Include="SysImg.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="VDecoder.h" />
     <ClInclude Include="Voice.h" />

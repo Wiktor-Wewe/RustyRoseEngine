@@ -1,7 +1,7 @@
 #pragma once
 #include "Sound.h"
 
-class BackGroundMusic : Sound
+class BackGroundMusic : public Sound
 {
 public:
 	BackGroundMusic(std::string path, SoLoud::Soloud* soloud);

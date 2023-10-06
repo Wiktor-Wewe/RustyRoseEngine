@@ -25,15 +25,15 @@
     <Filter Include="Pliki źródłowe\Pliki zasobów\GameElements">
       <UniqueIdentifier>{1a1b9cfe-3ee9-420a-8141-70a247ca362e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\EngineElements">
+      <UniqueIdentifier>{841f4225-b1fe-496c-973d-2c76d18a5a80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Pliki zasobów\EngineElements">
+      <UniqueIdentifier>{9f79a22f-9cc5-4ffa-bb48-5f2e257c9c9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RustyRoseEngine.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="VDecoder.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp">
@@ -48,20 +48,29 @@
     <ClCompile Include="BackGroundMusic.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
     </ClCompile>
-    <ClCompile Include="SharedUtils.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClCompile>
     <ClCompile Include="Image.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\BaseClasses</Filter>
     </ClCompile>
+    <ClCompile Include="SharedUtils.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="SysImg.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="VDecoder.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGround.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Script.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="VDecoder.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="Sound.h">
       <Filter>Pliki nagłówkowe\BaseClasses</Filter>
     </ClInclude>
@@ -76,6 +85,21 @@
     </ClInclude>
     <ClInclude Include="Image.h">
       <Filter>Pliki nagłówkowe\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="SysImg.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="VDecoder.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="BackGround.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Script.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

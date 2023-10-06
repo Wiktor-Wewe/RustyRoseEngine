@@ -47,16 +47,16 @@ Timer::Time Timer::elapsed()
 	int seconds = total_seconds % 60;
 
 	Timer::Time time;
-	time.millisecond = miliseconds;
-	time.second = seconds;
-	time.minute = minutes;
+	time.milliseconds = miliseconds;
+	time.seconds = seconds;
+	time.minutes = minutes;
 
 	return time;
 }
 
 void Timer::setTimerToTime(Timer::Time time)
 {
-	int total_milliseconds = time.millisecond + time.second * 1000 + time.minute * 60 * 1000;
+	int total_milliseconds = time.milliseconds + time.seconds * 1000 + time.minutes * 60 * 1000;
 
 	clock_t desired_ticks = static_cast<clock_t>(total_milliseconds * CLOCKS_PER_SEC / 1000.0);
 

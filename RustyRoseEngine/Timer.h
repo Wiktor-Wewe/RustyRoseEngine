@@ -6,39 +6,39 @@ class Timer
 public:
 	struct Time
 	{
-		unsigned int minute = 0;
-		unsigned int second = 0;
-		unsigned int millisecond = 0;
+		unsigned int minutes = 0;
+		unsigned int seconds = 0;
+		unsigned int milliseconds = 0;
 
 		bool operator<=(const Time& other) const {
-			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
-			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			int thisTotalMilliseconds = minutes * 60 * 1000 + seconds * 1000 + milliseconds;
+			int otherTotalMilliseconds = other.minutes * 60 * 1000 + other.seconds * 1000 + other.milliseconds;
 			return thisTotalMilliseconds <= otherTotalMilliseconds;
 		}
 
 		bool operator>=(const Time& other) const {
-			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
-			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			int thisTotalMilliseconds = minutes * 60 * 1000 + seconds * 1000 + milliseconds;
+			int otherTotalMilliseconds = other.minutes * 60 * 1000 + other.seconds * 1000 + other.milliseconds;
 			return thisTotalMilliseconds >= otherTotalMilliseconds;
 		}
 
 		Time operator+(const Time& other) const {
 			Time result;
 
-			result.minute = minute + other.minute;
-			result.second = second + other.second;
-			result.millisecond = millisecond + other.millisecond;
+			result.minutes = minutes + other.minutes;
+			result.seconds = seconds + other.seconds;
+			result.milliseconds = milliseconds + other.milliseconds;
 
-			if (result.millisecond >= 1000) {
-				unsigned int carrySeconds = result.millisecond / 1000;
-				result.second += carrySeconds;
-				result.millisecond %= 1000;
+			if (result.milliseconds >= 1000) {
+				unsigned int carrySeconds = result.milliseconds / 1000;
+				result.seconds += carrySeconds;
+				result.milliseconds %= 1000;
 			}
 
-			if (result.second >= 60) {
-				unsigned int carryMinutes = result.second / 60;
-				result.minute += carryMinutes;
-				result.second %= 60;
+			if (result.seconds >= 60) {
+				unsigned int carryMinutes = result.seconds / 60;
+				result.minutes += carryMinutes;
+				result.seconds %= 60;
 			}
 
 			return result;
@@ -47,30 +47,42 @@ public:
 		Time operator-(const Time& other) const {
 			Time result;
 
-			int thisTotalMilliseconds = minute * 60 * 1000 + second * 1000 + millisecond;
-			int otherTotalMilliseconds = other.minute * 60 * 1000 + other.second * 1000 + other.millisecond;
+			int thisTotalMilliseconds = minutes * 60 * 1000 + seconds * 1000 + milliseconds;
+			int otherTotalMilliseconds = other.minutes * 60 * 1000 + other.seconds * 1000 + other.milliseconds;
 			int diffMilliseconds = thisTotalMilliseconds - otherTotalMilliseconds;
 
 			if (diffMilliseconds >= 0) {
-				result.minute = diffMilliseconds / (60 * 1000);
+				result.minutes = diffMilliseconds / (60 * 1000);
 				diffMilliseconds %= (60 * 1000);
-				result.second = diffMilliseconds / 1000;
-				result.millisecond = diffMilliseconds % 1000;
+				result.seconds = diffMilliseconds / 1000;
+				result.milliseconds = diffMilliseconds % 1000;
 			}
 			else {
-				result.minute = result.second = result.millisecond = 0;
+				result.minutes = result.seconds = result.milliseconds = 0;
 			}
 
 			return result;
 		}
 
+		static Time* millisecondsToTime(uint32_t milliseconds) {
+			Time* time = new Time;
+
+			time->minutes = milliseconds / (60 * 1000);
+			milliseconds %= (60 * 1000);
+			time->seconds = milliseconds / 1000;
+			milliseconds %= 1000;
+			time->milliseconds = milliseconds;
+
+			return time;
+		}
+
 		std::string getString() {
 			std::string time;
-			time += std::to_string(this->minute);
+			time += std::to_string(this->minutes);
 			time += ":";
-			time += std::to_string(this->second);
+			time += std::to_string(this->seconds);
 			time += ":";
-			time += std::to_string(this->millisecond);
+			time += std::to_string(this->milliseconds);
 			return time;
 		}
 
