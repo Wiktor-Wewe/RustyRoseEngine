@@ -1,5 +1,6 @@
 ﻿#include <stdio.h>
 #include "BackGroundMusic.h"
+#include "Voice.h"
 #include <RustyControl.h>
 #include "Image.h"
 #include "BackGround.h"
@@ -23,6 +24,11 @@ int main(int argc, char* argv[])
     background->tryLoadAnimation(shortName);
 
     renderWindow->getScene()->addImage(background->getPath(), background->getTexture(), NULL);
+
+    Sound* sound = new Voice("tak", NULL);
+    sound->load();
+    BackGroundMusic* bg = dynamic_cast<BackGroundMusic*>(sound);
+    bg->isInitDone();
 
     bool quit = false;
     SDL_Event e;

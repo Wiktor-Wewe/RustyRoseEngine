@@ -72,6 +72,9 @@
     <ClCompile Include="IniFile.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
     </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sound.h">
@@ -105,6 +108,9 @@
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
     <ClInclude Include="IniFile.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
       <Filter>Pliki nagłówkowe\EngineElements</Filter>
     </ClInclude>
   </ItemGroup>

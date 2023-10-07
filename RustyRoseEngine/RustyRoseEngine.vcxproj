@@ -160,6 +160,7 @@
     <ClCompile Include="SharedUtils.h" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundEffect.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SysImg.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="VDecoder.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Script.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="SysImg.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="VDecoder.h" />
