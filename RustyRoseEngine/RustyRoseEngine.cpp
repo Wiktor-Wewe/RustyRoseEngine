@@ -4,9 +4,13 @@
 #include "Image.h"
 #include "BackGround.h"
 #include "SysImg.h"
+#include "IniFile.h"
 
 int main(int argc, char* argv[]) 
 {
+    IniFile iniFile;
+    iniFile.loadFile("C:/Users/Wiktor/source/repos/RustyRoseEngine/x64/Debug/rose.ini");
+
     std::string fontPath = RRE_NormalizePath("C:\\Users\\Wiktor\\source\\repos\\RustyRoseEngine\\x64\\Debug\\data\\arial.ttf");
     RustyRenderWindow* renderWindow = new RustyRenderWindow("RustyRoseEngine: SchoolDays", 1280, 720, fontPath.c_str());
     RustyControl control;

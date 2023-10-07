@@ -21,7 +21,7 @@ void IniFile::loadFile(std::string path)
 		return;
 	}
 
-	while (file.eof()) {
+	while (file.eof() == false) {
 
 		std::getline(file, line);
 		auto pair = RRE_Split(line, '=');

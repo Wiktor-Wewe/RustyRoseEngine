@@ -94,7 +94,7 @@ bool VDecoder::decodeFrame()
 	return false;
 }
 
-void VDecoder::freeDecoder()
+void VDecoder::free()
 {
 	if (this->_frame != NULL) {
 		av_frame_free(&this->_frame);
@@ -110,9 +110,6 @@ void VDecoder::freeDecoder()
 	this->_codecContext = NULL;
 	avformat_close_input(&this->_formatContext);
 	this->_formatContext = NULL;
-
-	//SDL_DestroyTexture(this->_texture);
-	//this->_texture = NULL;
 }
 
 SDL_Texture* VDecoder::getFrame()
@@ -163,6 +160,37 @@ SDL_Texture* VDecoder::getFrame()
 	delete[] rgbData;
 
 	return this->_texture;
+}
+
+VDecoder::~VDecoder()
+{
+	if (this->_formatContext) {
+		avformat_close_input(&this->_formatContext);
+	}
+
+	if (this->_codecContext) {
+		avcodec_close(this->_codecContext);
+	}
+
+	if (this->_frame) {
+		av_frame_free(&this->_frame);
+	}
+
+	if (this->_packet) {
+		av_packet_unref(this->_packet);
+	}
+
+	if (this->_codecContext) {
+		avcodec_close(this->_codecContext);
+	}
+
+	if (this->_formatContext) {
+		avformat_close_input(&this->_formatContext);
+	}
+
+	if (this->_texture) {
+		SDL_DestroyTexture(this->_texture);
+	}
 }
 
 int VDecoder::_getWidthFrame()

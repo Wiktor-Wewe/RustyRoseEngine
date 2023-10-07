@@ -13,9 +13,11 @@ public:
 	void setPath(std::string path);
 	bool start();
 	bool decodeFrame();
-	void freeDecoder();
+	void free();
 
 	SDL_Texture* getFrame();
+
+	~VDecoder();
 
 private:
 	SDL_Renderer* _renderer;
