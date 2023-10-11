@@ -153,8 +153,10 @@
   <ItemGroup>
     <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="IniFile.cpp" />
+    <ClCompile Include="Jumps.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="SharedUtils.h" />
@@ -169,8 +171,10 @@
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
     <ClInclude Include="BackGroundMusic.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="IniFile.h" />
+    <ClInclude Include="Jumps.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />

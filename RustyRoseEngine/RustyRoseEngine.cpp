@@ -1,11 +1,9 @@
 ﻿#include <stdio.h>
-#include "BackGroundMusic.h"
-#include "Voice.h"
 #include <RustyControl.h>
-#include "Image.h"
 #include "BackGround.h"
 #include "SysImg.h"
 #include "IniFile.h"
+#include "SoundManager.h"
 
 int main(int argc, char* argv[]) 
 {
@@ -25,10 +23,11 @@ int main(int argc, char* argv[])
 
     renderWindow->getScene()->addImage(background->getPath(), background->getTexture(), NULL);
 
-    Sound* sound = new Voice("tak", NULL);
-    sound->load();
-    BackGroundMusic* bg = dynamic_cast<BackGroundMusic*>(sound);
-    bg->isInitDone();
+    SoundManager soundManager;
+    soundManager.add(RRE_NormalizePath(iniFile.getDebugString() + "Voice00/00-00/00-00-B00\\00-00-B00-0090.ogg"));
+    soundManager.loadAll();
+    soundManager.get(RRE_NormalizePath(iniFile.getDebugString() + "Voice00/00-00/00-00-B00\\00-00-B00-0090.ogg"))->play();
+
 
     bool quit = false;
     SDL_Event e;

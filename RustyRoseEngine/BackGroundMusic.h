@@ -4,7 +4,7 @@
 class BackGroundMusic : public Sound
 {
 public:
-	BackGroundMusic(std::string path, SoLoud::Soloud* soloud);
+	BackGroundMusic(std::string path, SoLoud::Soloud* soloud, double speed);
 	void load();
 	void play();
 	bool isInitDone();

@@ -63,9 +63,6 @@
     <ClCompile Include="VDecoder.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
     </ClCompile>
-    <ClCompile Include="BackGround.cpp">
-      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
-    </ClCompile>
     <ClCompile Include="Script.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
     </ClCompile>
@@ -74,6 +71,15 @@
     </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="Jumps.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGround.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -101,9 +107,6 @@
     <ClInclude Include="VDecoder.h">
       <Filter>Pliki nagłówkowe\EngineElements</Filter>
     </ClInclude>
-    <ClInclude Include="BackGround.h">
-      <Filter>Pliki nagłówkowe\EngineElements</Filter>
-    </ClInclude>
     <ClInclude Include="Script.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
@@ -112,6 +115,15 @@
     </ClInclude>
     <ClInclude Include="SoundManager.h">
       <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Jumps.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="BackGround.h">
+      <Filter>Pliki nagłówkowe\GameElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

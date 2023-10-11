@@ -6,6 +6,19 @@ class SoundManager
 {
 public:
 	SoundManager();
+	
+	void add(std::string path);
+	Sound* get(std::string path);
+	void remove(std::string path);
+	
+	void loadAll();
+	void freeAll();
+
+	void pauseAll();
+	void resumeAll();
+
+	void setSpeed(int level);
+	void clear();
 
 	~SoundManager();
 
@@ -14,5 +27,6 @@ private:
 	int _speedLevels[5] = {1, 2, 4, 16, 32};
 	int _currentSpeedLevelIndex = 0;
 
+	std::vector<Sound*> _sounds;
 };
 

@@ -1,7 +1,8 @@
 #include "Sound.h"
 
-Sound::Sound(std::string path, SoLoud::Soloud* soloud)
+Sound::Sound(std::string path, SoLoud::Soloud* soloud, double speed)
 {
+	this->_speed = speed;
 	this->_path = path;
 	this->_soloud = soloud;
 	this->_wave = new SoLoud::Wav();
@@ -28,6 +29,7 @@ void Sound::play()
 	}
 
 	this->_handle = this->_soloud->play(*this->_wave);
+	this->_soloud->setRelativePlaySpeed(this->_handle, this->_speed);
 	// add - unable to play voice: %s\n
 }
 
@@ -68,6 +70,7 @@ void Sound::setSpeed(float speed)
 		return;
 	}
 
+	this->_speed = speed;
 	this->_soloud->setRelativePlaySpeed(this->_handle, speed);
 }
 

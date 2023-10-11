@@ -5,18 +5,18 @@ class Image
 {
 public:
 	Image(SDL_Renderer* renderer, RRW_ScreenSize* screenSize, std::string path);
-	virtual void load();
-	virtual void loadTrimInstructions(std::string path);
-	virtual void free();
-	virtual void setTextureToTrim(std::string path);
-	virtual void trimTexture(int id); // if 0 -> free trimedTexture and set default
+	void load();
+	void loadTrimInstructions(std::string path);
+	void free();
+	void setTextureToTrim(std::string path);
+	void trimTexture(int id); // if 0 -> free trimedTexture and set default
 
-	virtual std::string getPath();
-	virtual SDL_Texture* getTexture();
-	virtual SDL_Texture* getTrimedTexture();
-	virtual SDL_Rect* getRectOfTrim(int id);
+	std::string getPath();
+	SDL_Texture* getTexture();
+	SDL_Texture* getTrimedTexture();
+	SDL_Rect* getRectOfTrim(int id);
 
-	virtual ~Image();
+	~Image();
 
 protected:
 	SDL_Renderer* _renderer;
