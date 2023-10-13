@@ -2,7 +2,9 @@
 
 IniFile::IniFile()
 {
+	this->_info["title"] = "RustyRoseEngine: SchoolDaysHQ";
 	this->_info["debugString"] = std::string(); // default = no debugString
+	this->_info["startScript"] = "00/00-00-A00";
 	this->_info["mainPath"] = "./data/";
 	this->_info["windowWidth"] = "1280";
 	this->_info["windowHeight"] = "720";
@@ -44,9 +46,19 @@ void IniFile::loadFile(std::string path)
 	file.close();
 }
 
+std::string IniFile::getTitle()
+{
+	return this->_info["title"];
+}
+
 std::string IniFile::getDebugString()
 {
 	return this->_info["debugString"];
+}
+
+std::string IniFile::getStartScript()
+{
+	return this->_info["startScript"];
 }
 
 std::string IniFile::getMainPath()

@@ -7,7 +7,9 @@ public:
 	IniFile();
 	void loadFile(std::string path);
 
+	std::string getTitle();
 	std::string getDebugString();
+	std::string getStartScript();
 	std::string getMainPath();
 	int getWindowWidth();
 	int getWindowHeight();
@@ -17,16 +19,6 @@ public:
 
 
 private:
-	/*
-		- in _info -
-		debugString
-		mainPath
-		windowWidth
-		windowHeight
-		pathToJump
-		pathToSave
-		pathToFont
-	*/
 	std::unordered_map<std::string, std::string> _info;
 
 	bool _isGoodToConvert(std::string x);
