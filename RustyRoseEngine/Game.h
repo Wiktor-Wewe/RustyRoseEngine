@@ -114,5 +114,6 @@ private:
 	void _MoveSom_End(Script::Event* event);
 
 	void _pause();
+	void _debug();
 };
 

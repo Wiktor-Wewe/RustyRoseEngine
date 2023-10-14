@@ -34,8 +34,15 @@ Game::Game()
 
 void Game::play()
 {
+    this->_control->addKeyFunction(SDLK_d, [this]() {this->_debug(); });
     this->_control->addKeyFunction(SDLK_SPACE, [this]() { this->_pause(); });
     this->_renderWindow->getScene()->addText(("GameStatus: " + std::string(this->_status ? "True" : "False")), 0, 0, {255, 255, 255, 255}, {255, 0, 0, 255});
+
+
+    EventsStateLists* eventsLists = new EventsStateLists();
+    for (auto event : this->_currentScript->getEvents()) {
+        eventsLists->toLoad.push_back(event);
+    }
 
     // fps
     const int TARGET_FPS = 24; // <- no need more | video are in 24 fps
@@ -58,8 +65,14 @@ void Game::play()
             }
         }
 
+        this->_loadEvents(eventsLists);
+        this->_startEvents(eventsLists);
+
         this->_renderWindow->reversedDraw();
 
+        this->_loopOrEndEvents(eventsLists);
+
+        /*
         RRW_MouseInfo mouseInfo = this->_control->getMouseInfo();
         RRW_MouseMove mouseMove = this->_control->getMouseMove();
         this->_renderWindow->getScene()->clear(RustyScene::Clear::Dialogs);
@@ -72,6 +85,7 @@ void Game::play()
         this->_renderWindow->getScene()->addDialog("Current Window Id: " + std::to_string(this->_renderWindow->getManager()->getCurrentWindowId()));
         this->_renderWindow->getScene()->addDialog("Pause Status: " + std::string(this->_pauseStatus == true ? "True" : "False"));
         this->_renderWindow->getScene()->addDialog("Timer: " + this->_timer->elapsed().getString());
+        */
 
         //handleWindows(renderWindow->getManager(), &control);
 
@@ -85,6 +99,8 @@ void Game::play()
             SDL_Delay(1000 / TARGET_FPS - frameTime);
         }
     }
+
+    delete eventsLists;
 }
 
 bool Game::getStatus()
@@ -109,6 +125,11 @@ void Game::_pause()
         this->_timer->pause();
         this->_pauseStatus = true;
     }
+}
+
+void Game::_debug()
+{
+    int i = 69; // <- breakpoint
 }
 
 void Game::_loadEvents(EventsStateLists* eventsLists)
@@ -349,7 +370,9 @@ void Game::_PlayBgm_Load(Script::Event* event)
     this->_soundManager->add(RRE_NormalizePath(path + event->data));
     auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
     // add option to load specific names of BGM - ini - loop
-    bgm->load();
+    if (bgm) {
+        bgm->load();
+    }
 }
 
 void Game::_PlayBgm_Start(Script::Event* event)
@@ -357,14 +380,16 @@ void Game::_PlayBgm_Start(Script::Event* event)
     std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
 
     auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data));
-    bgm->play();
+    if (bgm) {
+        bgm->play();
+    }
 }
 
 void Game::_PlayBgm_Loop(Script::Event* event)
 {
     std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
     auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data));
-    if (bgm->isInitDone()) {
+    if (bgm && bgm->isInitDone()) {
         bgm->play();
     }
 }
@@ -416,16 +441,23 @@ void Game::_PrintText_End(Script::Event* event)
 
 void Game::_PlayVoice_Load(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto voice = (Voice*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
-    voice->load();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+    this->_soundManager->add(path);
+
+    auto voice = (Voice*)this->_soundManager->get(path);
+    if (voice) {
+        voice->load();
+    }
 }
 
 void Game::_PlayVoice_Start(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto voice = (Voice*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
-    voice->play();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    auto voice = (Voice*)this->_soundManager->get(path);
+    if (voice) {
+        voice->play();
+    }
 
     if (this->_backGrounds.empty()) {
         return;
@@ -451,28 +483,37 @@ void Game::_PlayVoice_Loop(Script::Event* event)
 
 void Game::_PlayVoice_End(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    this->_soundManager->remove(RRE_NormalizePath(path + event->data + ".ogg"));
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    this->_soundManager->remove(path);
 }
 
 void Game::_PlaySe_Load(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto se = (SoundEffect*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
-    se->load();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+    this->_soundManager->add(path);
+
+    auto se = (SoundEffect*)this->_soundManager->get(path);
+    if (se) {
+        se->load();
+    }
 }
 
 void Game::_PlaySe_Start(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto se = (SoundEffect*)this->_soundManager->get(RRE_NormalizePath(path + event->data) + ".ogg");
-    se->play();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    auto se = (SoundEffect*)this->_soundManager->get(path);
+    if (se) {
+        se->play();
+    }
 }
 
 void Game::_PlaySe_End(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    this->_soundManager->remove(RRE_NormalizePath(path + event->data + ".ogg"));
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    this->_soundManager->remove(path);
 }
 
 void Game::_Next_(Script::Event* event)
@@ -483,11 +524,10 @@ void Game::_Next_(Script::Event* event)
 
 void Game::_PlayMovie_Start(Script::Event* event)
 {
-    // i dont know if this gonna work :) to test
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".WMV");
 
     this->_vDecoder->free();
-    this->_vDecoder->setPath(RRE_NormalizePath(path + event->data + ".WMV")); // <- tested for mp4 h264 its better | add video_foramt to ini file
+    this->_vDecoder->setPath(path); // <- tested for mp4 h264 its better | add video_foramt to ini file
     this->_vDecoder->start();
     if (this->_vDecoder->decodeFrame()) {
         this->_renderWindow->getScene()->addImage(event->data, this->_vDecoder->getFrame(), NULL);
@@ -506,6 +546,7 @@ void Game::_PlayMovie_Loop(Script::Event* event)
     }
 
     if (pass) {
+        this->_renderWindow->getScene()->removeImage(event->data);
         this->_renderWindow->getScene()->addImage(event->data, this->_vDecoder->getFrame(), NULL);
     }
 }
@@ -539,10 +580,10 @@ void Game::_EndBGM_End(Script::Event* event)
 void Game::_EndRoll_Start(Script::Event* event)
 {
     // same as just normal video, but at the end open save screen
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".WMV");
 
     this->_vDecoder->free();
-    this->_vDecoder->setPath(RRE_NormalizePath(path + event->data + ".WMV"));
+    this->_vDecoder->setPath(path);
     this->_vDecoder->start();
     if (this->_vDecoder->decodeFrame()) {
         this->_renderWindow->getScene()->addImage(event->data, this->_vDecoder->getFrame(), NULL);
@@ -561,6 +602,7 @@ void Game::_EndRoll_Loop(Script::Event* event)
     }
 
     if (pass) {
+        this->_renderWindow->getScene()->removeImage(event->data);
         this->_renderWindow->getScene()->addImage(event->data, this->_vDecoder->getFrame(), NULL);
     }
 }
@@ -568,4 +610,5 @@ void Game::_EndRoll_Loop(Script::Event* event)
 void Game::_EndRoll_End(Script::Event* event)
 {
     this->_renderWindow->getScene()->removeImage(event->data);
+    // open save screen
 }
