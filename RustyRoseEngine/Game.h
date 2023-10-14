@@ -114,6 +114,8 @@ private:
 	void _MoveSom_End(Script::Event* event);
 
 	void _pause();
+	void _speedUp();
+	void _speedDown();
 	void _debug();
 };
 

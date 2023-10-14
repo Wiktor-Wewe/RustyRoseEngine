@@ -5,16 +5,17 @@ class Sound
 {
 public:
 	Sound(std::string path, SoLoud::Soloud* soloud, double speed);
-	virtual void load();
-	virtual void play();
-	virtual void pause();
-	virtual void resume();
-	virtual void stop();
-	virtual void setSpeed(float speed);
-	virtual void free();
+	void load();
+	void play();
+	void pause();
+	void resume();
+	void stop();
+	void setSpeed(float speed);
+	void free();
 
 	std::string getPath();
 
+	void setSoLoud(SoLoud::Soloud* soloud);
 	~Sound();
 
 protected:

@@ -8,6 +8,7 @@ public:
 	SoundManager();
 	
 	void add(std::string path);
+	void add(Sound* sound);
 	Sound* get(std::string path);
 	void remove(std::string path);
 	int getCurrentSpeed();

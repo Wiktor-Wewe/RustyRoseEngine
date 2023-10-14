@@ -85,6 +85,11 @@ std::string Sound::getPath()
 	return this->_path;
 }
 
+void Sound::setSoLoud(SoLoud::Soloud* soloud)
+{
+	this->_soloud = soloud;
+}
+
 Sound::~Sound()
 {
 	if (this->_wave) {

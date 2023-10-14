@@ -9,6 +9,14 @@ SoundManager::SoundManager()
 void SoundManager::add(std::string path)
 {
 	Sound* sound = new Sound(path, this->_soloud, this->_speedLevels[this->_currentSpeedLevelIndex]);
+
+	this->_sounds.push_back(sound);
+}
+
+void SoundManager::add(Sound* sound)
+{
+	sound->setSoLoud(this->_soloud);
+	sound->setSpeed(this->_speedLevels[this->_currentSpeedLevelIndex]);
 	this->_sounds.push_back(sound);
 }
 

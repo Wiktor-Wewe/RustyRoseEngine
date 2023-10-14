@@ -34,6 +34,10 @@ void BackGroundMusic::play()
 		return;
 	}
 
+	if (this->_soloud->isValidVoiceHandle(this->_handle)) {
+		return;
+	}
+
 	if (this->_initDone) {
 		this->_handle = this->_soloud->play(*this->_waveLoop);
 		this->_soloud->setLooping(this->_handle, true);
@@ -50,7 +54,7 @@ bool BackGroundMusic::isInitDone()
 		return false;
 	}
 
-	if (this->_soloud->isValidVoiceHandle(this->_handle)) {
+	if (!this->_soloud->isValidVoiceHandle(this->_handle)) {
 		this->_initDone = true;
 	}
 	return this->_initDone;

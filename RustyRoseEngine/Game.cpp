@@ -29,6 +29,9 @@ Game::Game()
 		this->_status = true;
 	}
 
+    this->_timeToLoad.seconds = 1;
+    this->_timeToEnd.milliseconds = 500;
+
     this->_pauseStatus = false;
 }
 
@@ -36,6 +39,8 @@ void Game::play()
 {
     this->_control->addKeyFunction(SDLK_d, [this]() {this->_debug(); });
     this->_control->addKeyFunction(SDLK_SPACE, [this]() { this->_pause(); });
+    this->_control->addKeyFunction(SDLK_LEFT, [this]() { this->_speedDown(); });
+    this->_control->addKeyFunction(SDLK_RIGHT, [this]() { this->_speedUp(); });
     this->_renderWindow->getScene()->addText(("GameStatus: " + std::string(this->_status ? "True" : "False")), 0, 0, {255, 255, 255, 255}, {255, 0, 0, 255});
 
 
@@ -127,6 +132,18 @@ void Game::_pause()
     }
 }
 
+void Game::_speedUp()
+{
+    // todo
+    printf("speed up\n");
+}
+
+void Game::_speedDown()
+{
+    // todo
+    printf("speed down\n");
+}
+
 void Game::_debug()
 {
     int i = 69; // <- breakpoint
@@ -140,6 +157,7 @@ void Game::_loadEvents(EventsStateLists* eventsLists)
 
             eventsLists->toStart.push_back(*currEvent);
             currEvent = eventsLists->toLoad.erase(currEvent);
+            break;
         }
         else {
             ++currEvent;
@@ -365,11 +383,12 @@ void Game::_removeBackground(std::string path)
 
 void Game::_PlayBgm_Load(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
+    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data;
+    auto bgm = new BackGroundMusic(path, nullptr, 0);
 
-    this->_soundManager->add(RRE_NormalizePath(path + event->data));
-    auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
-    // add option to load specific names of BGM - ini - loop
+    this->_soundManager->add(bgm);
+    bgm = (BackGroundMusic*)this->_soundManager->get(path);
+
     if (bgm) {
         bgm->load();
     }
@@ -377,9 +396,9 @@ void Game::_PlayBgm_Load(Script::Event* event)
 
 void Game::_PlayBgm_Start(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
+    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data;
 
-    auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data));
+    auto bgm = (BackGroundMusic*)this->_soundManager->get(path);
     if (bgm) {
         bgm->play();
     }
@@ -387,8 +406,8 @@ void Game::_PlayBgm_Start(Script::Event* event)
 
 void Game::_PlayBgm_Loop(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto bgm = (BackGroundMusic*)this->_soundManager->get(RRE_NormalizePath(path + event->data));
+    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data;
+    auto bgm = (BackGroundMusic*)this->_soundManager->get(path);
     if (bgm && bgm->isInitDone()) {
         bgm->play();
     }
@@ -396,8 +415,8 @@ void Game::_PlayBgm_Loop(Script::Event* event)
 
 void Game::_PlayBgm_End(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    this->_soundManager->remove(RRE_NormalizePath(path + event->data));
+    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data;
+    this->_soundManager->remove(path);
 }
 
 void Game::_CreateBG_Load(Script::Event* event)
@@ -463,8 +482,8 @@ void Game::_PlayVoice_Start(Script::Event* event)
         return;
     }
 
-    if (this->_backGrounds[0]->tryLoadAnimation(event->shortName)) {
-        this->_renderWindow->getScene()->addImage(event->data, this->_backGrounds[0]->getAnimation(event->shortName), NULL, 1);
+    if (this->_backGrounds[this->_backGrounds.size()-1]->tryLoadAnimation(event->shortName)) {
+        this->_renderWindow->getScene()->addImage(event->data + event->shortName, this->_backGrounds[0]->getAnimation(event->shortName), NULL, 1);
     }
 }
 
@@ -474,10 +493,10 @@ void Game::_PlayVoice_Loop(Script::Event* event)
         return;
     }
 
-    auto nextAnimation = this->_backGrounds[0]->getAnimation(event->shortName);
+    auto nextAnimation = this->_backGrounds[this->_backGrounds.size()-1]->getAnimation(event->shortName);
     if (nextAnimation) {
-        this->_renderWindow->getScene()->removeImage(event->data);
-        this->_renderWindow->getScene()->addImage(event->data, nextAnimation, NULL, 1);
+        this->_renderWindow->getScene()->removeImage(event->data + event->shortName);
+        this->_renderWindow->getScene()->addImage(event->data + event->shortName, nextAnimation, NULL, 1);
     }
 }
 
@@ -486,6 +505,7 @@ void Game::_PlayVoice_End(Script::Event* event)
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
 
     this->_soundManager->remove(path);
+    this->_renderWindow->getScene()->removeImage(event->data + event->shortName);
 }
 
 void Game::_PlaySe_Load(Script::Event* event)
