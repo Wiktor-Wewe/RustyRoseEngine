@@ -10,6 +10,7 @@ public:
 	void add(std::string path);
 	Sound* get(std::string path);
 	void remove(std::string path);
+	int getCurrentSpeed();
 	
 	void loadAll();
 	void freeAll();

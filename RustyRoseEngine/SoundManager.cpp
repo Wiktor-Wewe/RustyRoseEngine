@@ -35,6 +35,11 @@ void SoundManager::remove(std::string path)
 	}
 }
 
+int SoundManager::getCurrentSpeed()
+{
+	return this->_speedLevels[this->_currentSpeedLevelIndex];
+}
+
 void SoundManager::loadAll()
 {
 	for (auto sound : this->_sounds) {

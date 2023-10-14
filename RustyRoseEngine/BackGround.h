@@ -21,7 +21,7 @@ public:
 	};
 
 	BackGround(SDL_Renderer* renderer, RRW_ScreenSize* screenSize, std::string path);
-	void tryLoadAnimation(std::string shortName);
+	bool tryLoadAnimation(std::string shortName);
 	void resetAnimationCounter();
 	void free();
 

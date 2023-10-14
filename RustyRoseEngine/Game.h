@@ -36,7 +36,33 @@ private:
 	std::vector<BackGround*> _backGrounds;
 
 	// gameplay
+	enum TaskType {
+		load,
+		start,
+		loop,
+		end
+	};
+
+	struct EventsStateLists {
+		std::vector<Script::Event*> toLoad;
+		std::vector<Script::Event*> toStart;
+		std::vector<Script::Event*> inProgress;
+	};
+
 	bool _pauseStatus;
+	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
+	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
+
+	void _loadEvents(EventsStateLists* eventsLists);
+	void _startEvents(EventsStateLists* eventsLists);
+	void _loopOrEndEvents(EventsStateLists* eventsLists);
+
+	void _findAndHandle(Script::Event* event, TaskType taskType);
+
+	BackGround* _getBackground(std::string path);
+	void _removeBackground(std::string path);
+
+	void _SkipFRAME_(Script::Event* event);
 
 	void _PlayBgm_Load(Script::Event* event);
 	void _PlayBgm_Start(Script::Event* event);
@@ -52,6 +78,7 @@ private:
 
 	void _PlayVoice_Load(Script::Event* event);
 	void _PlayVoice_Start(Script::Event* event);
+	void _PlayVoice_Loop(Script::Event* event); // animation
 	void _PlayVoice_End(Script::Event* event);
 
 	void _PlaySe_Load(Script::Event* event);
@@ -87,6 +114,5 @@ private:
 	void _MoveSom_End(Script::Event* event);
 
 	void _pause();
-	void _resume();
 };
 

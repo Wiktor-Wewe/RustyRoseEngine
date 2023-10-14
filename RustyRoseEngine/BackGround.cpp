@@ -5,7 +5,7 @@ BackGround::BackGround(SDL_Renderer* renderer, RRW_ScreenSize* screenSize, std::
 	this->_animationCounter = 0;
 }
 
-void BackGround::tryLoadAnimation(std::string shortName)
+bool BackGround::tryLoadAnimation(std::string shortName)
 {
 	std::string animPath = this->_path.substr(0, this->_path.size() - 4);
 	animPath = RRE_NormalizePath(animPath + shortName + ".A.PNG");
@@ -13,7 +13,7 @@ void BackGround::tryLoadAnimation(std::string shortName)
 	SDL_Texture* buffTexture = this->_tryGetAnimationTexture(animPath);
 	
 	if (buffTexture == NULL) { // its possible that there is no animation for this background
-		return;
+		false;
 	}
 
 	// if animation .A. excist -> allocate animation -> add .A. -> load and add .B. -> load and add .C.
@@ -31,6 +31,7 @@ void BackGround::tryLoadAnimation(std::string shortName)
 
 	// add to animations
 	this->_animations[shortName] = animation;
+	return true;
 }
 
 void BackGround::resetAnimationCounter()
