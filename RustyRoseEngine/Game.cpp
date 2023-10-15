@@ -32,6 +32,8 @@ Game::Game()
     this->_timeToLoad.seconds = 1;
     this->_timeToEnd.milliseconds = 500;
 
+    this->_soundManager->setGlobalSE(this->_iniFile);
+
     this->_pauseStatus = false;
 }
 
@@ -120,6 +122,8 @@ Game::~Game()
 
 void Game::_pause()
 {
+    this->_soundManager->globalSE->Click->play();
+
     if (this->_pauseStatus) {
         this->_soundManager->resumeAll();
         this->_timer->resume();
@@ -134,18 +138,21 @@ void Game::_pause()
 
 void Game::_speedUp()
 {
+    this->_soundManager->globalSE->Click->play();
     this->_timer->setTimerSpeedUp();
     this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
 void Game::_speedDown()
 {
+    this->_soundManager->globalSE->Click->play();
     this->_timer->setTimerSpeedDown();
     this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
 void Game::_debug()
 {
+    this->_soundManager->globalSE->Click->play();
     int i = 69; // <- breakpoint
 }
 
@@ -157,7 +164,7 @@ void Game::_loadEvents(EventsStateLists* eventsLists)
 
             eventsLists->toStart.push_back(*currEvent);
             currEvent = eventsLists->toLoad.erase(currEvent);
-            break;
+            break; // <- load one per frame, reduce lagas / at least i think so
         }
         else {
             ++currEvent;

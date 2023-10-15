@@ -77,7 +77,7 @@ void Sound::setSpeed(float speed)
 void Sound::free()
 {
 	delete this->_wave;
-	this->_wave = nullptr;
+	this->_wave = new SoLoud::Wav();
 }
 
 std::string Sound::getPath()

@@ -11,6 +11,14 @@ IniFile::IniFile()
 	this->_info["pathToJump"] = "./data/boatJumps.rosej";
 	this->_info["pathToSave"] = "./Save/";
 	this->_info["pathToFont"] = "./data/ARIAL.TTF";
+
+	// GlobalSE
+	this->_info["secancel"] = "./data/SysSe/NEWSYS/SECANCEL_01.OGG";
+	this->_info["seclick"] = "./data/SysSe/NEWSYS/SECLICK_01.OGG";
+	this->_info["seopen"] = "./data/SysSe/NEWSYS/SEOPEN.OGG";
+	this->_info["seselect"] = "./data/SysSe/NEWSYS/SESELECT.OGG";
+	this->_info["seup"] = "./data/SysSe/NEWSYS/SEUP.OGG";
+	this->_info["seview"] = "./data/SysSe/NEWSYS/SEVIEW.OGG";
 }
 
 void IniFile::loadFile(std::string path)
@@ -44,6 +52,11 @@ void IniFile::loadFile(std::string path)
 	}
 
 	file.close();
+}
+
+std::string IniFile::get(std::string key)
+{
+	return this->_info[key];
 }
 
 std::string IniFile::getTitle()

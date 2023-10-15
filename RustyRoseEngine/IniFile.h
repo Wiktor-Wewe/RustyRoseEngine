@@ -7,6 +7,8 @@ public:
 	IniFile();
 	void loadFile(std::string path);
 
+	std::string get(std::string key);
+
 	std::string getTitle();
 	std::string getDebugString();
 	std::string getStartScript();

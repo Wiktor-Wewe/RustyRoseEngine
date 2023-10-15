@@ -1,9 +1,32 @@
 #include "SoundManager.h"
 
+void SoundManager::setGlobalSE(IniFile* ini)
+{
+	this->globalSE->Cancel = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("secancel")), this->_soloud, 1);
+	this->globalSE->Cancel->load();
+
+	this->globalSE->Click = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("seclick")), this->_soloud, 1);
+	this->globalSE->Click->load();
+
+	this->globalSE->Open = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("seopen")), this->_soloud, 1);
+	this->globalSE->Open->load();
+
+	this->globalSE->Select = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("seselect")), this->_soloud, 1);
+	this->globalSE->Select->load();
+
+	this->globalSE->Up = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("seup")), this->_soloud, 1);
+	this->globalSE->Up->load();
+
+	this->globalSE->View = new Sound(RRE_NormalizePath(ini->getDebugString() + ini->get("seview")), this->_soloud, 1);
+	this->globalSE->View->load();
+}
+
 SoundManager::SoundManager()
 {
 	this->_soloud = new SoLoud::Soloud();
 	this->_soloud->init();
+
+	this->globalSE = new GlobalSE();
 }
 
 void SoundManager::add(std::string path)
