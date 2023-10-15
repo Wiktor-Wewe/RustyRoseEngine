@@ -94,13 +94,21 @@ public:
 	void pause();
 	void resume();
 	void reset();
+
 	bool isPause();
 	Time elapsed();
+
 	void setTimerToTime(Time time);
-	void setTimerSpeed(int speed);
+	void setTimerSpeed(int level);
+	void setTimerSpeedUp();
+	void setTimerSpeedDown();
+
+	double getSpeed();
 
 private:
-	int _speed;
+	double _speedLevels[5] = { 1, 2, 4, 16, 32 };
+	int _currentSpeedLevelIndex = 0;
+
 	bool _pause;
 	clock_t _previous_time;
 	clock_t _elapsed_time;

@@ -8,7 +8,7 @@ SoundManager::SoundManager()
 
 void SoundManager::add(std::string path)
 {
-	Sound* sound = new Sound(path, this->_soloud, this->_speedLevels[this->_currentSpeedLevelIndex]);
+	Sound* sound = new Sound(path, this->_soloud, this->_speed);
 
 	this->_sounds.push_back(sound);
 }
@@ -16,7 +16,7 @@ void SoundManager::add(std::string path)
 void SoundManager::add(Sound* sound)
 {
 	sound->setSoLoud(this->_soloud);
-	sound->setSpeed(this->_speedLevels[this->_currentSpeedLevelIndex]);
+	sound->setSpeed(this->_speed);
 	this->_sounds.push_back(sound);
 }
 
@@ -41,11 +41,6 @@ void SoundManager::remove(std::string path)
 			return;
 		}
 	}
-}
-
-int SoundManager::getCurrentSpeed()
-{
-	return this->_speedLevels[this->_currentSpeedLevelIndex];
 }
 
 void SoundManager::loadAll()
@@ -76,15 +71,13 @@ void SoundManager::resumeAll()
 	}
 }
 
-void SoundManager::setSpeed(int level)
+void SoundManager::setSpeed(double speed)
 {
-	if (level > 4) level = 4;
-	if (level < 0) level = 0;
-
-	this->_currentSpeedLevelIndex = this->_speedLevels[level];
-	
-	for (auto sound : this->_sounds) {
-		sound->setSpeed(this->_speedLevels[this->_currentSpeedLevelIndex]);
+	if (this->_speed != speed) {
+		this->_speed = speed;
+		for (auto sound : this->_sounds) {
+			sound->setSpeed(speed);
+		}
 	}
 }
 

@@ -134,14 +134,14 @@ void Game::_pause()
 
 void Game::_speedUp()
 {
-    // todo
-    printf("speed up\n");
+    this->_timer->setTimerSpeedUp();
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
 void Game::_speedDown()
 {
-    // todo
-    printf("speed down\n");
+    this->_timer->setTimerSpeedDown();
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
 void Game::_debug()
@@ -493,7 +493,7 @@ void Game::_PlayVoice_Loop(Script::Event* event)
         return;
     }
 
-    auto nextAnimation = this->_backGrounds[this->_backGrounds.size()-1]->getAnimation(event->shortName);
+    auto nextAnimation = this->_backGrounds[0]->getAnimation(event->shortName);
     if (nextAnimation) {
         this->_renderWindow->getScene()->removeImage(event->data + event->shortName);
         this->_renderWindow->getScene()->addImage(event->data + event->shortName, nextAnimation, NULL, 1);
@@ -561,7 +561,7 @@ void Game::_PlayMovie_Loop(Script::Event* event)
     }
 
     bool pass = false;
-    for (int i = 0; i < this->_soundManager->getCurrentSpeed(); i++) {
+    for (int i = 0; i < this->_timer->getSpeed(); i++) {
         pass = _vDecoder->decodeFrame();
     }
 
@@ -617,7 +617,7 @@ void Game::_EndRoll_Loop(Script::Event* event)
     }
 
     bool pass = false;
-    for (int i = 0; i < this->_soundManager->getCurrentSpeed(); i++) {
+    for (int i = 0; i < this->_timer->getSpeed(); i++) {
         pass = _vDecoder->decodeFrame();
     }
 

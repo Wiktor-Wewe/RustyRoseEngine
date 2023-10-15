@@ -5,8 +5,6 @@ Timer::Timer()
 	this->_previous_time = clock();
 	this->_pause = false;
 	this->_elapsed_time = clock() - this->_previous_time;
-
-	this->_speed = 1;
 }
 
 void Timer::pause()
@@ -35,7 +33,7 @@ bool Timer::isPause()
 Timer::Time Timer::elapsed()
 {
 	if (!this->_pause) {
-		this->_elapsed_time += (clock() - this->_previous_time) * this->_speed;
+		this->_elapsed_time += (clock() - this->_previous_time) * this->_speedLevels[this->_currentSpeedLevelIndex];
 		this->_previous_time = clock();
 	}
 
@@ -64,7 +62,26 @@ void Timer::setTimerToTime(Timer::Time time)
 	this->_elapsed_time = desired_ticks;
 }
 
-void Timer::setTimerSpeed(int speed)
+void Timer::setTimerSpeed(int level)
 {
-	this->_speed = speed;
+	if (level > 4) level = 4;
+	if (level < 0) level = 0;
+	this->_currentSpeedLevelIndex = level;
+}
+
+void Timer::setTimerSpeedUp()
+{
+	int newLevel = this->_currentSpeedLevelIndex + 1;
+	this->setTimerSpeed(newLevel);
+}
+
+void Timer::setTimerSpeedDown()
+{
+	int newLevel = this->_currentSpeedLevelIndex - 1;
+	this->setTimerSpeed(newLevel);
+}
+
+double Timer::getSpeed()
+{
+	return this->_speedLevels[this->_currentSpeedLevelIndex];
 }

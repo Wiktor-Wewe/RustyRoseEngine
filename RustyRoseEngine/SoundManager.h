@@ -9,9 +9,9 @@ public:
 	
 	void add(std::string path);
 	void add(Sound* sound);
+
 	Sound* get(std::string path);
 	void remove(std::string path);
-	int getCurrentSpeed();
 	
 	void loadAll();
 	void freeAll();
@@ -19,15 +19,15 @@ public:
 	void pauseAll();
 	void resumeAll();
 
-	void setSpeed(int level);
+	void setSpeed(double speed);
+
 	void clear();
 
 	~SoundManager();
 
 private:
 	SoLoud::Soloud* _soloud;
-	int _speedLevels[5] = {1, 2, 4, 16, 32};
-	int _currentSpeedLevelIndex = 0;
+	double _speed;
 
 	std::vector<Sound*> _sounds;
 };
