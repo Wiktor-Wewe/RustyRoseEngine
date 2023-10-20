@@ -19,6 +19,7 @@ IniFile::IniFile()
 	this->_info["seselect"] = "./data/SysSe/NEWSYS/SESELECT.OGG";
 	this->_info["seup"] = "./data/SysSe/NEWSYS/SEUP.OGG";
 	this->_info["seview"] = "./data/SysSe/NEWSYS/SEVIEW.OGG";
+
 }
 
 void IniFile::loadFile(std::string path)

@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BackGround.cpp" />
+    <ClCompile Include="BackGroundManager.cpp" />
     <ClCompile Include="BackGroundMusic.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
+    <ClInclude Include="BackGroundManager.h" />
     <ClInclude Include="BackGroundMusic.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Image.h" />

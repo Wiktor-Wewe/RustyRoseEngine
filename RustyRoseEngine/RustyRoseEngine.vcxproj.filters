@@ -81,6 +81,9 @@
     <ClCompile Include="BackGround.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\GameElements</Filter>
     </ClCompile>
+    <ClCompile Include="BackGroundManager.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sound.h">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="BackGround.h">
       <Filter>Pliki nagłówkowe\GameElements</Filter>
+    </ClInclude>
+    <ClInclude Include="BackGroundManager.h">
+      <Filter>Pliki nagłówkowe\EngineElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

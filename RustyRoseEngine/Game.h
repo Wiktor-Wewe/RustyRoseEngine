@@ -4,6 +4,7 @@
 #include "IniFile.h"
 #include "Jumps.h"
 #include "SoundManager.h"
+#include "BackGroundManager.h"
 #include "VDecoder.h"
 #include "Timer.h"
 #include <RustyControl.h>
@@ -26,14 +27,13 @@ private:
 	RustyRenderWindow* _renderWindow;
 	Jumps* _jumps;
 	SoundManager* _soundManager;
+	BackGroundManager* _backgroundManager;
 	VDecoder* _vDecoder;
 	Timer* _timer;
 	RustyControl* _control;
 
 	std::vector<Script*> _historyScript;
 	Script* _currentScript;
-
-	std::vector<BackGround*> _backGrounds;
 
 	// gameplay
 	enum TaskType {
@@ -43,24 +43,18 @@ private:
 		end
 	};
 
-	struct EventsStateLists {
-		std::vector<Script::Event*> toLoad;
-		std::vector<Script::Event*> toStart;
-		std::vector<Script::Event*> inProgress;
-	};
-
 	bool _pauseStatus;
 	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
 	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
+	Script::EventsStateLists* _eventsStateLists;
 
-	void _loadEvents(EventsStateLists* eventsLists);
-	void _startEvents(EventsStateLists* eventsLists);
-	void _loopOrEndEvents(EventsStateLists* eventsLists);
+	void _handleWindows();
+
+	void _loadEvents();
+	void _startEvents();
+	void _loopOrEndEvents();
 
 	void _findAndHandle(Script::Event* event, TaskType taskType);
-
-	BackGround* _getBackground(std::string path);
-	void _removeBackground(std::string path);
 
 	void _SkipFRAME_(Script::Event* event);
 
@@ -97,9 +91,9 @@ private:
 	void _WhiteFade_Start(Script::Event* event);
 	void _WhiteFade_End(Script::Event* event);
 
-	void _SetSELECT_Start(Script::Event* event);
+	void _SetSELECT_Start(Script::Event* event); // todo
 	void _SetSELECT_Loop(Script::Event* event);
-	void _SetSELECT_End(Script::Event* event);
+	void _SetSELECT_End(Script::Event* event); // todo
 
 	void _EndBGM_Load(Script::Event* event);
 	void _EndBGM_Start(Script::Event* event);
@@ -116,6 +110,15 @@ private:
 	void _pause();
 	void _speedUp();
 	void _speedDown();
+	void _next();
+
+	int _pauseWindow();
+	int _speedUpWindow();
+	int _speedDownWindow();
+	int _nextWindow();
+	
+
 	void _debug();
+	int _debugWindow();
 };
 

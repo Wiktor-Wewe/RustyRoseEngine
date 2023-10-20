@@ -13,7 +13,7 @@ bool BackGround::tryLoadAnimation(std::string shortName)
 	SDL_Texture* buffTexture = this->_tryGetAnimationTexture(animPath);
 	
 	if (buffTexture == NULL) { // its possible that there is no animation for this background
-		false;
+		return false;
 	}
 
 	// if animation .A. excist -> allocate animation -> add .A. -> load and add .B. -> load and add .C.
@@ -64,6 +64,10 @@ void BackGround::free()
 
 SDL_Texture* BackGround::getAnimation(std::string shortName)
 {
+	if (this->_animations.empty()) {
+		return nullptr;
+	}
+
 	auto animation = this->_animations[shortName];
 	if (animation == nullptr) {
 		return nullptr;

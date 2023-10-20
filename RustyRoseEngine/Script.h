@@ -46,6 +46,26 @@ public:
 		}
 	};
 
+	struct EventsStateLists {
+		std::vector<Script::Event*> toLoad;
+		std::vector<Script::Event*> toStart;
+		std::vector<Script::Event*> inProgress;
+
+		~EventsStateLists() {
+			for (auto& event : this->toLoad) {
+				delete event;
+			}
+
+			for (auto& event : this->toStart) {
+				delete event;
+			}
+
+			for (auto& event : this->inProgress) {
+				delete event;
+			}
+		}
+	};
+
 	Script(std::string path);
 	std::string getPath();
 	std::vector<Event*> getEvents();

@@ -2,6 +2,7 @@
 #include "BackGroundMusic.h"
 #include "SoundEffect.h"
 #include "Voice.h"
+#include "Timer.h"
 
 Game::Game()
 {
@@ -16,6 +17,7 @@ Game::Game()
 	this->_jumps->load(ini->getDebugString() + ini->getPathToJump());
 	
 	this->_soundManager = new SoundManager();
+    this->_backgroundManager = new BackGroundManager(this->_renderWindow->getRenderer(), this->_renderWindow->getScene(), this->_renderWindow->getScreenSize());
 	
 	this->_vDecoder = new VDecoder(this->_renderWindow->getRenderer());
 
@@ -31,6 +33,7 @@ Game::Game()
 
     this->_timeToLoad.seconds = 1;
     this->_timeToEnd.milliseconds = 500;
+    this->_eventsStateLists = nullptr;
 
     this->_soundManager->setGlobalSE(this->_iniFile);
 
@@ -43,13 +46,35 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_SPACE, [this]() { this->_pause(); });
     this->_control->addKeyFunction(SDLK_LEFT, [this]() { this->_speedDown(); });
     this->_control->addKeyFunction(SDLK_RIGHT, [this]() { this->_speedUp(); });
+    this->_control->addKeyFunction(SDLK_n, [this]() { this->_next(); });
+    
     this->_renderWindow->getScene()->addText(("GameStatus: " + std::string(this->_status ? "True" : "False")), 0, 0, {255, 255, 255, 255}, {255, 0, 0, 255});
+    auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 100);
+    gameplayMenu->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
+    gameplayMenu->setPosition((1280 / 2) - (1000 / 2), 50);
+    
+    gameplayMenu->addButton("PAUSE", 100, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(1)->setFunction([this]() -> int { return this->_pauseWindow(); });
 
+    gameplayMenu->addButton("SPEED UP", 250, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(2)->setFunction([this]() -> int { return this->_speedUpWindow(); });
 
-    EventsStateLists* eventsLists = new EventsStateLists();
+    gameplayMenu->addButton("SPEED DOWN", 400, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(3)->setFunction([this]() -> int { return this->_speedDownWindow(); });
+
+    gameplayMenu->addButton("DEBUG", 550, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(4)->setFunction([this]() -> int { return this->_debugWindow(); });
+
+    gameplayMenu->addButton("NEXT", 700, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_nextWindow(); });
+
+    this->_renderWindow->getManager()->addWindow(gameplayMenu);
+
+    this->_eventsStateLists = new Script::EventsStateLists();
     for (auto event : this->_currentScript->getEvents()) {
-        eventsLists->toLoad.push_back(event);
+        this->_eventsStateLists->toLoad.push_back(event);
     }
+    this->_backgroundManager->setEventsStateLists(this->_eventsStateLists);
 
     // fps
     const int TARGET_FPS = 24; // <- no need more | video are in 24 fps
@@ -72,12 +97,12 @@ void Game::play()
             }
         }
 
-        this->_loadEvents(eventsLists);
-        this->_startEvents(eventsLists);
+        this->_loadEvents();
+        this->_startEvents();
 
-        this->_renderWindow->reversedDraw();
+        this->_renderWindow->draw();
 
-        this->_loopOrEndEvents(eventsLists);
+        this->_loopOrEndEvents();
 
         /*
         RRW_MouseInfo mouseInfo = this->_control->getMouseInfo();
@@ -94,7 +119,7 @@ void Game::play()
         this->_renderWindow->getScene()->addDialog("Timer: " + this->_timer->elapsed().getString());
         */
 
-        //handleWindows(renderWindow->getManager(), &control);
+        this->_handleWindows();
 
         this->_control->reset();
 
@@ -107,7 +132,9 @@ void Game::play()
         }
     }
 
-    delete eventsLists;
+    this->_backgroundManager->free();
+    delete this->_eventsStateLists;
+    this->_eventsStateLists = nullptr;
 }
 
 bool Game::getStatus()
@@ -125,15 +152,24 @@ void Game::_pause()
     this->_soundManager->globalSE->Click->play();
 
     if (this->_pauseStatus) {
+        this->_backgroundManager->startAnimation();
         this->_soundManager->resumeAll();
         this->_timer->resume();
         this->_pauseStatus = false;
     }
     else {
+        this->_backgroundManager->stopAnimation();
         this->_soundManager->pauseAll();
         this->_timer->pause();
         this->_pauseStatus = true;
     }
+}
+
+int Game::_pauseWindow()
+{
+    this->_pause();
+    SDL_Delay(500);
+    return 0;
 }
 
 void Game::_speedUp()
@@ -143,11 +179,112 @@ void Game::_speedUp()
     this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
+int Game::_speedUpWindow()
+{
+    this->_speedUp();
+    SDL_Delay(500);
+    return 0;
+}
+
 void Game::_speedDown()
 {
     this->_soundManager->globalSE->Click->play();
     this->_timer->setTimerSpeedDown();
     this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
+int Game::_speedDownWindow()
+{
+    this->_speedDown();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_nextWindow()
+{
+    this->_next();
+    SDL_Delay(500);
+    return 0;
+}
+
+void Game::_next()
+{
+    this->_soundManager->globalSE->Click->play();
+    // find setSELECT in this script
+    Script::Event* e = nullptr;
+    for (auto event : this->_eventsStateLists->toLoad) {
+        if (event->type == Script::EventType::SetSELECT) {
+            e = event;
+            break;
+        }
+    }
+
+    // if setSELECT event is null in this script -> revind to end
+    if (!e) {
+        for (auto event : this->_eventsStateLists->toLoad) {
+            if (event->type == Script::EventType::SkipFRAME) {
+                e = event;
+                break;
+            }
+        }
+    }
+
+    if (!e) {
+        printf("ERROR - Unable to NEXT\n");
+        return;
+    }
+
+    // if setSELECT is not null -> set timer to setSELECT->start -> end all events that should be skipped
+    this->_timer->setTimerToTime(*e->start);
+
+    // end and remove skipped events from toStart
+    for (auto it = this->_eventsStateLists->toStart.begin(); it != this->_eventsStateLists->toStart.end();) {
+        if ((*it)->end != nullptr) {
+            if ((*(*it)->end) <= this->_timer->elapsed()) {
+                this->_findAndHandle(*it, TaskType::end);
+                it = this->_eventsStateLists->toStart.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        else {
+            ++it;
+        }
+    }
+
+    // remove skipped events from toLoad
+    for (auto it = this->_eventsStateLists->toLoad.begin(); it != this->_eventsStateLists->toLoad.end();) {
+        if ((*it)->end != nullptr) {
+            bool x = (*(*it)->end) <= this->_timer->elapsed();
+            //printf("%s <= %s = %s\n", (*it)->end->getString().c_str(), this->_timer->elapsed().getString().c_str(), x == true ? "true" : "false");
+            if ((*(*it)->end) <= this->_timer->elapsed()) {
+                it = this->_eventsStateLists->toLoad.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        else {
+            ++it;
+        }
+    }
+
+    // end and remove skipped events from inProgress
+    for (auto it = this->_eventsStateLists->inProgress.begin(); it != this->_eventsStateLists->inProgress.end();) {
+        if ((*it)->end != nullptr) {
+            if ((*(*it)->end) <= this->_timer->elapsed()) {
+                this->_findAndHandle(*it, TaskType::end);
+                it = this->_eventsStateLists->inProgress.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        else {
+            ++it;
+        }
+    }
 }
 
 void Game::_debug()
@@ -156,8 +293,41 @@ void Game::_debug()
     int i = 69; // <- breakpoint
 }
 
-void Game::_loadEvents(EventsStateLists* eventsLists)
+int Game::_debugWindow()
+{
+    this->_debug();
+    SDL_Delay(500);
+    return 0;
+}
+
+void Game::_handleWindows()
+{
+    auto manager = this->_renderWindow->getManager();
+    auto control = this->_control;
+
+    if (manager->isAnyWindow()) {
+        auto mouseInfo = control->getMouseInfo();
+        manager->getCurrentWindow()->updateSelectedId(mouseInfo.x, mouseInfo.y);
+
+        if (mouseInfo.clickL) {
+            manager->updateCurrentWindow(mouseInfo.x, mouseInfo.y);
+            if (RRW_CheckMousePositionOnObject(mouseInfo.x, mouseInfo.y, manager->getCurrentWindow()->getBarPosition())) {
+                auto mouseMove = control->getMouseMove();
+                manager->getCurrentWindow()->move(mouseMove.vecx, mouseMove.vecy);
+            }
+
+            int response = manager->getCurrentWindow()->click();
+            if (response == -1) {
+                manager->removeCurrentWindow();
+            }
+        }
+    }
+}
+
+void Game::_loadEvents()
 { 
+    auto eventsLists = this->_eventsStateLists;
+
     for (auto currEvent = eventsLists->toLoad.begin(); currEvent != eventsLists->toLoad.end();) {
         if (this->_timer->elapsed() >= (*(*currEvent)->start - this->_timeToLoad)) {
             this->_findAndHandle(*currEvent, TaskType::load);
@@ -172,8 +342,10 @@ void Game::_loadEvents(EventsStateLists* eventsLists)
     }
 }
 
-void Game::_startEvents(EventsStateLists* eventsLists)
+void Game::_startEvents()
 {
+    auto eventsLists = this->_eventsStateLists;
+
     for (auto currEvent = eventsLists->toStart.begin(); currEvent != eventsLists->toStart.end();) {
         if (this->_timer->elapsed() >= *(*currEvent)->start) {
             this->_findAndHandle(*currEvent, TaskType::start);
@@ -189,8 +361,10 @@ void Game::_startEvents(EventsStateLists* eventsLists)
     }
 }
 
-void Game::_loopOrEndEvents(EventsStateLists* eventsLists)
+void Game::_loopOrEndEvents()
 {
+    auto eventsLists = this->_eventsStateLists;
+
     for (auto currEvent = eventsLists->inProgress.begin(); currEvent != eventsLists->inProgress.end();) {
 
         if (this->_timer->elapsed() >= (*(*currEvent)->end + this->_timeToEnd)) {
@@ -260,7 +434,7 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
             this->_PlayVoice_Start(event);
         }
         else if (taskType == TaskType::loop) {
-            this->_PlayBgm_Loop(event);
+            this->_PlayVoice_Loop(event);
         }
         else if (taskType == TaskType::end) {
             this->_PlayVoice_End(event);
@@ -317,13 +491,13 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
 
     case Script::EventType::SetSELECT:
         if (taskType == TaskType::start) {
-            //this->_SetSELECT_Start(event);
+            this->_SetSELECT_Start(event);
         }
         else if (taskType == TaskType::loop) {
             //this->_SetSELECT_Loop(event);
         }
         else if (taskType == TaskType::end) {
-            //this->_SetSELECT_End(event);
+            this->_SetSELECT_End(event);
         }
         break;
 
@@ -363,28 +537,6 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
     default:
         printf("uanble to handle action: 0x%X\n", event->type);
         break;
-    }
-}
-
-BackGround* Game::_getBackground(std::string path)
-{
-    for (auto bg : this->_backGrounds) {
-        if (bg->getPath() == path) {
-            return bg;
-        }
-    }
-
-    return nullptr;
-}
-
-void Game::_removeBackground(std::string path)
-{
-    for (int i = 0; i < this->_backGrounds.size(); i++) {
-        if (this->_backGrounds[i]->getPath() == path) {
-            delete this->_backGrounds[i];
-            this->_backGrounds.erase(this->_backGrounds.begin() + i);
-            return;
-        }
     }
 }
 
@@ -428,31 +580,18 @@ void Game::_PlayBgm_End(Script::Event* event)
 
 void Game::_CreateBG_Load(Script::Event* event)
 {
-    auto renWin = this->_renderWindow;
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-
-    auto bg = new BackGround(renWin->getRenderer(), renWin->getScreenSize(), RRE_NormalizePath(path + event->data + ".png"));
-    bg->load();
-
-    this->_backGrounds.push_back(bg);
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".PNG");
+    this->_backgroundManager->setFutureBg(path);
 }
 
 void Game::_CreateBG_Start(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-
-    auto bg = this->_getBackground(RRE_NormalizePath(path + event->data + ".png"));
-    if (bg) {
-        this->_renderWindow->getScene()->addImage(event->data, bg->getTexture(), NULL);
-    }
+    this->_backgroundManager->swapBg();
 }
 
 void Game::_CreateBG_End(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-
-    this->_renderWindow->getScene()->removeImage(event->data);
-    this->_removeBackground(RRE_NormalizePath(path + event->data + ".png"));
+    
 }
 
 void Game::_PrintText_Start(Script::Event* event)
@@ -484,27 +623,14 @@ void Game::_PlayVoice_Start(Script::Event* event)
     if (voice) {
         voice->play();
     }
-
-    if (this->_backGrounds.empty()) {
-        return;
-    }
-
-    if (this->_backGrounds[this->_backGrounds.size()-1]->tryLoadAnimation(event->shortName)) {
-        this->_renderWindow->getScene()->addImage(event->data + event->shortName, this->_backGrounds[0]->getAnimation(event->shortName), NULL, 1);
-    }
+    
+    this->_backgroundManager->setShortName(event->shortName);
+    this->_backgroundManager->startAnimation();
 }
 
 void Game::_PlayVoice_Loop(Script::Event* event)
 {
-    if (this->_backGrounds.empty()) {
-        return;
-    }
-
-    auto nextAnimation = this->_backGrounds[0]->getAnimation(event->shortName);
-    if (nextAnimation) {
-        this->_renderWindow->getScene()->removeImage(event->data + event->shortName);
-        this->_renderWindow->getScene()->addImage(event->data + event->shortName, nextAnimation, NULL, 1);
-    }
+    this->_backgroundManager->handleAnimation();
 }
 
 void Game::_PlayVoice_End(Script::Event* event)
@@ -512,7 +638,7 @@ void Game::_PlayVoice_End(Script::Event* event)
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
 
     this->_soundManager->remove(path);
-    this->_renderWindow->getScene()->removeImage(event->data + event->shortName);
+    this->_backgroundManager->resetShortName(event->shortName);
 }
 
 void Game::_PlaySe_Load(Script::Event* event)
@@ -547,10 +673,12 @@ void Game::_Next_(Script::Event* event)
 {
     // dont delete this function -> if delete -> error nullptr exceprion while delete scalar in string
     // mozzarella
+    printf("Script End\n");
 }
 
 void Game::_PlayMovie_Start(Script::Event* event)
 {
+    this->_backgroundManager->resetShortName();
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".WMV");
 
     this->_vDecoder->free();
@@ -583,6 +711,17 @@ void Game::_PlayMovie_End(Script::Event* event)
     this->_renderWindow->getScene()->removeImage(event->data);
 }
 
+void Game::_SetSELECT_Start(Script::Event* event)
+{
+    this->_renderWindow->getScene()->addDialog(event->data);
+    printf("event->data: %s\n", event->data.c_str());
+}
+
+void Game::_SetSELECT_End(Script::Event* event)
+{
+    this->_renderWindow->getScene()->removeDialog(event->data);
+}
+
 void Game::_EndBGM_Load(Script::Event* event)
 {
     // EndBGM work just like SoundEffect or Voice - so i use it like SE
@@ -606,6 +745,7 @@ void Game::_EndBGM_End(Script::Event* event)
 
 void Game::_EndRoll_Start(Script::Event* event)
 {
+    this->_backgroundManager->resetShortName();
     // same as just normal video, but at the end open save screen
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".WMV");
 

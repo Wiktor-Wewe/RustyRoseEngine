@@ -9,7 +9,7 @@
 int main(int argc, char* argv[]) 
 {
     Game game = Game();
-    printf("%s", game.getStatus() ? "True" : "False");
+    printf("%s", game.getStatus() ? "True\n" : "False\n");
     game.play();
 
     return 0;
