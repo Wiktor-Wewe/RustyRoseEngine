@@ -32,7 +32,7 @@ private:
 	Timer* _timer;
 	RustyControl* _control;
 
-	std::vector<Script*> _historyScript;
+	std::vector<std::string> _historyScript;
 	Script* _currentScript;
 
 	// gameplay
@@ -43,10 +43,15 @@ private:
 		end
 	};
 
+	bool _quitGame;
+	bool _quitScriptLoop;
 	bool _pauseStatus;
 	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
 	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
 	Script::EventsStateLists* _eventsStateLists;
+
+	void _nextScript();
+	void _playScript();
 
 	void _handleWindows();
 
@@ -107,18 +112,18 @@ private:
 	void _MoveSom_Start(Script::Event* event);
 	void _MoveSom_End(Script::Event* event);
 
+	void _exit();
+	void _debug();
 	void _pause();
 	void _speedUp();
 	void _speedDown();
 	void _next();
 
+	int _exitWindow();
+	int _debugWindow();
 	int _pauseWindow();
 	int _speedUpWindow();
 	int _speedDownWindow();
 	int _nextWindow();
-	
-
-	void _debug();
-	int _debugWindow();
 };
 

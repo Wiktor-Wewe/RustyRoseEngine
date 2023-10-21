@@ -38,7 +38,7 @@ public:
 
 		~Event() {
 			if (this->start) {
-				delete this->start; // todo delete in time
+				delete this->start;
 			}
 			if (this->end) {
 				delete this->end;
@@ -53,16 +53,30 @@ public:
 
 		~EventsStateLists() {
 			for (auto& event : this->toLoad) {
-				delete event;
+				//delete event; <- dont need to delete? is will me delete in while deleting scrpit
 			}
 
 			for (auto& event : this->toStart) {
-				delete event;
+				//delete event;
 			}
 
 			for (auto& event : this->inProgress) {
-				delete event;
+				//delete event;
 			}
+			this->clear();
+		}
+
+		bool isAllEnd() {
+			if (this->toLoad.empty() && this->toStart.empty() && this->inProgress.empty()) {
+				return true;
+			}
+			return false;
+		}
+
+		void clear() {
+			this->toLoad.clear();
+			this->toStart.clear();
+			this->inProgress.clear();
 		}
 	};
 

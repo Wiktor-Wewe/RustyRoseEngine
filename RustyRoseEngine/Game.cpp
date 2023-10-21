@@ -15,6 +15,7 @@ Game::Game()
 	
 	this->_jumps = new Jumps();
 	this->_jumps->load(ini->getDebugString() + ini->getPathToJump());
+    this->_jumps->setStart(this->_iniFile->getStartScript());
 	
 	this->_soundManager = new SoundManager();
     this->_backgroundManager = new BackGroundManager(this->_renderWindow->getRenderer(), this->_renderWindow->getScene(), this->_renderWindow->getScreenSize());
@@ -24,8 +25,9 @@ Game::Game()
 	this->_timer = new Timer();
 
 	this->_control = new RustyControl();
-	
-	this->_currentScript = new Script(ini->getDebugString() + ini->getMainPath() + "Script/ENGLISH/" + ini->getStartScript() + ".rose");
+
+	this->_currentScript = new Script(RRE_NormalizePath(ini->getDebugString() + ini->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose"));
+    this->_historyScript.push_back(this->_jumps->getCurrentJump()->scriptName);
 
 	if (this->_renderWindow->getInitStatus() == 0 && this->_jumps->getStatus() && this->_currentScript->isGood()) {
 		this->_status = true;
@@ -37,22 +39,27 @@ Game::Game()
 
     this->_soundManager->setGlobalSE(this->_iniFile);
 
+    this->_quitGame = false;
+    this->_quitScriptLoop = false;
     this->_pauseStatus = false;
+    this->_eventsStateLists = new Script::EventsStateLists();
 }
 
 void Game::play()
 {
+    // register keys
     this->_control->addKeyFunction(SDLK_d, [this]() {this->_debug(); });
     this->_control->addKeyFunction(SDLK_SPACE, [this]() { this->_pause(); });
     this->_control->addKeyFunction(SDLK_LEFT, [this]() { this->_speedDown(); });
     this->_control->addKeyFunction(SDLK_RIGHT, [this]() { this->_speedUp(); });
     this->_control->addKeyFunction(SDLK_n, [this]() { this->_next(); });
     
-    this->_renderWindow->getScene()->addText(("GameStatus: " + std::string(this->_status ? "True" : "False")), 0, 0, {255, 255, 255, 255}, {255, 0, 0, 255});
+    // make gameplay menu/bar (at the top of game window)
     auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 100);
     gameplayMenu->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
     gameplayMenu->setPosition((1280 / 2) - (1000 / 2), 50);
     
+    // register buttons on menu
     gameplayMenu->addButton("PAUSE", 100, 20, 100, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(1)->setFunction([this]() -> int { return this->_pauseWindow(); });
 
@@ -68,73 +75,25 @@ void Game::play()
     gameplayMenu->addButton("NEXT", 700, 20, 100, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_nextWindow(); });
 
+    gameplayMenu->addButton("EXIT", 850, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(6)->setFunction([this]() -> int { return this->_exitWindow(); });
+
+    //gameplayMenu->centerButtons(); <- to fix
+    
+    // add window to manager
     this->_renderWindow->getManager()->addWindow(gameplayMenu);
 
-    this->_eventsStateLists = new Script::EventsStateLists();
-    for (auto event : this->_currentScript->getEvents()) {
-        this->_eventsStateLists->toLoad.push_back(event);
+    // main loop of scripts
+    while (!this->_quitGame) {
+        auto jump = this->_jumps->getCurrentJump();
+        this->_renderWindow->getScene()->addText(jump->scriptName, 0, 0, { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0xff, 0xff, 0xff }, this->_renderWindow->getFonts()->medium);
+        this->_playScript();
+        this->_renderWindow->getScene()->removeText(jump->scriptName);
+
+        this->_backgroundManager->free();
+        this->_eventsStateLists->clear();
+        this->_nextScript();
     }
-    this->_backgroundManager->setEventsStateLists(this->_eventsStateLists);
-
-    // fps
-    const int TARGET_FPS = 24; // <- no need more | video are in 24 fps
-    Uint32 frameStartTime;
-    Uint32 frameEndTime;
-    Uint32 frameTime;
-
-    this->_timer->reset(); // reset timer
-
-    bool quit = false;
-    SDL_Event e;
-    while (!quit) {
-        frameStartTime = SDL_GetTicks(); // fps stuff
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
-            }
-            else {
-                this->_control->handle(e);
-            }
-        }
-
-        this->_loadEvents();
-        this->_startEvents();
-
-        this->_renderWindow->draw();
-
-        this->_loopOrEndEvents();
-
-        /*
-        RRW_MouseInfo mouseInfo = this->_control->getMouseInfo();
-        RRW_MouseMove mouseMove = this->_control->getMouseMove();
-        this->_renderWindow->getScene()->clear(RustyScene::Clear::Dialogs);
-        this->_renderWindow->getScene()->addDialog("Mouse x: " + std::to_string(mouseInfo.x));
-        this->_renderWindow->getScene()->addDialog("Mouse y: " + std::to_string(mouseInfo.y));
-        this->_renderWindow->getScene()->addDialog("Click Left: " + std::string(mouseInfo.clickL == true ? "True" : "False"));
-        this->_renderWindow->getScene()->addDialog("Click Right: " + std::string(mouseInfo.clickR == true ? "True" : "False"));
-        this->_renderWindow->getScene()->addDialog("Move X: " + std::to_string(mouseMove.vecx));
-        this->_renderWindow->getScene()->addDialog("Move Y: " + std::to_string(mouseMove.vecy));
-        this->_renderWindow->getScene()->addDialog("Current Window Id: " + std::to_string(this->_renderWindow->getManager()->getCurrentWindowId()));
-        this->_renderWindow->getScene()->addDialog("Pause Status: " + std::string(this->_pauseStatus == true ? "True" : "False"));
-        this->_renderWindow->getScene()->addDialog("Timer: " + this->_timer->elapsed().getString());
-        */
-
-        this->_handleWindows();
-
-        this->_control->reset();
-
-        // fps stuff
-        frameEndTime = SDL_GetTicks();
-        frameTime = frameEndTime - frameStartTime;
-
-        if (frameTime < 1000 / TARGET_FPS) {
-            SDL_Delay(1000 / TARGET_FPS - frameTime);
-        }
-    }
-
-    this->_backgroundManager->free();
-    delete this->_eventsStateLists;
-    this->_eventsStateLists = nullptr;
 }
 
 bool Game::getStatus()
@@ -145,6 +104,12 @@ bool Game::getStatus()
 Game::~Game()
 {
     // todo
+}
+
+void Game::_exit()
+{
+    this->_quitScriptLoop = true;
+    this->_quitGame = true;
 }
 
 void Game::_pause()
@@ -163,6 +128,13 @@ void Game::_pause()
         this->_timer->pause();
         this->_pauseStatus = true;
     }
+}
+
+int Game::_exitWindow()
+{
+    this->_exit();
+    SDL_Delay(500);
+    return 0;
 }
 
 int Game::_pauseWindow()
@@ -235,7 +207,7 @@ void Game::_next()
     }
 
     // if setSELECT is not null -> set timer to setSELECT->start -> end all events that should be skipped
-    this->_timer->setTimerToTime(*e->start);
+    this->_timer->setTimerToTime(*e->start - this->_timeToLoad);
 
     // end and remove skipped events from toStart
     for (auto it = this->_eventsStateLists->toStart.begin(); it != this->_eventsStateLists->toStart.end();) {
@@ -298,6 +270,71 @@ int Game::_debugWindow()
     this->_debug();
     SDL_Delay(500);
     return 0;
+}
+
+void Game::_nextScript()
+{
+    delete this->_currentScript;
+    this->_jumps->move(0); // <- should be player chooice 
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose");
+    this->_currentScript = new Script(path);
+    if (this->_currentScript->isGood() == false) {
+        printf("Unable to load next Script: %s\n", path.c_str());
+    }
+    else {
+        this->_historyScript.push_back(this->_jumps->getCurrentJump()->scriptName);
+    }
+}
+
+void Game::_playScript()
+{
+    for (auto event : this->_currentScript->getEvents()) {
+        this->_eventsStateLists->toLoad.push_back(event);
+    }
+    this->_backgroundManager->setEventsStateLists(this->_eventsStateLists);
+
+    // fps
+    const int TARGET_FPS = 24; // <- no need more | video are in 24 fps
+    Uint32 frameStartTime;
+    Uint32 frameEndTime;
+    Uint32 frameTime;
+
+    this->_timer->reset(); // reset timer
+
+    this->_quitScriptLoop = false;
+    SDL_Event e;
+    while (!this->_quitScriptLoop) {
+        frameStartTime = SDL_GetTicks(); // fps stuff
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                this->_exit();
+            }
+            else {
+                this->_control->handle(e);
+            }
+        }
+
+        // handle gameplay
+        this->_loadEvents();
+        this->_startEvents();
+        this->_renderWindow->draw();
+        this->_loopOrEndEvents();
+        this->_handleWindows();
+        this->_control->reset();
+
+        // fps stuff
+        frameEndTime = SDL_GetTicks();
+        frameTime = frameEndTime - frameStartTime;
+
+        if (frameTime < 1000 / TARGET_FPS) {
+            SDL_Delay(1000 / TARGET_FPS - frameTime);
+        }
+
+        // if all events done -> end script loop
+        if (this->_eventsStateLists->isAllEnd()) {
+            this->_quitScriptLoop = true;
+        }
+    }
 }
 
 void Game::_handleWindows()

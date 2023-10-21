@@ -53,21 +53,70 @@ bool Jumps::load(std::string path)
     }
 
     file.close();
+
+    if (this->_jumps.empty()) {
+        printf("ERROR - Jumps are empty after load\n");
+        return false;
+    }
+
+    this->_currentJump = this->_jumps[0];
     this->_status = true;
     return true;
 }
 
-void Jumps::move(int playerOption)
+void Jumps::setStart(std::string scriptName)
 {
-    for (int i = 0; i < this->_jumps.size(); i++) {
-        if (this->_jumps[i] == this->_currentJump) {
-            if (i + playerOption - 1 > this->_jumps.size()) {
-                this->_currentJump = this->_jumps[this->_jumps.size() - 1]; // if jump is impossible, return last possible jump
-                return;
-            }
-            this->_currentJump = this->_jumps[i + playerOption];
+    for (auto jump : this->_jumps) {
+        if (jump->scriptName == scriptName) {
+            this->_currentJump = jump;
+            return;
         }
     }
+
+    printf("Unable to set starting jump: %s\n", scriptName.c_str());
+}
+
+void Jumps::move(int playerOption)
+{
+    /*
+    this is how Jumps work:
+    +------+----------+--------------+------------------+
+    | id   | route_id | script       | jump_to_scene_id |
+    +------+----------+-------+--------------+----------+
+    |    1 |        0 | 00/00-00-A00 |                2 |
+    |    2 |        0 | 00/00-00-A01 |                3 |
+    |    3 |        0 | 00/00-00-A02 |                4 |
+    |    4 |        0 | 00/00-00-A03 |                5 |
+    |    4 |        0 | 00/00-00-A03 |                6 |
+    |    4 |        0 | 00/00-00-A03 |                7 |
+    |    5 |        0 | 00/00-00-A04 |                8 |
+    |    6 |        0 | 00/00-00-A05 |                9 |
+    */
+
+    // find current jump and add move coursor if player set any option
+    Jump* currJump = nullptr;
+    for (int i = 0; i < this->_jumps.size(); i++) {
+        if (this->_jumps[i] == this->_currentJump) {
+            currJump = this->_jumps[i + playerOption]; // <- todo - check if jump is possible
+        }
+    }
+
+    // check if current Jump was find
+    if (currJump == nullptr) {
+        printf("ERROR - Jump is impossible\n");
+        return;
+    }
+
+    // move to next Jump
+    for (auto jump : this->_jumps) {
+        if (jump->id == currJump->jumpToId) {
+            this->_currentJump = jump;
+            return;
+        }
+    }
+
+    // if next Jump is impossible to set
+    printf("Unable to make jump\n");
 }
 
 Jumps::Jump* Jumps::getCurrentJump()

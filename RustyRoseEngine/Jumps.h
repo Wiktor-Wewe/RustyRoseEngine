@@ -14,6 +14,7 @@ public:
 
 	Jumps();
 	bool load(std::string path);
+	void setStart(std::string scriptName);
 	void move(int playerOption);
 
 	Jump* getCurrentJump();
