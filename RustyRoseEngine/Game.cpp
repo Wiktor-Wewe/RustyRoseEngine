@@ -762,22 +762,30 @@ void Game::_SetSELECT_End(Script::Event* event)
 void Game::_EndBGM_Load(Script::Event* event)
 {
     // EndBGM work just like SoundEffect or Voice - so i use it like SE
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto endbgm = (SoundEffect*)this->_soundManager->get(RRE_NormalizePath(path + event->data + ".ogg"));
-    endbgm->load();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+    this->_soundManager->add(path);
+
+    auto se = (SoundEffect*)this->_soundManager->get(path);
+    if (se) {
+        se->load();
+    }
 }
 
 void Game::_EndBGM_Start(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    auto endbgm = (SoundEffect*)this->_soundManager->get(RRE_NormalizePath(path + event->data) + ".ogg");
-    endbgm->play();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    auto se = (SoundEffect*)this->_soundManager->get(path);
+    if (se) {
+        se->play();
+    }
 }
 
 void Game::_EndBGM_End(Script::Event* event)
 {
-    std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath();
-    this->_soundManager->remove(RRE_NormalizePath(path + event->data + ".ogg"));
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
+
+    this->_soundManager->remove(path);
 }
 
 void Game::_EndRoll_Start(Script::Event* event)

@@ -117,6 +117,7 @@ private:
 	void _pause();
 	void _speedUp();
 	void _speedDown();
+
 	void _next();
 
 	int _exitWindow();
