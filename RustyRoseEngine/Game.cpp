@@ -55,30 +55,45 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_n, [this]() { this->_next(); });
     
     // make gameplay menu/bar (at the top of game window)
-    auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 100);
+    auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 50);
     gameplayMenu->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
     gameplayMenu->setPosition((1280 / 2) - (1000 / 2), 50);
     
     // register buttons on menu
-    gameplayMenu->addButton("PAUSE", 100, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("PAUSE", 100, 20, 50, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(1)->setFunction([this]() -> int { return this->_pauseWindow(); });
 
-    gameplayMenu->addButton("SPEED UP", 250, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED UP", 250, 20, 50, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(2)->setFunction([this]() -> int { return this->_speedUpWindow(); });
 
-    gameplayMenu->addButton("SPEED DOWN", 400, 20, 100, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED DOWN", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(3)->setFunction([this]() -> int { return this->_speedDownWindow(); });
 
-    gameplayMenu->addButton("DEBUG", 550, 20, 100, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(4)->setFunction([this]() -> int { return this->_debugWindow(); });
+    gameplayMenu->addButton("SPEED 1", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(4)->setFunction([this]() -> int { return this->_setSpeed1Window(); });
 
-    gameplayMenu->addButton("NEXT", 700, 20, 100, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_nextWindow(); });
+    gameplayMenu->addButton("SPEED 2", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_setSpeed2Window(); });
 
-    gameplayMenu->addButton("EXIT", 850, 20, 100, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(6)->setFunction([this]() -> int { return this->_exitWindow(); });
+    gameplayMenu->addButton("SPEED 4", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(6)->setFunction([this]() -> int { return this->_setSpeed4Window(); });
 
-    //gameplayMenu->centerButtons(); <- to fix
+    gameplayMenu->addButton("SPEED 16", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(7)->setFunction([this]() -> int { return this->_setSpeed16Window(); });
+
+    gameplayMenu->addButton("SPEED 32", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(8)->setFunction([this]() -> int { return this->_setSpeed32Window(); });
+
+    gameplayMenu->addButton("DEBUG", 550, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(9)->setFunction([this]() -> int { return this->_debugWindow(); });
+
+    gameplayMenu->addButton("NEXT", 700, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_nextWindow(); });
+
+    gameplayMenu->addButton("EXIT", 850, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_exitWindow(); });
+
+    gameplayMenu->centerButtons(); // <- to fix
     
     // add window to manager
     this->_renderWindow->getManager()->addWindow(gameplayMenu);
@@ -165,9 +180,79 @@ void Game::_speedDown()
     this->_soundManager->setSpeed(this->_timer->getSpeed());
 }
 
+void Game::_setSpeed1()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_timer->setTimerSpeed(0);
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
+void Game::_setSpeed2()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_timer->setTimerSpeed(1);
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
+void Game::_setSpeed4()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_timer->setTimerSpeed(2);
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
+void Game::_setSpeed16()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_timer->setTimerSpeed(3);
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
+void Game::_setSpeed32()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_timer->setTimerSpeed(4);
+    this->_soundManager->setSpeed(this->_timer->getSpeed());
+}
+
 int Game::_speedDownWindow()
 {
     this->_speedDown();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setSpeed1Window()
+{
+    this->_setSpeed1();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setSpeed2Window()
+{
+    this->_setSpeed2();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setSpeed4Window()
+{
+    this->_setSpeed4();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setSpeed16Window()
+{
+    this->_setSpeed16();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setSpeed32Window()
+{
+    this->_setSpeed32();
     SDL_Delay(500);
     return 0;
 }

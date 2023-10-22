@@ -27,7 +27,7 @@ private:
 	RustyRenderWindow* _renderWindow;
 	Jumps* _jumps;
 	SoundManager* _soundManager;
-	BackGroundManager* _backgroundManager;
+	BackGroundManager* _backgroundManager; // <- got memmory leak - to fix (only when script ends?)
 	VDecoder* _vDecoder;
 	Timer* _timer;
 	RustyControl* _control;
@@ -117,7 +117,11 @@ private:
 	void _pause();
 	void _speedUp();
 	void _speedDown();
-
+	void _setSpeed1();
+	void _setSpeed2();
+	void _setSpeed4();
+	void _setSpeed16();
+	void _setSpeed32();
 	void _next();
 
 	int _exitWindow();
@@ -125,6 +129,11 @@ private:
 	int _pauseWindow();
 	int _speedUpWindow();
 	int _speedDownWindow();
+	int _setSpeed1Window();
+	int _setSpeed2Window();
+	int _setSpeed4Window();
+	int _setSpeed16Window();
+	int _setSpeed32Window();
 	int _nextWindow();
 };
 
