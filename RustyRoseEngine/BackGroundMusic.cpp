@@ -1,6 +1,6 @@
 #include "BackGroundMusic.h"
 
-BackGroundMusic::BackGroundMusic(std::string path, SoLoud::Soloud* soloud, double speed) : Sound(path, soloud, speed)
+BackGroundMusic::BackGroundMusic(std::string path, SoLoud::Soloud* soloud, double speed, int type) : Sound(path, soloud, speed, type)
 {
 	this->_initDone = false;
 	this->_waveLoop = new SoLoud::Wav();

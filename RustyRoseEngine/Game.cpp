@@ -33,7 +33,7 @@ Game::Game()
 		this->_status = true;
 	}
 
-    this->_timeToLoad.seconds = 1;
+    this->_timeToLoad.seconds = 5;
     this->_timeToEnd.milliseconds = 500;
     this->_eventsStateLists = nullptr;
 
@@ -42,6 +42,7 @@ Game::Game()
     this->_quitGame = false;
     this->_quitScriptLoop = false;
     this->_pauseStatus = false;
+    this->_previousScript = false;
     this->_eventsStateLists = new Script::EventsStateLists();
 }
 
@@ -53,6 +54,12 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_LEFT, [this]() { this->_speedDown(); });
     this->_control->addKeyFunction(SDLK_RIGHT, [this]() { this->_speedUp(); });
     this->_control->addKeyFunction(SDLK_n, [this]() { this->_next(); });
+    this->_control->addKeyFunction(SDLK_p, [this]() { this->_previous(); });
+    this->_control->addKeyFunction(SDLK_1, [this]() { this->_setSpeed1(); });
+    this->_control->addKeyFunction(SDLK_2, [this]() { this->_setSpeed2(); });
+    this->_control->addKeyFunction(SDLK_3, [this]() { this->_setSpeed4(); });
+    this->_control->addKeyFunction(SDLK_4, [this]() { this->_setSpeed16(); });
+    this->_control->addKeyFunction(SDLK_5, [this]() { this->_setSpeed32(); });
     
     // make gameplay menu/bar (at the top of game window)
     auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 50);
@@ -103,10 +110,12 @@ void Game::play()
         auto jump = this->_jumps->getCurrentJump();
         this->_renderWindow->getScene()->addText(jump->scriptName, 0, 0, { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0xff, 0xff, 0xff }, this->_renderWindow->getFonts()->medium);
         this->_playScript();
-        this->_renderWindow->getScene()->removeText(jump->scriptName);
 
-        this->_backgroundManager->free();
+        this->_backgroundManager->clear();
+        this->_soundManager->clear();
         this->_eventsStateLists->clear();
+        this->_renderWindow->getScene()->clear(RustyScene::Clear::All);
+
         this->_nextScript();
     }
 }
@@ -132,13 +141,13 @@ void Game::_pause()
     this->_soundManager->globalSE->Click->play();
 
     if (this->_pauseStatus) {
-        this->_backgroundManager->startAnimation();
+        this->_backgroundManager->setAnimationStatus(true);
         this->_soundManager->resumeAll();
         this->_timer->resume();
         this->_pauseStatus = false;
     }
     else {
-        this->_backgroundManager->stopAnimation();
+        this->_backgroundManager->setAnimationStatus(false);
         this->_soundManager->pauseAll();
         this->_timer->pause();
         this->_pauseStatus = true;
@@ -344,6 +353,22 @@ void Game::_next()
     }
 }
 
+void Game::_previous()
+{
+    this->_previousScript = true;
+    this->_soundManager->globalSE->Click->play();
+
+    // if timer is more than / equal 5 seconds -> rewind to start of current script
+    Timer::Time time; time.seconds = 5;
+    if (time <= this->_timer->elapsed()) {
+        this->_quitScriptLoop = true;
+        return;
+    }
+
+    // if timer is less than 2 second -> end current script and play previous script
+    // todo
+}
+
 void Game::_debug()
 {
     this->_soundManager->globalSE->Click->play();
@@ -359,6 +384,13 @@ int Game::_debugWindow()
 
 void Game::_nextScript()
 {
+    this->_backgroundManager->clear();
+
+    if (this->_previousScript) { // if there was 'previous action' -> dont do anything with script -> _previous() handle all themself
+        this->_previousScript = false;
+        return;
+    }
+
     delete this->_currentScript;
     this->_jumps->move(0); // <- should be player chooice 
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose");
@@ -405,6 +437,7 @@ void Game::_playScript()
         this->_renderWindow->draw();
         this->_loopOrEndEvents();
         this->_handleWindows();
+        this->_backgroundManager->handleAnimation();
         this->_control->reset();
 
         // fps stuff
@@ -456,7 +489,7 @@ void Game::_loadEvents()
 
             eventsLists->toStart.push_back(*currEvent);
             currEvent = eventsLists->toLoad.erase(currEvent);
-            break; // <- load one per frame, reduce lagas / at least i think so
+            //break; // <- load one per frame, reduce lagas / at least i think so
         }
         else {
             ++currEvent;
@@ -583,13 +616,13 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
 
     case Script::EventType::PlayMovie:
         if (taskType == TaskType::start) {
-            this->_PlayMovie_Start(event);
+            //this->_PlayMovie_Start(event);
         }
         else if (taskType == TaskType::loop) {
-            this->_PlayMovie_Loop(event);
+            //this->_PlayMovie_Loop(event);
         }
         else if (taskType == TaskType::end) {
-            this->_PlayMovie_End(event);
+            //this->_PlayMovie_End(event);
         }
         break;
 
@@ -665,14 +698,8 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
 void Game::_PlayBgm_Load(Script::Event* event)
 {
     std::string path = this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data;
-    auto bgm = new BackGroundMusic(path, nullptr, 0);
 
-    this->_soundManager->add(bgm);
-    bgm = (BackGroundMusic*)this->_soundManager->get(path);
-
-    if (bgm) {
-        bgm->load();
-    }
+    this->_soundManager->add(path, SoundManager::Type::BackGroundMusicType);
 }
 
 void Game::_PlayBgm_Start(Script::Event* event)
@@ -703,17 +730,19 @@ void Game::_PlayBgm_End(Script::Event* event)
 void Game::_CreateBG_Load(Script::Event* event)
 {
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".PNG");
-    this->_backgroundManager->setFutureBg(path);
+    this->_backgroundManager->addBG(path);
 }
 
 void Game::_CreateBG_Start(Script::Event* event)
 {
-    this->_backgroundManager->swapBg();
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".PNG");
+    this->_backgroundManager->setBG(path);
 }
 
 void Game::_CreateBG_End(Script::Event* event)
 {
-    
+    std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".PNG");
+    this->_backgroundManager->freeBG(path);
 }
 
 void Game::_PrintText_Start(Script::Event* event)
@@ -729,12 +758,8 @@ void Game::_PrintText_End(Script::Event* event)
 void Game::_PlayVoice_Load(Script::Event* event)
 {
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
-    this->_soundManager->add(path);
-
-    auto voice = (Voice*)this->_soundManager->get(path);
-    if (voice) {
-        voice->load();
-    }
+    
+    this->_soundManager->add(path, SoundManager::Type::VoiceType);
 }
 
 void Game::_PlayVoice_Start(Script::Event* event)
@@ -747,12 +772,12 @@ void Game::_PlayVoice_Start(Script::Event* event)
     }
     
     this->_backgroundManager->setShortName(event->shortName);
-    this->_backgroundManager->startAnimation();
+    this->_backgroundManager->setAnimationStatus(true);
 }
 
 void Game::_PlayVoice_Loop(Script::Event* event)
 {
-    this->_backgroundManager->handleAnimation();
+    
 }
 
 void Game::_PlayVoice_End(Script::Event* event)
@@ -766,12 +791,8 @@ void Game::_PlayVoice_End(Script::Event* event)
 void Game::_PlaySe_Load(Script::Event* event)
 {
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
-    this->_soundManager->add(path);
-
-    auto se = (SoundEffect*)this->_soundManager->get(path);
-    if (se) {
-        se->load();
-    }
+    
+    this->_soundManager->add(path, SoundManager::Type::SoundEffectType);
 }
 
 void Game::_PlaySe_Start(Script::Event* event)
@@ -848,12 +869,8 @@ void Game::_EndBGM_Load(Script::Event* event)
 {
     // EndBGM work just like SoundEffect or Voice - so i use it like SE
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + event->data + ".OGG");
-    this->_soundManager->add(path);
-
-    auto se = (SoundEffect*)this->_soundManager->get(path);
-    if (se) {
-        se->load();
-    }
+    
+    this->_soundManager->add(path, SoundManager::Type::SoundEffectType);
 }
 
 void Game::_EndBGM_Start(Script::Event* event)

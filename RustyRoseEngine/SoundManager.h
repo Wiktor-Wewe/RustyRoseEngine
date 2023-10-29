@@ -1,11 +1,21 @@
 #pragma once
 #include "SharedUtils.h"
 #include "Sound.h"
+#include "BackGroundMusic.h"
+#include "SoundEffect.h"
+#include "Voice.h"
 #include "IniFile.h"
 
 class SoundManager
 {
 public:
+	enum Type {
+		SoundType,
+		BackGroundMusicType,
+		SoundEffectType,
+		VoiceType
+	};
+
 	struct GlobalSE {
 		GlobalSE() {
 			this->Cancel = nullptr;
@@ -38,8 +48,7 @@ public:
 
 	SoundManager();
 	
-	void add(std::string path);
-	void add(Sound* sound);
+	void add(std::string path, Type type = Type::SoundType);
 
 	Sound* get(std::string path);
 	void remove(std::string path);
@@ -61,5 +70,5 @@ private:
 	double _speed;
 
 	std::vector<Sound*> _sounds;
+	void _deleteOnType(Sound* sound);
 };
-

@@ -27,7 +27,7 @@ private:
 	RustyRenderWindow* _renderWindow;
 	Jumps* _jumps;
 	SoundManager* _soundManager;
-	BackGroundManager* _backgroundManager; // <- got memmory leak - to fix (only when script ends?)
+	BackGroundManager* _backgroundManager;
 	VDecoder* _vDecoder;
 	Timer* _timer;
 	RustyControl* _control;
@@ -46,6 +46,7 @@ private:
 	bool _quitGame;
 	bool _quitScriptLoop;
 	bool _pauseStatus;
+	bool _previousScript;
 	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
 	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
 	Script::EventsStateLists* _eventsStateLists;
@@ -123,6 +124,7 @@ private:
 	void _setSpeed16();
 	void _setSpeed32();
 	void _next();
+	void _previous();
 
 	int _exitWindow();
 	int _debugWindow();

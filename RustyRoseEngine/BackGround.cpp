@@ -82,7 +82,9 @@ SDL_Texture* BackGround::getAnimation(std::string shortName)
 BackGround::~BackGround()
 {
 	for (auto& animation : this->_animations) {
-		delete animation.second;
+		if (&animation) {
+			delete animation.second;
+		}
 	}
 	this->_animations.clear();
 }

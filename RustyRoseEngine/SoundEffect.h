@@ -4,7 +4,7 @@
 class SoundEffect : public Sound
 {
 public:
-	SoundEffect(std::string path, SoLoud::Soloud* soloud, double speed);
+	SoundEffect(std::string path, SoLoud::Soloud* soloud, double speed, int type);
 
 private:
 

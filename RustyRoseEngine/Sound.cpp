@@ -1,11 +1,17 @@
 #include "Sound.h"
 
-Sound::Sound(std::string path, SoLoud::Soloud* soloud, double speed)
+Sound::Sound(std::string path, SoLoud::Soloud* soloud, double speed, int type)
 {
+	this->_type = type;
 	this->_speed = speed;
 	this->_path = path;
 	this->_soloud = soloud;
 	this->_wave = new SoLoud::Wav();
+}
+
+int Sound::getType()
+{
+	return this->_type;
 }
 
 void Sound::load()
@@ -83,11 +89,6 @@ void Sound::free()
 std::string Sound::getPath()
 {
 	return this->_path;
-}
-
-void Sound::setSoLoud(SoLoud::Soloud* soloud)
-{
-	this->_soloud = soloud;
 }
 
 Sound::~Sound()

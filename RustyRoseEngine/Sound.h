@@ -4,7 +4,8 @@
 class Sound
 {
 public:
-	Sound(std::string path, SoLoud::Soloud* soloud, double speed);
+	Sound(std::string path, SoLoud::Soloud* soloud, double speed, int type = 0);
+	int getType();
 	void load();
 	void play();
 	void pause();
@@ -15,10 +16,10 @@ public:
 
 	std::string getPath();
 
-	void setSoLoud(SoLoud::Soloud* soloud);
 	~Sound();
 
 protected:
+	int _type;
 	double _speed;
 	std::string _path;
 	SoLoud::Soloud* _soloud;

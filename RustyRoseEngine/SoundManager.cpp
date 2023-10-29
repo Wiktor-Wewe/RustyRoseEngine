@@ -25,22 +25,43 @@ SoundManager::SoundManager()
 {
 	this->_soloud = new SoLoud::Soloud();
 	this->_soloud->init();
+	this->_speed = 1;
 
 	this->globalSE = new GlobalSE();
 }
 
-void SoundManager::add(std::string path)
+void SoundManager::add(std::string path, Type type)
 {
-	Sound* sound = new Sound(path, this->_soloud, this->_speed);
+	Sound* sound = nullptr;
 
-	this->_sounds.push_back(sound);
-}
+	switch (type) {
+	case Type::BackGroundMusicType: {
+		auto bgm = new BackGroundMusic(path, this->_soloud, this->_speed, type);
+		bgm->load();
+		sound = bgm;
+		} break;
 
-void SoundManager::add(Sound* sound)
-{
-	sound->setSoLoud(this->_soloud);
-	sound->setSpeed(this->_speed);
-	this->_sounds.push_back(sound);
+	case Type::SoundEffectType: {
+		auto se = new SoundEffect(path, this->_soloud, this->_speed, type);
+		se->load();
+		sound = se;
+		} break;
+
+	case Type::SoundType: {
+		sound = new Sound(path, this->_soloud, this->_speed);
+		sound->load();
+		} break;
+
+	case Type::VoiceType: {
+		auto v = new Voice(path, this->_soloud, this->_speed, type);
+		v->load();
+		sound = v;
+		} break;
+	}
+
+	if (sound) {
+		this->_sounds.push_back(sound);
+	}
 }
 
 Sound* SoundManager::get(std::string path)
@@ -59,7 +80,7 @@ void SoundManager::remove(std::string path)
 	for (int i = 0; i < this->_sounds.size(); i++) {
 		if (this->_sounds[i]->getPath() == path) {
 			this->_sounds[i]->stop();
-			delete this->_sounds[i];
+			this->_deleteOnType(this->_sounds[i]);
 			this->_sounds.erase(this->_sounds.begin() + i);
 			return;
 		}
@@ -68,6 +89,7 @@ void SoundManager::remove(std::string path)
 
 void SoundManager::loadAll()
 {
+	// i dont know if its needed anymore | if no -> delete | if yes -> add load depend on sound type
 	for (auto sound : this->_sounds) {
 		sound->load();
 	}
@@ -75,6 +97,7 @@ void SoundManager::loadAll()
 
 void SoundManager::freeAll()
 {
+	// same as loadAll
 	for (auto sound : this->_sounds) {
 		sound->free();
 	}
@@ -108,7 +131,7 @@ void SoundManager::clear()
 {
 	for (auto sound : this->_sounds) {
 		sound->stop();
-		delete sound;
+		this->_deleteOnType(sound);
 	}
 	this->_sounds.clear();
 }
@@ -116,6 +139,32 @@ void SoundManager::clear()
 SoundManager::~SoundManager()
 {
 	this->clear();
+	delete this->globalSE;
 	this->_soloud->deinit();
 	delete this->_soloud;
+}
+
+void SoundManager::_deleteOnType(Sound* sound)
+{
+	switch (sound->getType()) {
+
+	case Type::BackGroundMusicType: {
+		auto bgm = (BackGroundMusic*)sound;
+		delete bgm;
+		} break;
+
+	case Type::SoundEffectType: {
+		auto se = (SoundEffect*)sound;
+		delete se;
+		} break;
+
+	case Type::SoundType: {
+		delete sound;
+		} break;
+
+	case Type::VoiceType: {
+		auto v = (Voice*)sound;
+		delete v;
+		} break;
+	}
 }

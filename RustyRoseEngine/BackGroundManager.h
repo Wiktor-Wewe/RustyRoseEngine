@@ -9,15 +9,16 @@ class BackGroundManager
 public:
 	BackGroundManager(SDL_Renderer* renderer, RustyScene* scene, RRW_ScreenSize* screenSize);
 
-	void setEventsStateLists(Script::EventsStateLists* eventsStateLists);
-	void setFutureBg(std::string path);
-	void swapBg();
+	void setEventsStateLists(Script::EventsStateLists* esl);
+	void addBG(std::string path);
+	void setBG(std::string path);
+	void freeBG(std::string path);
+
 	void setShortName(std::string shortName);
 	void resetShortName(std::string shortName = std::string());
-	void startAnimation();
-	void stopAnimation();
+	void setAnimationStatus(bool status);
 	void handleAnimation();
-	void free();
+	void clear();
 
 	~BackGroundManager();
 
@@ -30,8 +31,7 @@ private:
 	bool _isAnimation;
 	std::vector<std::string> _names;
 	std::string _shortName;
-	BackGround* _currentBackGround;
-	BackGround* _futureBackGround;
-
+	BackGround* _currentBg;
+	std::vector<BackGround*> _backgrounds;
 };
 
