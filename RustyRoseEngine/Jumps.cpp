@@ -76,6 +76,18 @@ void Jumps::setStart(std::string scriptName)
     printf("Unable to set starting jump: %s\n", scriptName.c_str());
 }
 
+void Jumps::setCurrent(std::string scriptName)
+{
+    for (auto jump : this->_jumps) {
+        if (jump->scriptName == scriptName) {
+            this->_currentJump = jump;
+            return;
+        }
+    }
+
+    printf("Unable to set current jump: %s\n", scriptName.c_str());
+}
+
 void Jumps::move(int playerOption)
 {
     /*

@@ -47,9 +47,12 @@ private:
 	bool _quitScriptLoop;
 	bool _pauseStatus;
 	bool _previousScript;
+	bool _setScriptToStart;
 	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
 	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
 	Script::EventsStateLists* _eventsStateLists;
+	unsigned int _optionWindowId;
+	unsigned short _playerOption;
 
 	void _nextScript();
 	void _playScript();
@@ -78,7 +81,7 @@ private:
 
 	void _PlayVoice_Load(Script::Event* event);
 	void _PlayVoice_Start(Script::Event* event);
-	void _PlayVoice_Loop(Script::Event* event); // animation
+	void _PlayVoice_Loop(Script::Event* event); // nothing
 	void _PlayVoice_End(Script::Event* event);
 
 	void _PlaySe_Load(Script::Event* event);
@@ -97,9 +100,8 @@ private:
 	void _WhiteFade_Start(Script::Event* event);
 	void _WhiteFade_End(Script::Event* event);
 
-	void _SetSELECT_Start(Script::Event* event); // todo
-	void _SetSELECT_Loop(Script::Event* event);
-	void _SetSELECT_End(Script::Event* event); // todo
+	void _SetSELECT_Start(Script::Event* event);
+	void _SetSELECT_End(Script::Event* event);
 
 	void _EndBGM_Load(Script::Event* event);
 	void _EndBGM_Start(Script::Event* event);
@@ -125,6 +127,10 @@ private:
 	void _setSpeed32();
 	void _next();
 	void _previous();
+	void _setPlayerOption0();
+	void _setPlayerOption1();
+	void _setPlayerOption2();
+	void _showHistory();
 
 	int _exitWindow();
 	int _debugWindow();
@@ -137,5 +143,10 @@ private:
 	int _setSpeed16Window();
 	int _setSpeed32Window();
 	int _nextWindow();
+	int _previousWindow();
+	int _setPlayerOption0Window();
+	int _setPlayerOption1Window();
+	int _setPlayerOption2Window();
+
 };
 

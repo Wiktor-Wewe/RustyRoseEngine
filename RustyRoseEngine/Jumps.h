@@ -15,6 +15,7 @@ public:
 	Jumps();
 	bool load(std::string path);
 	void setStart(std::string scriptName);
+	void setCurrent(std::string scriptName); // <- to set previous script base on history
 	void move(int playerOption);
 
 	Jump* getCurrentJump();

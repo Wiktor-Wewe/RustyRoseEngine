@@ -27,7 +27,6 @@ Game::Game()
 	this->_control = new RustyControl();
 
 	this->_currentScript = new Script(RRE_NormalizePath(ini->getDebugString() + ini->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose"));
-    this->_historyScript.push_back(this->_jumps->getCurrentJump()->scriptName);
 
 	if (this->_renderWindow->getInitStatus() == 0 && this->_jumps->getStatus() && this->_currentScript->isGood()) {
 		this->_status = true;
@@ -44,6 +43,8 @@ Game::Game()
     this->_pauseStatus = false;
     this->_previousScript = false;
     this->_eventsStateLists = new Script::EventsStateLists();
+    this->_optionWindowId = 0;
+    this->_playerOption = 0;
 }
 
 void Game::play()
@@ -60,6 +61,7 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_3, [this]() { this->_setSpeed4(); });
     this->_control->addKeyFunction(SDLK_4, [this]() { this->_setSpeed16(); });
     this->_control->addKeyFunction(SDLK_5, [this]() { this->_setSpeed32(); });
+    this->_control->addKeyFunction(SDLK_h, [this]() { this->_showHistory(); });
     
     // make gameplay menu/bar (at the top of game window)
     auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 50);
@@ -94,11 +96,14 @@ void Game::play()
     gameplayMenu->addButton("DEBUG", 550, 20, 50, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(9)->setFunction([this]() -> int { return this->_debugWindow(); });
 
+    gameplayMenu->addButton("BACK", 550, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_previousWindow(); });
+
     gameplayMenu->addButton("NEXT", 700, 20, 50, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_nextWindow(); });
+    gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_nextWindow(); });
 
     gameplayMenu->addButton("EXIT", 850, 20, 50, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_exitWindow(); });
+    gameplayMenu->getButton(12)->setFunction([this]() -> int { return this->_exitWindow(); });
 
     gameplayMenu->centerButtons(); // <- to fix
     
@@ -108,7 +113,8 @@ void Game::play()
     // main loop of scripts
     while (!this->_quitGame) {
         auto jump = this->_jumps->getCurrentJump();
-        this->_renderWindow->getScene()->addText(jump->scriptName, 0, 0, { 0xff, 0x00, 0x00, 0xff }, { 0xff, 0xff, 0xff, 0xff }, this->_renderWindow->getFonts()->medium);
+        this->_renderWindow->getScene()->addText("Current Script: " + jump->scriptName, 0, 0, {0xff, 0x00, 0x00, 0xff}, {0xff, 0xff, 0xff, 0xff}, this->_renderWindow->getFonts()->medium);
+        
         this->_playScript();
 
         this->_backgroundManager->clear();
@@ -127,7 +133,17 @@ bool Game::getStatus()
 
 Game::~Game()
 {
-    // todo
+    delete this->_iniFile;
+    delete this->_jumps;
+    //delete this->_soundManager;
+    delete this->_backgroundManager;
+    delete this->_vDecoder;
+    delete this->_timer;
+    delete this->_control;
+    delete this->_currentScript;
+
+    delete this->_eventsStateLists;
+    delete this->_renderWindow;
 }
 
 void Game::_exit()
@@ -273,6 +289,42 @@ int Game::_nextWindow()
     return 0;
 }
 
+int Game::_previousWindow()
+{
+    this->_previous();
+    SDL_Delay(500);
+    return 0;
+}
+
+int Game::_setPlayerOption0Window()
+{
+    this->_renderWindow->getManager()->removeWindow(this->_optionWindowId);
+    this->_optionWindowId = 0;
+    this->_setPlayerOption0();
+    this->_soundManager->globalSE->Select->play();
+    this->_soundManager->globalSE->Up->play();
+    return 0;
+}
+
+int Game::_setPlayerOption1Window()
+{
+    this->_renderWindow->getManager()->removeWindow(this->_optionWindowId);
+    this->_optionWindowId = 0;
+    this->_setPlayerOption1();
+    this->_soundManager->globalSE->Select->play();
+    this->_soundManager->globalSE->Up->play();
+    return 0;
+}
+
+int Game::_setPlayerOption2Window()
+{
+    this->_renderWindow->getManager()->removeWindow(this->_optionWindowId);
+    this->_optionWindowId = 0;
+    this->_setPlayerOption2();
+    this->_soundManager->globalSE->Cancel->play();
+    return 0;
+}
+
 void Game::_next()
 {
     this->_soundManager->globalSE->Click->play();
@@ -355,18 +407,41 @@ void Game::_next()
 
 void Game::_previous()
 {
-    this->_previousScript = true;
     this->_soundManager->globalSE->Click->play();
+    this->_quitScriptLoop = true;
 
     // if timer is more than / equal 5 seconds -> rewind to start of current script
     Timer::Time time; time.seconds = 5;
     if (time <= this->_timer->elapsed()) {
-        this->_quitScriptLoop = true;
-        return;
+        this->_setScriptToStart = true;
     }
+    else { // else -> play previus script
+        this->_previousScript = true;
+    }
+}
 
-    // if timer is less than 2 second -> end current script and play previous script
-    // todo
+void Game::_setPlayerOption0()
+{
+    this->_playerOption = 0;
+}
+
+void Game::_setPlayerOption1()
+{
+    this->_playerOption = 1;
+}
+
+void Game::_setPlayerOption2()
+{
+    this->_playerOption = 2;
+}
+
+void Game::_showHistory()
+{
+    std::string historyList = "History: ";
+    for (auto name : this->_historyScript) historyList += name + ", ";
+    auto window = new RustyDialogWindow(historyList, this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, this->_renderWindow->getFonts()->small, 800, 600);
+    window->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
+    this->_renderWindow->getManager()->addWindow(window);
 }
 
 void Game::_debug()
@@ -386,20 +461,45 @@ void Game::_nextScript()
 {
     this->_backgroundManager->clear();
 
-    if (this->_previousScript) { // if there was 'previous action' -> dont do anything with script -> _previous() handle all themself
-        this->_previousScript = false;
+    // set current script just to start
+    if (this->_setScriptToStart) { 
+        this->_setScriptToStart = false;
         return;
     }
 
+    // set to previous script
+    if (this->_previousScript) {
+        this->_previousScript = false;
+
+        delete this->_currentScript;
+        std::string scriptName = this->_historyScript.empty() ? this->_iniFile->getStartScript() : this->_historyScript[this->_historyScript.size() - 1];
+        std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + scriptName + ".rose");
+        this->_currentScript = new Script(path);
+        if (this->_currentScript->isGood() == false) {
+            printf("Unable to load previus Script: %s\n", path.c_str());
+            return;
+        }
+        
+        if (this->_historyScript.empty() == false) {
+            this->_historyScript.erase(this->_historyScript.begin() + this->_historyScript.size() - 1);
+        }
+        
+        this->_jumps->setCurrent(scriptName);
+
+        return;
+    }
+
+    // add script to history
+    this->_historyScript.push_back(this->_jumps->getCurrentJump()->scriptName);
+
+    // set next script depends on player dialog options
     delete this->_currentScript;
-    this->_jumps->move(0); // <- should be player chooice 
+    this->_jumps->move(this->_playerOption); // <- player chooice 
+    this->_playerOption = 0; // <- reset player chooice
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose");
     this->_currentScript = new Script(path);
     if (this->_currentScript->isGood() == false) {
         printf("Unable to load next Script: %s\n", path.c_str());
-    }
-    else {
-        this->_historyScript.push_back(this->_jumps->getCurrentJump()->scriptName);
     }
 }
 
@@ -616,13 +716,13 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
 
     case Script::EventType::PlayMovie:
         if (taskType == TaskType::start) {
-            //this->_PlayMovie_Start(event);
+            this->_PlayMovie_Start(event);
         }
         else if (taskType == TaskType::loop) {
-            //this->_PlayMovie_Loop(event);
+            this->_PlayMovie_Loop(event);
         }
         else if (taskType == TaskType::end) {
-            //this->_PlayMovie_End(event);
+            this->_PlayMovie_End(event);
         }
         break;
 
@@ -647,9 +747,6 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
     case Script::EventType::SetSELECT:
         if (taskType == TaskType::start) {
             this->_SetSELECT_Start(event);
-        }
-        else if (taskType == TaskType::loop) {
-            //this->_SetSELECT_Loop(event);
         }
         else if (taskType == TaskType::end) {
             this->_SetSELECT_End(event);
@@ -856,13 +953,45 @@ void Game::_PlayMovie_End(Script::Event* event)
 
 void Game::_SetSELECT_Start(Script::Event* event)
 {
-    this->_renderWindow->getScene()->addDialog(event->data);
-    printf("event->data: %s\n", event->data.c_str());
+    // create new window and split options
+    auto window = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 500, 100);
+    auto options = RRE_Split(event->data, '\t');
+
+    // clac size of buttons
+    int buttonWidth = options[0].length() * 20;
+    if (options.size() > 1 && options[0].length() < options[1].length()) {
+        buttonWidth = options[1].length() * 20;
+    }
+
+    // add buttons
+    window->addButton(options[0], 0, 0, buttonWidth, 30, this->_renderWindow->getFonts()->medium);
+    if (options.size() > 1) {
+        window->addButton(options[1], 0, 0, buttonWidth, 30, this->_renderWindow->getFonts()->medium);
+    }
+
+    // set funtions to buttons
+    window->getButton(1)->setFunction([this]() -> int { return this->_setPlayerOption0Window(); });
+    if (options.size() > 1) {
+        window->getButton(2)->setFunction([this]() -> int { return this->_setPlayerOption1Window(); });
+    }
+
+    // todo - add autosize to buttons in 'RustyRoseWindow'
+
+    // set settings for buttons and add window to manager
+    window->centerButtons();
+    window->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
+    this->_optionWindowId = this->_renderWindow->getManager()->addWindow(window);
+
+    // play sounds effects
+    this->_soundManager->globalSE->View->play();
 }
 
 void Game::_SetSELECT_End(Script::Event* event)
 {
-    this->_renderWindow->getScene()->removeDialog(event->data);
+    // if window is still open -> close it
+    if (this->_optionWindowId != 0) {
+        this->_setPlayerOption2Window();
+    }
 }
 
 void Game::_EndBGM_Load(Script::Event* event)

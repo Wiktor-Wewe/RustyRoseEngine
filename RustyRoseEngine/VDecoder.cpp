@@ -12,7 +12,10 @@ VDecoder::VDecoder(SDL_Renderer* renderer)
 void VDecoder::setPath(std::string path)
 {
 	this->_path = path;
-	this->_frame = NULL;
+	if (this->_frame) {
+		av_frame_free(&this->_frame);
+		this->_frame = NULL;
+	}
 }
 
 bool VDecoder::start()
@@ -89,6 +92,7 @@ bool VDecoder::decodeFrame()
 	}
 	if (this->_frame != NULL) {
 		av_frame_free(&this->_frame);
+		this->_frame = NULL;
 	}
 	av_packet_unref(this->_packet);
 	return false;
@@ -114,9 +118,9 @@ void VDecoder::free()
 
 SDL_Texture* VDecoder::getFrame()
 {
-	if (this->_frame == nullptr)
+	if (this->_frame == NULL)
 	{
-		return nullptr;
+		return NULL;
 	}
 
 	// Prepare RGB data buffer for the frame
@@ -132,13 +136,13 @@ SDL_Texture* VDecoder::getFrame()
 
 	SwsContext* swsContext = sws_getContext(srcWidth, srcHeight, srcFormat,
 		dstWidth, dstHeight, dstFormat,
-		SWS_BILINEAR, nullptr, nullptr, nullptr);
+		SWS_BILINEAR, NULL, NULL, NULL);
 
 
 	// Perform YUV to RGB conversion
 	uint8_t* srcData[AV_NUM_DATA_POINTERS] = { this->_frame->data[0], this->_frame->data[1], this->_frame->data[2] };
 	int srcLinesize[AV_NUM_DATA_POINTERS] = { this->_frame->linesize[0], this->_frame->linesize[1], this->_frame->linesize[2] };
-	uint8_t* dstData[AV_NUM_DATA_POINTERS] = { rgbData, nullptr, nullptr };
+	uint8_t* dstData[AV_NUM_DATA_POINTERS] = { rgbData, NULL, NULL };
 	int dstLinesize[AV_NUM_DATA_POINTERS] = { this->_frame->width * 3, 0, 0 };
 	sws_scale(swsContext, srcData, srcLinesize, 0, srcHeight, dstData, dstLinesize);
 
@@ -148,7 +152,7 @@ SDL_Texture* VDecoder::getFrame()
 	// Lock the texture to update its data.
 	void* texturePixels;
 	int texturePitch;
-	SDL_LockTexture(this->_texture, nullptr, &texturePixels, &texturePitch);
+	SDL_LockTexture(this->_texture, NULL, &texturePixels, &texturePitch);
 
 	// Copy the converted RGB data to the texture
 	memcpy(texturePixels, rgbData, dstWidth * dstHeight * 3);
