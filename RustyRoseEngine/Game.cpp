@@ -42,6 +42,7 @@ Game::Game()
     this->_quitScriptLoop = false;
     this->_pauseStatus = false;
     this->_previousScript = false;
+    this->_skipToPlayerOption = false;
     this->_eventsStateLists = new Script::EventsStateLists();
     this->_optionWindowId = 0;
     this->_playerOption = 0;
@@ -62,6 +63,7 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_4, [this]() { this->_setSpeed16(); });
     this->_control->addKeyFunction(SDLK_5, [this]() { this->_setSpeed32(); });
     this->_control->addKeyFunction(SDLK_h, [this]() { this->_showHistory(); });
+    this->_control->addKeyFunction(SDLK_s, [this]() { this->_skip(); });
     
     // make gameplay menu/bar (at the top of game window)
     auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 50);
@@ -69,41 +71,47 @@ void Game::play()
     gameplayMenu->setPosition((1280 / 2) - (1000 / 2), 50);
     
     // register buttons on menu
-    gameplayMenu->addButton("PAUSE", 100, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("PAUSE", 100, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(1)->setFunction([this]() -> int { return this->_pauseWindow(); });
 
-    gameplayMenu->addButton("SPEED UP", 250, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED UP", 250, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(2)->setFunction([this]() -> int { return this->_speedUpWindow(); });
 
-    gameplayMenu->addButton("SPEED DOWN", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED DOWN", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(3)->setFunction([this]() -> int { return this->_speedDownWindow(); });
 
-    gameplayMenu->addButton("SPEED 1", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x1", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(4)->setFunction([this]() -> int { return this->_setSpeed1Window(); });
 
-    gameplayMenu->addButton("SPEED 2", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x2", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_setSpeed2Window(); });
 
-    gameplayMenu->addButton("SPEED 4", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x4", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(6)->setFunction([this]() -> int { return this->_setSpeed4Window(); });
 
-    gameplayMenu->addButton("SPEED 16", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x16", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(7)->setFunction([this]() -> int { return this->_setSpeed16Window(); });
 
-    gameplayMenu->addButton("SPEED 32", 400, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x32", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(8)->setFunction([this]() -> int { return this->_setSpeed32Window(); });
 
-    gameplayMenu->addButton("DEBUG", 550, 20, 50, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("DEBUG", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
     gameplayMenu->getButton(9)->setFunction([this]() -> int { return this->_debugWindow(); });
 
-    gameplayMenu->addButton("BACK", 550, 20, 50, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_previousWindow(); });
+    gameplayMenu->addButton("HISTORY", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_showHistoryWindow(); });
 
-    gameplayMenu->addButton("NEXT", 700, 20, 50, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_nextWindow(); });
+    gameplayMenu->addButton("SKIP", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_skipWindow(); });
 
-    gameplayMenu->addButton("EXIT", 850, 20, 50, 30, this->_renderWindow->getFonts()->small);
-    gameplayMenu->getButton(12)->setFunction([this]() -> int { return this->_exitWindow(); });
+    gameplayMenu->addButton("<<", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(12)->setFunction([this]() -> int { return this->_previousWindow(); });
+
+    gameplayMenu->addButton(">>", 700, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(13)->setFunction([this]() -> int { return this->_nextWindow(); });
+
+    gameplayMenu->addButton("EXIT", 850, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->getButton(14)->setFunction([this]() -> int { return this->_exitWindow(); });
 
     gameplayMenu->centerButtons(); // <- to fix
     
@@ -296,6 +304,13 @@ int Game::_previousWindow()
     return 0;
 }
 
+int Game::_skipWindow()
+{
+    this->_skip();
+    SDL_Delay(500);
+    return 0;
+}
+
 int Game::_setPlayerOption0Window()
 {
     this->_renderWindow->getManager()->removeWindow(this->_optionWindowId);
@@ -325,9 +340,20 @@ int Game::_setPlayerOption2Window()
     return 0;
 }
 
+int Game::_showHistoryWindow()
+{
+    this->_showHistory();
+    SDL_Delay(500);
+    return 0;
+}
+
 void Game::_next()
 {
-    this->_soundManager->globalSE->Click->play();
+    // play cliclSE once if skipToPlayerOption is true
+    if (this->_skipToPlayerOption == false) {
+        this->_soundManager->globalSE->Click->play();
+    }
+
     // find setSELECT in this script
     Script::Event* e = nullptr;
     for (auto event : this->_eventsStateLists->toLoad) {
@@ -353,7 +379,7 @@ void Game::_next()
     }
 
     // if setSELECT is not null -> set timer to setSELECT->start -> end all events that should be skipped
-    this->_timer->setTimerToTime(*e->start - this->_timeToLoad);
+    this->_timer->setTimerToTime(*e->start);
 
     // end and remove skipped events from toStart
     for (auto it = this->_eventsStateLists->toStart.begin(); it != this->_eventsStateLists->toStart.end();) {
@@ -420,6 +446,13 @@ void Game::_previous()
     }
 }
 
+void Game::_skip()
+{
+    this->_soundManager->globalSE->Click->play();
+    this->_quitScriptLoop = true;
+    this->_skipToPlayerOption = true;
+}
+
 void Game::_setPlayerOption0()
 {
     this->_playerOption = 0;
@@ -437,6 +470,8 @@ void Game::_setPlayerOption2()
 
 void Game::_showHistory()
 {
+    this->_soundManager->globalSE->Click->play();
+
     std::string historyList = "History: ";
     for (auto name : this->_historyScript) historyList += name + ", ";
     auto window = new RustyDialogWindow(historyList, this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, this->_renderWindow->getFonts()->small, 800, 600);
@@ -501,6 +536,16 @@ void Game::_nextScript()
     if (this->_currentScript->isGood() == false) {
         printf("Unable to load next Script: %s\n", path.c_str());
     }
+
+    // skip scripts until setSELECT event is found
+    if (this->_skipToPlayerOption) {
+        for (auto event : this->_currentScript->getEvents()) {
+            if (event->type == Script::EventType::SetSELECT) {
+                return;
+            }
+        }
+        this->_nextScript();
+    }
 }
 
 void Game::_playScript()
@@ -519,6 +564,13 @@ void Game::_playScript()
     this->_timer->reset(); // reset timer
 
     this->_quitScriptLoop = false;
+
+    // if this script play just after SKIP -> rewind to setSELECT
+    if (this->_skipToPlayerOption) {
+        this->_next();
+        this->_skipToPlayerOption = false;
+    }
+
     SDL_Event e;
     while (!this->_quitScriptLoop) {
         frameStartTime = SDL_GetTicks(); // fps stuff

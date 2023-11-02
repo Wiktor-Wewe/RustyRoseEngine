@@ -73,9 +73,9 @@ SDL_Texture* BackGround::getAnimation(std::string shortName)
 		return nullptr;
 	}
 
-	auto sprite = animation->sprites[this->_animationCounter];
-	this->_animationCounter++;
-	if (this->_animationCounter > 2) this->_animationCounter = 0;
+	auto sprite = animation->sprites[this->_animationCounter / 10];
+	this->_animationCounter+=4;
+	if (this->_animationCounter > 29) this->_animationCounter = 0;
 	return sprite;
 }
 

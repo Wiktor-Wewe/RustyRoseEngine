@@ -48,6 +48,8 @@ private:
 	bool _pauseStatus;
 	bool _previousScript;
 	bool _setScriptToStart;
+	bool _skipToPlayerOption;
+
 	Timer::Time _timeToLoad; // eg. if set to 1 sec, it will load events 1 sec before start
 	Timer::Time _timeToEnd; // eg. if set to 500 ms, it will end events afert 500 ms extra time - useful with dialogs
 	Script::EventsStateLists* _eventsStateLists;
@@ -127,6 +129,7 @@ private:
 	void _setSpeed32();
 	void _next();
 	void _previous();
+	void _skip();
 	void _setPlayerOption0();
 	void _setPlayerOption1();
 	void _setPlayerOption2();
@@ -144,9 +147,11 @@ private:
 	int _setSpeed32Window();
 	int _nextWindow();
 	int _previousWindow();
+	int _skipWindow();
 	int _setPlayerOption0Window();
 	int _setPlayerOption1Window();
 	int _setPlayerOption2Window();
+	int _showHistoryWindow();
 
 };
 
