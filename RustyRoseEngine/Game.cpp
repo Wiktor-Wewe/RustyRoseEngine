@@ -7,11 +7,12 @@
 Game::Game()
 {
 	this->_status = false;
+    this->_firstLoad = false;
 	this->_iniFile = new IniFile();
 	this->_iniFile->loadFile("C:/Users/Wiktor/source/repos/RustyRoseEngine/x64/Debug/rose.ini");
 	auto ini = this->_iniFile;
 
-	this->_renderWindow = new RustyRenderWindow(ini->getTitle(), ini->getWindowWidth(), ini->getWindowHeight(), (ini->getDebugString() + ini->getPathToFont()).c_str());
+	this->_renderWindow = new RustyRenderWindow(ini->getTitle(), ini->getWindowWidth(), ini->getWindowHeight(), (ini->getDebugString() + ini->getPathToFont()).c_str(), 2);
 	
 	this->_jumps = new Jumps();
 	this->_jumps->load(ini->getDebugString() + ini->getPathToJump());
@@ -32,7 +33,7 @@ Game::Game()
 		this->_status = true;
 	}
 
-    this->_timeToLoad.seconds = 5;
+    this->_timeToLoad.seconds = 0;
     this->_timeToEnd.milliseconds = 500;
     this->_eventsStateLists = nullptr;
 
@@ -66,54 +67,55 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_s, [this]() { this->_skip(); });
     
     // make gameplay menu/bar (at the top of game window)
-    auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 1000, 50);
+    auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->mediumFont, 1000, 50);
     gameplayMenu->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
     gameplayMenu->setPosition((1280 / 2) - (1000 / 2), 50);
     
     // register buttons on menu
-    gameplayMenu->addButton("PAUSE", 100, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("PAUSE", 100, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(1)->setFunction([this]() -> int { return this->_pauseWindow(); });
 
-    gameplayMenu->addButton("SPEED UP", 250, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED UP", 250, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(2)->setFunction([this]() -> int { return this->_speedUpWindow(); });
 
-    gameplayMenu->addButton("SPEED DOWN", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SPEED DOWN", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(3)->setFunction([this]() -> int { return this->_speedDownWindow(); });
 
-    gameplayMenu->addButton("x1", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x1", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(4)->setFunction([this]() -> int { return this->_setSpeed1Window(); });
 
-    gameplayMenu->addButton("x2", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x2", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(5)->setFunction([this]() -> int { return this->_setSpeed2Window(); });
 
-    gameplayMenu->addButton("x4", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x4", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(6)->setFunction([this]() -> int { return this->_setSpeed4Window(); });
 
-    gameplayMenu->addButton("x16", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x16", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(7)->setFunction([this]() -> int { return this->_setSpeed16Window(); });
 
-    gameplayMenu->addButton("x32", 400, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("x32", 400, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(8)->setFunction([this]() -> int { return this->_setSpeed32Window(); });
 
-    gameplayMenu->addButton("DEBUG", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("DEBUG", 550, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(9)->setFunction([this]() -> int { return this->_debugWindow(); });
 
-    gameplayMenu->addButton("HISTORY", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("HISTORY", 550, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(10)->setFunction([this]() -> int { return this->_showHistoryWindow(); });
 
-    gameplayMenu->addButton("SKIP", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("SKIP", 550, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(11)->setFunction([this]() -> int { return this->_skipWindow(); });
 
-    gameplayMenu->addButton("<<", 550, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("<<", 550, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(12)->setFunction([this]() -> int { return this->_previousWindow(); });
 
-    gameplayMenu->addButton(">>", 700, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton(">>", 700, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(13)->setFunction([this]() -> int { return this->_nextWindow(); });
 
-    gameplayMenu->addButton("EXIT", 850, 20, 60, 30, this->_renderWindow->getFonts()->small);
+    gameplayMenu->addButton("EXIT", 850, 20, 60, 30, this->_renderWindow->getFonts()->smallFont);
     gameplayMenu->getButton(14)->setFunction([this]() -> int { return this->_exitWindow(); });
 
-    gameplayMenu->centerButtons(); // <- to fix
+    gameplayMenu->centerButtons();
+    //gameplayMenu->hideBar(); // <0 to fix
     
     // add window to manager
     this->_renderWindow->getManager()->addWindow(gameplayMenu);
@@ -121,7 +123,7 @@ void Game::play()
     // main loop of scripts
     while (!this->_quitGame) {
         auto jump = this->_jumps->getCurrentJump();
-        this->_renderWindow->getScene()->addText("Current Script: " + jump->scriptName, 0, 0, {0xff, 0x00, 0x00, 0xff}, {0xff, 0xff, 0xff, 0xff}, this->_renderWindow->getFonts()->medium);
+        this->_renderWindow->getScene()->addText("Current Script: " + jump->scriptName, 0, 0, {0xff, 0x00, 0x00, 0xff}, {0xff, 0xff, 0xff, 0xff}, this->_renderWindow->getFonts()->mediumFont);
         
         this->_playScript();
 
@@ -318,7 +320,7 @@ int Game::_setPlayerOption0Window()
     this->_setPlayerOption0();
     this->_soundManager->globalSE->Select->play();
     this->_soundManager->globalSE->Up->play();
-    return 0;
+    return -1;
 }
 
 int Game::_setPlayerOption1Window()
@@ -328,7 +330,7 @@ int Game::_setPlayerOption1Window()
     this->_setPlayerOption1();
     this->_soundManager->globalSE->Select->play();
     this->_soundManager->globalSE->Up->play();
-    return 0;
+    return -1;
 }
 
 int Game::_setPlayerOption2Window()
@@ -337,7 +339,7 @@ int Game::_setPlayerOption2Window()
     this->_optionWindowId = 0;
     this->_setPlayerOption2();
     this->_soundManager->globalSE->Cancel->play();
-    return 0;
+    return -1;
 }
 
 int Game::_showHistoryWindow()
@@ -474,9 +476,12 @@ void Game::_showHistory()
 
     std::string historyList = "History: ";
     for (auto name : this->_historyScript) historyList += name + ", ";
-    auto window = new RustyDialogWindow(historyList, this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, this->_renderWindow->getFonts()->small, 800, 600);
+    int windowId = 0;
+    auto window = this->_renderWindow->getManager()->makeWindow(800, 600, windowId);
+    window->addText(historyList, 0, 0, nullptr);
+    window->centerTexts();
     window->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
-    this->_renderWindow->getManager()->addWindow(window);
+    window->addCloseButton();
 }
 
 void Game::_debug()
@@ -564,16 +569,18 @@ void Game::_playScript()
     this->_timer->reset(); // reset timer
 
     this->_quitScriptLoop = false;
+    this->_firstLoad = true;
 
     // if this script play just after SKIP -> rewind to setSELECT
     if (this->_skipToPlayerOption) {
         this->_next();
         this->_skipToPlayerOption = false;
+        this->_firstLoad = false;
     }
 
     SDL_Event e;
     while (!this->_quitScriptLoop) {
-        frameStartTime = SDL_GetTicks(); // fps stuff
+        frameStartTime = SDL_GetTicks(); // fps stuff // <<-------- add SDL_GetTicks64;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 this->_exit();
@@ -585,6 +592,18 @@ void Game::_playScript()
 
         // handle gameplay
         this->_loadEvents();
+        if (this->_firstLoad) {
+            this->_timer->reset();
+            this->_firstLoad = false;
+        }
+
+        if (this->_control->getMouseInfo().y < this->_renderWindow->getScreenSize()->Height / 2) {
+            this->_renderWindow->getManager()->getWindow(1)->show();
+        }
+        else {
+            this->_renderWindow->getManager()->getWindow(1)->hide();
+        }
+
         this->_startEvents();
         this->_renderWindow->draw();
         this->_loopOrEndEvents();
@@ -1005,21 +1024,23 @@ void Game::_PlayMovie_End(Script::Event* event)
 
 void Game::_SetSELECT_Start(Script::Event* event)
 {
+    this->_renderWindow->getManager()->getWindow(1)->lockButtons();
+
     // create new window and split options
-    auto window = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->medium, 500, 100);
+    int windowId = 0;
+    auto window = this->_renderWindow->getManager()->makeWindow(500, 100, windowId);
+
     auto options = RRE_Split(event->data, '\t');
 
-    // clac size of buttons
-    int buttonWidth = options[0].length() * 20;
-    if (options.size() > 1 && options[0].length() < options[1].length()) {
-        buttonWidth = options[1].length() * 20;
-    }
-
     // add buttons
-    window->addButton(options[0], 0, 0, buttonWidth, 30, this->_renderWindow->getFonts()->medium);
+    window->addButton(options[0], 0, 0, 0, 0);
     if (options.size() > 1) {
-        window->addButton(options[1], 0, 0, buttonWidth, 30, this->_renderWindow->getFonts()->medium);
+        window->addButton(options[1], 0, 0, 0, 0);
     }
+    window->formatButtons();
+    window->formatWindow();
+    window->centerWindow();
+    //window->hideBar(); // <- to fix
 
     // set funtions to buttons
     window->getButton(1)->setFunction([this]() -> int { return this->_setPlayerOption0Window(); });
@@ -1027,12 +1048,8 @@ void Game::_SetSELECT_Start(Script::Event* event)
         window->getButton(2)->setFunction([this]() -> int { return this->_setPlayerOption1Window(); });
     }
 
-    // todo - add autosize to buttons in 'RustyRoseWindow'
-
     // set settings for buttons and add window to manager
-    window->centerButtons();
     window->setBackgroundColor({ 0x00, 0x00, 0x00, 0x50 });
-    this->_optionWindowId = this->_renderWindow->getManager()->addWindow(window);
 
     // play sounds effects
     this->_soundManager->globalSE->View->play();
@@ -1044,6 +1061,7 @@ void Game::_SetSELECT_End(Script::Event* event)
     if (this->_optionWindowId != 0) {
         this->_setPlayerOption2Window();
     }
+    this->_renderWindow->getManager()->getWindow(1)->unlockButtons();
 }
 
 void Game::_EndBGM_Load(Script::Event* event)

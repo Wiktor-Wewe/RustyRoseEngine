@@ -23,6 +23,7 @@ public:
 private:
 	// engine
 	bool _status;
+	bool _firstLoad;
 	IniFile* _iniFile;
 	RustyRenderWindow* _renderWindow;
 	Jumps* _jumps;
