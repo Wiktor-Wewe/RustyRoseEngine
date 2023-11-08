@@ -33,8 +33,6 @@ private:
 	AVPacket* _packet;
 	AVFrame* _frame;
 
-	int _texFrameWidth;
-	int _texFrameHeight;
 	bool _texDimensionsValid;
 	SDL_Texture* _texture;
 
