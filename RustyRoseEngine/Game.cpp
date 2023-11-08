@@ -1027,8 +1027,7 @@ void Game::_SetSELECT_Start(Script::Event* event)
     this->_renderWindow->getManager()->getWindow(1)->lockButtons();
 
     // create new window and split options
-    int windowId = 0;
-    auto window = this->_renderWindow->getManager()->makeWindow(500, 100, windowId);
+    auto window = this->_renderWindow->getManager()->makeWindow(500, 100, (int&)this->_optionWindowId);
 
     auto options = RRE_Split(event->data, '\t');
 
