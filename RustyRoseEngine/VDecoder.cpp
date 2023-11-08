@@ -4,9 +4,12 @@ VDecoder::VDecoder(SDL_Renderer* renderer)
 {
 	avformat_network_init();
 	this->_renderer = renderer;
-	this->_frameWidth = 800;
-	this->_frameHeight = 452;
-	this->_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, this->_frameWidth, this->_frameHeight); // <- get size of frame from file
+	this->_frameWidth = -1;
+	this->_frameHeight = -1;
+	this->_texDimensionsValid = false;
+	this->_texture = NULL;
+	this->_frame = NULL;
+	this->_packet = NULL;
 }
 
 void VDecoder::setPath(std::string path)
@@ -34,7 +37,7 @@ bool VDecoder::start()
 
 	// Try to find index of video
 	this->_videoStreamIndex = -1;
-	for (int i = 0; i < this->_formatContext->nb_streams; i++) {
+	for (unsigned int i = 0; i < this->_formatContext->nb_streams; i++) {
 		if (this->_formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 			this->_videoStreamIndex = i;
 			break;
@@ -65,6 +68,8 @@ bool VDecoder::start()
 
 	this->_packet = av_packet_alloc();
 
+	this->_texDimensionsValid = false;
+
 	return true;
 }
 
@@ -80,6 +85,9 @@ bool VDecoder::decodeFrame()
 			avcodec_send_packet(this->_codecContext, this->_packet);
 			frameFinished = avcodec_receive_frame(this->_codecContext, this->_frame);
 			if (frameFinished == 0) {
+				if (!_texDimensionsValid) {
+					_resizeTexture();
+				}
 				return true;
 			}
 			else if (frameFinished == AVERROR(EAGAIN)) {
@@ -224,4 +232,15 @@ int* VDecoder::_getLinesize()
 uint8_t** VDecoder::_getFrameData()
 {
 	return this->_frame->data;
+}
+
+void VDecoder::_resizeTexture() {
+	if (_texture != NULL) {
+		SDL_DestroyTexture(_texture);
+	}
+	this->_frameWidth = _getWidthFrame();
+	this->_frameHeight = _getHeightFrame();
+	printf("[VDecoder] Resized framebuffer to %ix%i\n", this->_frameWidth, this->_frameHeight);
+	this->_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, this->_frameWidth, this->_frameHeight);
+	this->_texDimensionsValid = true;
 }
