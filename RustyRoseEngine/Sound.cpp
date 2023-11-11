@@ -17,32 +17,35 @@ int Sound::getType()
 void Sound::load()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to load NULL in sound\n");
+		RRE_LogError("ERROR - Trying to load NULL in sound");
 		return;
 	}
 
 	auto result = this->_wave->load(this->_path.c_str());
 	if (result != SoLoud::SO_NO_ERROR) {
-		printf("unable to load sound: %s\n", this->_path.c_str());
+		RRE_LogError("unable to load sound: \n" + this->_path);
 	}
 }
 
 void Sound::play()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to play NULL in sound\n");
+		RRE_LogError("ERROR - Trying to play NULL in sound\n");
 		return;
 	}
 
 	this->_handle = this->_soloud->play(*this->_wave);
 	this->_soloud->setRelativePlaySpeed(this->_handle, this->_speed);
-	// add - unable to play voice: %s\n
+
+	if (this->_soloud->isValidVoiceHandle(this->_handle) == false) {
+		RRE_LogError("unable to play sound: \n" + this->_path);
+	}
 }
 
 void Sound::pause()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to pause NULL in sound\n");
+		RRE_LogError("ERROR - Trying to pause NULL in sound");
 		return;
 	}
 
@@ -52,7 +55,7 @@ void Sound::pause()
 void Sound::resume()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to resume NULL in sound\n");
+		RRE_LogError("ERROR - Trying to resume NULL in sound");
 		return;
 	}
 
@@ -62,7 +65,7 @@ void Sound::resume()
 void Sound::stop()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to stop NULL in sound\n");
+		RRE_LogError("ERROR - Trying to stop NULL in sound\n");
 		return;
 	}
 
@@ -72,7 +75,7 @@ void Sound::stop()
 void Sound::setSpeed(float speed)
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to setSpeed NULL in sound\n");
+		RRE_LogError("ERROR - Trying to setSpeed NULL in sound");
 		return;
 	}
 

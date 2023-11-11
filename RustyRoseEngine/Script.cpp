@@ -10,12 +10,12 @@ Script::Script(std::string path)
 	file.open(this->_path.c_str(), std::ios::in | std::ios::binary);
 
 	if (!file.good()) {
-		printf("unable to load script file: %s\n", this->_path.c_str());
+		RRE_LogError("unable to load script file: \n" + this->_path);
 		return;
 	}
 
 	if (!this->_loadScript(&file)) {
-		printf("something went wrong while load script '%s' - loading stop\n", this->_path.c_str());
+		RRE_LogError("something went wrong while load script '" + this->_path + "' - loading stop");
 	}
 
 	this->_status = true;
@@ -53,7 +53,7 @@ bool Script::_loadScript(std::fstream* file)
 	file->read(&buffS[0], 0x8);
 
 	if (strcmp(buffS, "RoseScri") != 0) {
-		printf("Error - Header is missing: %s\n", this->_path.c_str());
+		RRE_LogError("Error - Header is missing: \n" + this->_path);
 		return false;
 	}
 
@@ -120,7 +120,7 @@ bool Script::_loadScript(std::fstream* file)
 			break;
 
 		default:
-			printf("ERROR - unknown command: 0x%X\n", buff16);
+			printf("ERROR - unknown command: 0x%X\n", buff16); // todo log in RRE
 			return false;
 		}
 	}

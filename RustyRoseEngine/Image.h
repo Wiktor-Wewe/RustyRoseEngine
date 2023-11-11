@@ -15,6 +15,8 @@ public:
 	SDL_Texture* getTexture();
 	SDL_Texture* getTrimedTexture();
 	SDL_Rect* getRectOfTrim(int id);
+	std::unordered_map<int, SDL_Rect*> getAllTrimInstructions();
+	RRW_ScreenSize* getOriginalImageSize();
 
 	~Image();
 

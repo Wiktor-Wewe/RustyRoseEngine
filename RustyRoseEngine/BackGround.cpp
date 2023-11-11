@@ -98,7 +98,7 @@ SDL_Texture* BackGround::_tryGetAnimationTexture(std::string path)
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
 	if (texture == NULL) {
-		printf("unable to make texture from surface in background animation: %s\n", path.c_str());
+		RRE_LogError("unable to make texture from surface in background animation: \n" + path);
 		SDL_FreeSurface(surface);
 		return NULL;
 	}

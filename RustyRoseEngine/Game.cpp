@@ -1,8 +1,4 @@
 #include "Game.h"
-#include "BackGroundMusic.h"
-#include "SoundEffect.h"
-#include "Voice.h"
-#include "Timer.h"
 
 Game::Game()
 {
@@ -26,6 +22,8 @@ Game::Game()
 	this->_timer = new Timer();
 
 	this->_control = new RustyControl();
+
+    this->_saveWindow = nullptr;
 
 	this->_currentScript = new Script(RRE_NormalizePath(ini->getDebugString() + ini->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose"));
 
@@ -65,6 +63,8 @@ void Game::play()
     this->_control->addKeyFunction(SDLK_5, [this]() { this->_setSpeed32(); });
     this->_control->addKeyFunction(SDLK_h, [this]() { this->_showHistory(); });
     this->_control->addKeyFunction(SDLK_s, [this]() { this->_skip(); });
+    this->_control->addKeyFunction(SDLK_q, [this]() { this->_showSaveWindow(); });
+
     
     // make gameplay menu/bar (at the top of game window)
     auto gameplayMenu = new RustyWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->mediumFont, 1000, 50);
@@ -115,7 +115,7 @@ void Game::play()
     gameplayMenu->getButton(14)->setFunction([this]() -> int { return this->_exitWindow(); });
 
     gameplayMenu->centerButtons();
-    //gameplayMenu->hideBar(); // <0 to fix
+    gameplayMenu->hideBar();
     
     // add window to manager
     this->_renderWindow->getManager()->addWindow(gameplayMenu);
@@ -320,7 +320,7 @@ int Game::_setPlayerOption0Window()
     this->_setPlayerOption0();
     this->_soundManager->globalSE->Select->play();
     this->_soundManager->globalSE->Up->play();
-    return -1;
+    return 0;
 }
 
 int Game::_setPlayerOption1Window()
@@ -330,7 +330,7 @@ int Game::_setPlayerOption1Window()
     this->_setPlayerOption1();
     this->_soundManager->globalSE->Select->play();
     this->_soundManager->globalSE->Up->play();
-    return -1;
+    return 0;
 }
 
 int Game::_setPlayerOption2Window()
@@ -339,7 +339,7 @@ int Game::_setPlayerOption2Window()
     this->_optionWindowId = 0;
     this->_setPlayerOption2();
     this->_soundManager->globalSE->Cancel->play();
-    return -1;
+    return 0;
 }
 
 int Game::_showHistoryWindow()
@@ -376,7 +376,7 @@ void Game::_next()
     }
 
     if (!e) {
-        printf("ERROR - Unable to NEXT\n");
+        RRE_LogWarning("Warning - Unable to NEXT\n");
         return;
     }
 
@@ -484,6 +484,14 @@ void Game::_showHistory()
     window->addCloseButton();
 }
 
+void Game::_showSaveWindow()
+{
+    this->_pause();
+    this->_saveWindow = new SaveWindow(this->_renderWindow->getRenderer(), this->_renderWindow->getScreenSize(), this->_renderWindow->getFonts()->mediumFont);
+    this->_renderWindow->getManager()->addWindow(this->_saveWindow);
+
+}
+
 void Game::_debug()
 {
     this->_soundManager->globalSE->Click->play();
@@ -516,7 +524,7 @@ void Game::_nextScript()
         std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + scriptName + ".rose");
         this->_currentScript = new Script(path);
         if (this->_currentScript->isGood() == false) {
-            printf("Unable to load previus Script: %s\n", path.c_str());
+            RRE_LogError("Unable to load previus Script: \n" + path);
             return;
         }
         
@@ -539,7 +547,7 @@ void Game::_nextScript()
     std::string path = RRE_NormalizePath(this->_iniFile->getDebugString() + this->_iniFile->getMainPath() + "Script/ENGLISH/" + this->_jumps->getCurrentJump()->scriptName + ".rose");
     this->_currentScript = new Script(path);
     if (this->_currentScript->isGood() == false) {
-        printf("Unable to load next Script: %s\n", path.c_str());
+        RRE_LogError("Unable to load next Script: \n" + path);
     }
 
     // skip scripts until setSELECT event is found
@@ -858,7 +866,7 @@ void Game::_findAndHandle(Script::Event* event, TaskType taskType)
         break;
 
     default:
-        printf("uanble to handle action: 0x%X\n", event->type);
+        ("uanble to handle action: 0x%X\n", event->type); // log RRE_LogWarning 
         break;
     }
 }
@@ -984,7 +992,7 @@ void Game::_Next_(Script::Event* event)
 {
     // dont delete this function -> if delete -> error nullptr exceprion while delete scalar in string
     // mozzarella
-    printf("Script End\n");
+    RRE_LogInfo("Script End");
 }
 
 void Game::_PlayMovie_Start(Script::Event* event)
@@ -1039,7 +1047,7 @@ void Game::_SetSELECT_Start(Script::Event* event)
     window->formatButtons();
     window->formatWindow();
     window->centerWindow();
-    //window->hideBar(); // <- to fix
+    window->hideBar();
 
     // set funtions to buttons
     window->getButton(1)->setFunction([this]() -> int { return this->_setPlayerOption0Window(); });

@@ -240,7 +240,7 @@ void VDecoder::_resizeTexture() {
 	}
 	this->_frameWidth = _getWidthFrame();
 	this->_frameHeight = _getHeightFrame();
-	//printf("[VDecoder] Resized framebuffer to %ix%i\n", this->_frameWidth, this->_frameHeight);
+	RRE_LogInfo("[VDecoder] Resized framebuffer to " + std::to_string(this->_frameWidth) + "x" +  std::to_string(this->_frameHeight));
 	this->_texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, this->_frameWidth, this->_frameHeight);
 	this->_texDimensionsValid = true;
 }

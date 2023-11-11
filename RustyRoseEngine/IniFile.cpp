@@ -28,7 +28,7 @@ void IniFile::loadFile(std::string path)
 	std::fstream file(path.c_str(), std::ios::in);
 
 	if (file.good() == false) {
-		printf("unable to open ini file: %s\n", path.c_str());
+		RRE_LogError("unable to open ini file: \n" + path);
 		return;
 	}
 

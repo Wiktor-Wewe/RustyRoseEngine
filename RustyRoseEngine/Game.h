@@ -10,6 +10,10 @@
 #include <RustyControl.h>
 #include "Script.h"
 #include "BackGround.h"
+#include "BackGroundMusic.h"
+#include "SoundEffect.h"
+#include "Voice.h"
+#include "SaveWindow.h"
 
 class Game
 {
@@ -32,6 +36,7 @@ private:
 	VDecoder* _vDecoder;
 	Timer* _timer;
 	RustyControl* _control;
+	SaveWindow* _saveWindow;
 
 	std::vector<std::string> _historyScript;
 	Script* _currentScript;
@@ -135,6 +140,7 @@ private:
 	void _setPlayerOption1();
 	void _setPlayerOption2();
 	void _showHistory();
+	void _showSaveWindow();
 
 	int _exitWindow();
 	int _debugWindow();

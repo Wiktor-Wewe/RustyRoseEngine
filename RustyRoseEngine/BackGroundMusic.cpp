@@ -11,14 +11,14 @@ BackGroundMusic::BackGroundMusic(std::string path, SoLoud::Soloud* soloud, doubl
 void BackGroundMusic::load()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to load NULL in sound\n");
+		RRE_LogError("ERROR - Trying to load NULL in sound\n");
 		return;
 	}
 
 	auto result1 = this->_wave->load(this->_pathInit.c_str());
 	if (result1 != SoLoud::SO_NO_ERROR) {
-		printf("unable to load background muisc int: %s\n", this->_path.c_str());
-		printf("its possible that this file just not exists\n");
+		RRE_LogInfo("unable to load background muisc int: \n" + this->_path);
+		RRE_LogInfo("its possible that this file just not exists");
 	}
 
 	auto result2 = this->_waveLoop->load(this->_pathLoop.c_str());
@@ -30,7 +30,7 @@ void BackGroundMusic::load()
 void BackGroundMusic::play()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to play NULL in sound\n");
+		RRE_LogError("ERROR - Trying to play NULL in sound");
 		return;
 	}
 
@@ -50,7 +50,7 @@ void BackGroundMusic::play()
 bool BackGroundMusic::isInitDone()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to check init status in NULL in sound\n");
+		RRE_LogError("ERROR - Trying to check init status in NULL in sound");
 		return false;
 	}
 
@@ -63,7 +63,7 @@ bool BackGroundMusic::isInitDone()
 void BackGroundMusic::pause()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to pause NULL in sound\n");
+		RRE_LogError("ERROR - Trying to pause NULL in sound");
 		return;
 	}
 
@@ -73,7 +73,7 @@ void BackGroundMusic::pause()
 void BackGroundMusic::resume()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to pause NULL in sound\n");
+		RRE_LogError("ERROR - Trying to pause NULL in sound");
 		return;
 	}
 
@@ -83,7 +83,7 @@ void BackGroundMusic::resume()
 void BackGroundMusic::stop()
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to stop NULL in sound\n");
+		RRE_LogError("ERROR - Trying to stop NULL in sound");
 		return;
 	}
 
@@ -94,7 +94,7 @@ void BackGroundMusic::stop()
 void BackGroundMusic::setSpeed(float speed)
 {
 	if (this == NULL) {
-		printf("ERROR - Trying to set speed in NULL in sound\n");
+		RRE_LogError("ERROR - Trying to set speed in NULL in sound");
 		return;
 	}
 

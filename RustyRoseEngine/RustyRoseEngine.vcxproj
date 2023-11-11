@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_ttf.lib;soloud_static.lib;RustyRoseWindow.lib;soloud_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -113,7 +113,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -128,7 +128,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;avcodec.lib;avformat.lib;swscale.lib;avutil.lib;SDL2_ttf.lib;soloud_static.lib;RustyRoseWindow.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -143,7 +143,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -159,6 +159,7 @@
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="Jumps.cpp" />
     <ClCompile Include="RustyRoseEngine.cpp" />
+    <ClCompile Include="SaveWindow.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="SharedUtils.h" />
     <ClCompile Include="Sound.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Image.h" />
     <ClInclude Include="IniFile.h" />
     <ClInclude Include="Jumps.h" />
+    <ClInclude Include="SaveWindow.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundEffect.h" />

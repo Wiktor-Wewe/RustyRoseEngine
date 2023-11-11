@@ -31,6 +31,12 @@
     <Filter Include="Pliki źródłowe\Pliki zasobów\EngineElements">
       <UniqueIdentifier>{9f79a22f-9cc5-4ffa-bb48-5f2e257c9c9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\Windows">
+      <UniqueIdentifier>{7e079bca-e5d0-49d8-898f-3be2ad908c1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\Pliki zasobów\Windows">
+      <UniqueIdentifier>{5305ad54-e2f6-414b-a118-79a137c210b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RustyRoseEngine.cpp">
@@ -84,6 +90,9 @@
     <ClCompile Include="BackGroundManager.cpp">
       <Filter>Pliki źródłowe\Pliki zasobów\EngineElements</Filter>
     </ClCompile>
+    <ClCompile Include="SaveWindow.cpp">
+      <Filter>Pliki źródłowe\Pliki zasobów\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sound.h">
@@ -130,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="BackGroundManager.h">
       <Filter>Pliki nagłówkowe\EngineElements</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveWindow.h">
+      <Filter>Pliki nagłówkowe\Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

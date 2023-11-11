@@ -8,8 +8,9 @@
 
 int main(int argc, char* argv[]) 
 {
+    RRE_OpenConsole();
     Game game = Game();
-    printf("%s", game.getStatus() ? "True\n" : "False\n");
+    RRE_LogInfo(game.getStatus() ? "Game Status: True" : "Game Status: False");
     game.play();
     return 0;
 }

@@ -12,7 +12,7 @@ bool Jumps::load(std::string path)
     file.open(path.c_str(), std::ios::in | std::ios::binary);
 
     if (!file.good()) {
-        printf("ERROR - unable to read jumps: %s\n", path.c_str());
+        RRE_LogError("ERROR - unable to read jumps: \n" + path);
         return false;
     }
 
@@ -23,7 +23,7 @@ bool Jumps::load(std::string path)
     file.read(reinterpret_cast<char*>(&buffC), 6);
 
     if (strncmp(buffC, "BEsrcF", 6) != 0) {
-        printf("ERROR - unable to read jumps | header error\n");
+        RRE_LogError("ERROR - unable to read jumps | header error\n");
         file.close();
         return false;
     }
@@ -55,7 +55,7 @@ bool Jumps::load(std::string path)
     file.close();
 
     if (this->_jumps.empty()) {
-        printf("ERROR - Jumps are empty after load\n");
+        RRE_LogError("ERROR - Jumps are empty after load");
         return false;
     }
 
@@ -73,7 +73,7 @@ void Jumps::setStart(std::string scriptName)
         }
     }
 
-    printf("Unable to set starting jump: %s\n", scriptName.c_str());
+    RRE_LogError("Unable to set starting jump: \n" + scriptName);
 }
 
 void Jumps::setCurrent(std::string scriptName)
@@ -85,7 +85,7 @@ void Jumps::setCurrent(std::string scriptName)
         }
     }
 
-    printf("Unable to set current jump: %s\n", scriptName.c_str());
+    RRE_LogError("Unable to set current jump: %s\n" + scriptName);
 }
 
 void Jumps::move(int playerOption)
@@ -115,7 +115,7 @@ void Jumps::move(int playerOption)
 
     // check if current Jump was find
     if (currJump == nullptr) {
-        printf("ERROR - Jump is impossible\n");
+        RRE_LogError("ERROR - Jump is impossible");
         return;
     }
 
@@ -128,7 +128,7 @@ void Jumps::move(int playerOption)
     }
 
     // if next Jump is impossible to set
-    printf("Unable to make jump\n");
+    RRE_LogError("Unable to make jump\n");
 }
 
 Jumps::Jump* Jumps::getCurrentJump()

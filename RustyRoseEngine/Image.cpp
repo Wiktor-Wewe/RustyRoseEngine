@@ -15,19 +15,19 @@ Image::Image(SDL_Renderer* renderer, RRW_ScreenSize* screenSize, std::string pat
 void Image::load()
 {
 	if (this == NULL) {
-		printf("Error - Trying to load NULL in image\n");
+		RRE_LogError("Error - Trying to load NULL in image");
 		return;
 	}
 
 	SDL_Surface* surface = IMG_Load(this->_path.c_str());
 	if (surface == NULL) {
-		printf("unable to load image surface: %s\n", this->_path.c_str());
+		RRE_LogError("unable to load image surface: \n" + this->_path);
 		return;
 	}
 
 	this->_texture = SDL_CreateTextureFromSurface(this->_renderer, surface);
 	if (this->_texture == NULL) {
-		printf("unable to create image texture: %s\n", this->_path.c_str());
+		RRE_LogError("unable to create image texture: \n" + this->_path);
 	}
 
 	this->_textureToTrim = this->_texture;
@@ -39,7 +39,7 @@ void Image::loadTrimInstructions(std::string path)
 	std::fstream file;
 	file.open(path.c_str(), std::ios::in | std::ios::binary);
 	if (!file.good()) {
-		printf("unable to add trim instruction: %s\nunable to open file\n", path.c_str());
+		RRE_LogError("unable to add trim instruction: " + path + "\nunable to open file");
 		return;
 	}
 
@@ -51,7 +51,7 @@ void Image::loadTrimInstructions(std::string path)
 	file.read(reinterpret_cast<char*>(&header[0]), 4);
 
 	if (strncmp(header, "rrmf", 4) != 0) {
-		printf("unable to add trim istructions: %s\nheader error\n", path.c_str());
+		RRE_LogError("unable to add trim istructions: " + path + "\nheader error");
 		return;
 	}
 
@@ -103,19 +103,19 @@ void Image::free()
 void Image::setTextureToTrim(std::string path)
 {
 	if (this == NULL) {
-		printf("Error - Trying to load trim NULL in image\n");
+		RRE_LogError("Error - Trying to load trim NULL in image");
 		return;
 	}
 
 	SDL_Surface* surface = IMG_Load(this->_path.c_str());
 	if (surface == NULL) {
-		printf("unable to load image surface to trim: %s\n", this->_path.c_str());
+		RRE_LogError("unable to load image surface to trim: \n" + this->_path);
 		return;
 	}
 
 	this->_textureToTrim = SDL_CreateTextureFromSurface(this->_renderer, surface);
 	if (this->_textureToTrim == NULL) {
-		printf("unable to create image texture for trim: %s\n", this->_path.c_str());
+		RRE_LogError("unable to create image texture for trim: \n" + this->_path);
 		this->_textureToTrim = this->_texture;
 	}
 
@@ -133,7 +133,7 @@ void Image::trimTexture(int id)
 
 	SDL_Rect* rect = this->_trimInstructions[id];
 	if (rect == nullptr) {
-		printf("unable to trim texture: %s\instruction with id: %i not found\n", this->_path.c_str(), id);
+		RRE_LogError("unable to trim texture: " + this->_path + "\ninstruction with id: " + std::to_string(id) + " not found");
 		return;
 	}
 
@@ -176,6 +176,16 @@ SDL_Texture* Image::getTrimedTexture()
 SDL_Rect* Image::getRectOfTrim(int id)
 {
 	return this->_trimInstructions[id];
+}
+
+std::unordered_map<int, SDL_Rect*> Image::getAllTrimInstructions()
+{
+	return this->_trimInstructions;
+}
+
+RRW_ScreenSize* Image::getOriginalImageSize()
+{
+	return this->_originalImageSize;
 }
 
 Image::~Image()

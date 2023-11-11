@@ -10,67 +10,60 @@
 #include <SDL_ttf.h>
 #include <soloud_wav.h>
 #include <RustyRenderWindow.h>
+#include <Windows.h>
 
 #ifndef SHARED_UTILS_H
 #define SHARED_UTILS_H
 
-/*
-std::fstream* RRE_LogFile = nullptr;
-
-static void RRE_CreateAndOpenLogFile()
+static void RRE_OpenConsole()
 {
-	time_t currentTime;
-	struct tm localTime;
-	time(&currentTime);
-	localtime_s(&localTime, &currentTime);
-	char result[24]; // "yyyy-mm-dd_hh-mm-ss.log" + 0x00 = 24
-	memset(result, 0x00, sizeof(result));
-	strftime(result, sizeof(result), "%Y-%m-%d_%H:%M:%S.log", &localTime);
-	
-	if (RRE_LogFile) {
-		RRE_LogFile->close();
-		delete RRE_LogFile;
-		RRE_LogFile = nullptr;
-	}
-
-	RRE_LogFile = new std::fstream;
-	RRE_LogFile->open(result, std::ios::in);
-	
-	if (RRE_LogFile->good() == false) {
-		printf("Unable to create and open log file: %s\n", result);
-	}
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 }
 
-static void RRE_LogOpenFile(std::string path)
+static void RRE_CloseConsole()
 {
-	if (RRE_LogFile->is_open()) {
-		*RRE_LogFile << "O " << path << "\n";
-	}
+	FreeConsole();
 }
 
-static void RRE_LogClosedFile(std::string path)
+static void RRE_LogInfo(std::string text)
 {
-	if (RRE_LogFile->is_open()) {
-		*RRE_LogFile << "C " << path << "\n";
-	}
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
+	printf("RRE_INFO: ");
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	printf(text.c_str());
+	printf("\n");
 }
 
-static void RRE_CloseLogFile()
+static void RRE_LogWarning(std::string text)
 {
-	if (RRE_LogFile->is_open()) {
-		RRE_LogFile->close();
-	}
-
-	delete RRE_LogFile;
-	RRE_LogFile = nullptr;
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);
+	printf("RRE_WARNING: ");
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	printf(text.c_str());
+	printf("\n");
 }
 
-static void RRE_VerifyFilesInputOutput()
+static void RRE_LogError(std::string text)
 {
-
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+	printf("RRE_ERROR: ");
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	printf(text.c_str());
+	printf("\n");
 }
 
-*/
+static void RRE_ScaleRectToScreenSize(RRW_ScreenSize* screenSize, RRW_ScreenSize* imageSize, SDL_Rect* srcRect, SDL_Rect* dstRect)
+{
+	dstRect->x = srcRect->x * screenSize->Width / imageSize->Width;
+	dstRect->y = srcRect->y * screenSize->Height / imageSize->Height;
+
+	dstRect->w = srcRect->w * screenSize->Width / imageSize->Width;
+	dstRect->h = srcRect->h * screenSize->Height / imageSize->Height;
+}
 
 static std::vector<std::string> RRE_Split(std::string text, char separator)
 {
